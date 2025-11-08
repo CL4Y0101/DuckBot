@@ -35,7 +35,9 @@ module.exports = {
                     .setDescription(`**Discord:** ${interaction.user.username}\n**Roblox Username:** ${existingUser.roblox_username}\n**Roblox Display Name:** ${existingUser.roblox_nickname || 'Not fetched yet'}\n**Verified:** ${existingUser.verified ? '✅ Yes' : '❌ No'}`)
                     .setAuthor({
                         name: interaction.user.username,
-                        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+                        iconURL: interaction.user.displayAvatarURL({
+                            dynamic: true
+                        }),
                         url: robloxProfileUrl
                     })
                     .setColor(existingUser.verified ? '#00ff00' : '#ff0000')

@@ -4,8 +4,5 @@
     "discord": "^0.8.2",
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3"
-  },
-  "scripts": {
-    "start": "node index.js"
   }
 }

@@ -1,5 +1,9 @@
-const { updateVerifications } = require('./verifyUser');
-const { updateRoles } = require('./roleManager');
+const {
+    updateVerifications
+} = require('./verifyUser');
+const {
+    updateRoles
+} = require('./roleManager');
 
 const CHECK_INTERVAL = 5 * 60 * 1000;
 

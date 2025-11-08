@@ -10,13 +10,13 @@ const {
 } = require('../utils/commandLoader');
 const {
   updateRobloxUIDs
-} = require('../utils/updateRobloxUIDs');
+} = require('../utils/roblox/updateRobloxUIDs');
 const {
   updateVerifications
-} = require('../utils/verifyUser');
+} = require('../utils/roblox/verifyUser');
 const {
   startScheduler
-} = require('../utils/scheduler');
+} = require('../utils/roblox/scheduler');
 const path = require('path');
 
 module.exports = {
@@ -24,13 +24,7 @@ module.exports = {
   once: true,
   async execute(client) {
     console.log(`✅ Logged in as ${client.user.tag}`);
-client.user.setPresence({
-  activities: [{
-    name: 'Duck 🦆',
-    type: 2, // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
-  }],
-  status: 'dnd', // 'online' | 'idle' | 'dnd' | 'invisible'
-});
+
     const commands = [];
     const deployCommandFiles = getCommandFiles('./src/commands');
 

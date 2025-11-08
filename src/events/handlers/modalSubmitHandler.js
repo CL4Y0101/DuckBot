@@ -1,4 +1,6 @@
-const { Events } = require('discord.js');
+const {
+  Events
+} = require('discord.js');
 const fs = require('fs');
 const robloxAPI = require('../../utils/robloxAPI');
 
@@ -19,18 +21,18 @@ module.exports = {
         verified: false
       };
 
-    let data = [];
-    try {
-      if (fs.existsSync('./src/database/username.json')) {
-        const fileContent = fs.readFileSync('./src/database/username.json', 'utf8');
-        if (fileContent.trim()) {
-          data = JSON.parse(fileContent);
+      let data = [];
+      try {
+        if (fs.existsSync('./src/database/username.json')) {
+          const fileContent = fs.readFileSync('./src/database/username.json', 'utf8');
+          if (fileContent.trim()) {
+            data = JSON.parse(fileContent);
+          }
         }
+      } catch (error) {
+        console.error('Error reading username.json:', error);
+        data = [];
       }
-    } catch (error) {
-      console.error('Error reading username.json:', error);
-      data = [];
-    }
 
       const existing = data.find(u => u.userid === interaction.user.id);
       if (existing) {
