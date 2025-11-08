@@ -1,3 +1,4 @@
+// 📁 File: src/utils/github/backup.js
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
@@ -9,10 +10,13 @@ const execPromise = util.promisify(exec);
 const databasePath = path.join(__dirname, '../../database/username.json');
 let lastHash = '';
 
+/**
+ * Jalankan command shell
+ */
 async function executeCommand(command) {
   try {
     const { stdout, stderr } = await execPromise(command);
-    if (stderr) console.error(stderr);
+    if (stderr && !stderr.includes('nothing to commit')) console.error(stderr);
     return stdout.trim();
   } catch (error) {
     console.error(`❌ Error executing command: ${command}`);
@@ -21,38 +25,53 @@ async function executeCommand(command) {
   }
 }
 
+/**
+ * Generate hash unik dari file untuk mendeteksi perubahan
+ */
 function getFileHash(filePath) {
   if (!fs.existsSync(filePath)) return '';
   const fileContent = fs.readFileSync(filePath);
   return crypto.createHash('sha1').update(fileContent).digest('hex');
 }
 
+/**
+ * Backup via local git commit & push
+ */
 async function localGitCommit() {
-  console.log('📦 Local git mode detected. Attempting commit...');
+  console.log('📦 Local Git mode detected. Attempting commit...');
+
   try {
     await executeCommand('git config user.name "DuckBot"');
     await executeCommand('git config user.email "bot@duckbot.com"');
 
-    await executeCommand(
-      `git remote set-url origin https://${process.env.GITHUB_USERNAME}:${process.env.GITHUB_TOKEN}@github.com/CL4Y0101/DuckBot.git`
-    );
+    if (process.env.GITHUB_USERNAME && process.env.GITHUB_TOKEN) {
+      await executeCommand(
+        `git remote set-url origin https://${process.env.GITHUB_USERNAME}:${process.env.GITHUB_TOKEN}@github.com/CL4Y0101/DuckBot.git`
+      );
+    }
 
     await executeCommand('git add src/database/username.json');
     await executeCommand(
-      'git commit -m "Auto backup: update username.json" || echo "No changes to commit"'
+      'git commit -m "Auto-backup: update username.json" || echo "⚠️ No changes to commit"'
     );
-    await executeCommand('git push origin main');
-    console.log('✅ Local git auto commit & push success!');
+
+    // push ke branch main
+    const pushResult = await executeCommand('git push origin main');
+    if (pushResult) console.log('✅ Local git auto commit & push success!');
   } catch (error) {
     console.error('❌ Local git commit failed:', error.message);
   }
 }
 
+/**
+ * Backup via GitHub API (fallback)
+ */
 async function apiBackup() {
-  console.log('🌐 Fallback mode: GitHub API backup');
+  console.log('🌐 Fallback mode: Using GitHub API backup...');
   const githubToken = process.env.GITHUB_TOKEN;
+
   if (!githubToken) {
-    console.log('⚠️ No GITHUB_TOKEN provided. Skipping backup.');
+    console.log('⚠️ No GITHUB_TOKEN provided. Skipping API backup.');
     return;
   }
 
@@ -81,7 +100,7 @@ async function apiBackup() {
       message: 'Auto-backup: Update username.json',
       content: Buffer.from(fileContent).toString('base64'),
       sha: fileSha,
-      branch: branch,
+      branch,
     });
 
     console.log('✅ GitHub API backup successful!');
@@ -90,6 +109,9 @@ async function apiBackup() {
   }
 }
 
+/**
+ * Fungsi utama backup database
+ */
 async function backupDatabase() {
   if (!fs.existsSync(databasePath)) {
     console.log('⚠️ Database file does not exist, skipping backup.');
@@ -103,7 +125,9 @@ async function backupDatabase() {
   }
   lastHash = newHash;
 
+  console.log('🧩 Database change detected, starting backup...');
   const isGitRepo = fs.existsSync(path.join(process.cwd(), '.git'));
+
   if (isGitRepo) {
     await localGitCommit();
   } else {
