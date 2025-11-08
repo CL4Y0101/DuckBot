@@ -38,7 +38,7 @@ module.exports = {
       console.error(error);
     }
 
-    const databasePath = path.join(__dirname, '..', '..', 'database', 'users.json');
+    const databasePath = path.join(__dirname, '..', 'database', 'username.json');
 
     async function updatePresence() {
       try {
