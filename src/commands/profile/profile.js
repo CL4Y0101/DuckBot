@@ -67,7 +67,6 @@ function findUserByDiscordUserid(discordUserid) {
 
 async function createRobloxEmbed(user) {
   const embed = new EmbedBuilder()
-    .setColor('#393a41')
     .setTitle('Roblox Profile Information');
 
   try {
