@@ -10,32 +10,54 @@ const databasePath = path.join(__dirname, '../../database/username.json');
 
 function loadDatabase() {
   try {
+    if (!fs.existsSync(databasePath)) {
+      console.log('❌ Database file not found:', databasePath);
+      return [];
+    }
     const data = fs.readFileSync(databasePath, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    console.log(`📊 Loaded ${parsed.length} users from database`);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.error('Error loading database:', error);
+    console.error('❌ Error loading database:', error);
     return [];
   }
 }
 
 function getRobloxUsernames() {
   const users = loadDatabase();
-  return users.map(user => user.roblox_username).filter(username => username);
+  const usernames = users
+    .map(user => user.roblox_username)
+    .filter(username => username && typeof username === 'string')
+    .slice(0, 25); // Limit to 25 untuk autocomplete
+  console.log(`🎮 Found ${usernames.length} Roblox usernames`);
+  return usernames;
 }
 
 function getDiscordUsernames() {
   const users = loadDatabase();
-  return users.map(user => user.username).filter(username => username);
+  const usernames = users
+    .map(user => user.username)
+    .filter(username => username && typeof username === 'string')
+    .slice(0, 25);
+  console.log(`💬 Found ${usernames.length} Discord usernames`);
+  return usernames;
 }
 
 function findUserByRobloxUsername(robloxUsername) {
   const users = loadDatabase();
-  return users.find(user => user.roblox_username === robloxUsername);
+  return users.find(user => 
+    user.roblox_username && 
+    user.roblox_username.toLowerCase() === robloxUsername.toLowerCase()
+  );
 }
 
 function findUserByDiscordUsername(discordUsername) {
   const users = loadDatabase();
-  return users.find(user => user.username === discordUsername);
+  return users.find(user => 
+    user.username && 
+    user.username.toLowerCase() === discordUsername.toLowerCase()
+  );
 }
 
 function findUserByDiscordUserid(discordUserid) {
@@ -45,29 +67,43 @@ function findUserByDiscordUserid(discordUserid) {
 
 async function createRobloxEmbed(user) {
   const embed = new EmbedBuilder()
-    .setColor('#393a41');
+    .setColor('#393a41')
+    .setTitle('Roblox Profile Information');
 
-  const avatarUrl = await robloxAPI.getAvatarUrl(user.roblox_uid);
-  if (avatarUrl) {
-    embed.setThumbnail(avatarUrl);
+  try {
+    const avatarUrl = await robloxAPI.getAvatarUrl(user.roblox_uid);
+    if (avatarUrl) {
+      embed.setThumbnail(avatarUrl);
+    }
+  } catch (error) {
+    console.error('Error getting avatar:', error);
   }
 
-  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
   let description = 'None provided';
   let createdTimestamp = 'Unknown';
+  let displayName = user.roblox_nickname || user.roblox_username;
 
-  if (profile) {
-    description = profile.description || 'None provided';
-    createdTimestamp = profile.created ? `<t:${Math.floor(new Date(profile.created).getTime() / 1000)}:F>` : 'Unknown';
+  try {
+    const profile = await robloxAPI.getUserProfile(user.roblox_uid);
+    if (profile) {
+      description = profile.description || 'None provided';
+      if (profile.created) {
+        createdTimestamp = `<t:${Math.floor(new Date(profile.created).getTime() / 1000)}:F>`;
+      }
+      if (profile.displayName) {
+        displayName = profile.displayName;
+      }
+    }
+  } catch (error) {
+    console.error('Error getting Roblox profile:', error);
   }
 
   embed.setDescription(
-    `### [${user.roblox_nickname}](https://www.roblox.com/users/${user.roblox_uid}/profile) (${user.roblox_uid})\n` +
-    `## Roblox Information\n` +
-    `### @${user.roblox_username}\n` +
-    `Account Created: ${createdTimestamp}\n` +
-    `## Description\n` +
-    `${description}`
+    `### [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)\n` +
+    `**User ID:** ${user.roblox_uid}\n` +
+    `**Username:** @${user.roblox_username}\n` +
+    `**Account Created:** ${createdTimestamp}\n\n` +
+    `**Description:**\n${description}`
   );
 
   return embed;
@@ -75,7 +111,8 @@ async function createRobloxEmbed(user) {
 
 async function createDiscordEmbed(user, interaction) {
   const embed = new EmbedBuilder()
-    .setColor('#393a41');
+    .setColor('#5865F2')
+    .setTitle('Discord Profile Information');
 
   try {
     if (interaction.guild) {
@@ -85,27 +122,24 @@ async function createDiscordEmbed(user, interaction) {
       }
     }
   } catch (error) {
-    console.error('Error fetching Discord user:', error);
+    console.error('Error fetching Discord user avatar:', error);
   }
 
   let discordCreatedTimestamp = 'Unknown';
   try {
-    if (interaction.guild) {
-      const discordUser = await interaction.guild.members.fetch(user.userid);
-      if (discordUser) {
-        discordCreatedTimestamp = `<t:${Math.floor(discordUser.user.createdTimestamp / 1000)}:F>`;
-      }
+    const discordUser = await interaction.client.users.fetch(user.userid);
+    if (discordUser) {
+      discordCreatedTimestamp = `<t:${Math.floor(discordUser.createdTimestamp / 1000)}:F>`;
     }
   } catch (error) {
-    console.error('Error fetching Discord user:', error);
+    console.error('Error fetching Discord user creation date:', error);
   }
 
   embed.setDescription(
-    `## Discord Information\n` +
-    `### @${user.username}\n` +
-    `User ID: ${user.userid}\n` +
-    `Account Created: ${discordCreatedTimestamp}\n` +
-    `Verified: ${user.verified ? 'Yes' : 'No'}`
+    `**Username:** ${user.username}\n` +
+    `**User ID:** ${user.userid}\n` +
+    `**Account Created:** ${discordCreatedTimestamp}\n` +
+    `**Verified:** ${user.verified ? '✅ Yes' : '❌ No'}`
   );
 
   return embed;
@@ -138,77 +172,107 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    await interaction.deferReply();
+
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === 'roblox_user') {
-      const username = interaction.options.getString('username');
-      const user = findUserByRobloxUsername(username);
-      if (!user) {
-        return await interaction.reply({
-          content: 'User not found in database.',
-          ephemeral: true
-        });
+    try {
+      if (subcommand === 'roblox_user') {
+        const username = interaction.options.getString('username');
+        console.log(`🔍 Searching for Roblox user: ${username}`);
+        
+        const user = findUserByRobloxUsername(username);
+        if (!user) {
+          return await interaction.editReply({
+            content: `❌ User "${username}" not found in database.`,
+            ephemeral: true
+          });
+        }
+
+        console.log(`✅ Found user:`, user);
+        const embed = await createRobloxEmbed(user);
+        await interaction.editReply({ embeds: [embed] });
+
+      } else if (subcommand === 'discord_user') {
+        const discordUser = interaction.options.getUser('user');
+        console.log(`🔍 Searching for Discord user: ${discordUser.tag}`);
+        
+        const user = findUserByDiscordUserid(discordUser.id);
+        if (!user) {
+          return await interaction.editReply({
+            content: `❌ User ${discordUser.tag} not found in database.`,
+            ephemeral: true
+          });
+        }
+
+        console.log(`✅ Found user:`, user);
+        const robloxEmbed = await createRobloxEmbed(user);
+        const discordEmbed = await createDiscordEmbed(user, interaction);
+        await interaction.editReply({ embeds: [robloxEmbed, discordEmbed] });
       }
-
-      const embed = await createRobloxEmbed(user);
-      await interaction.reply({ embeds: [embed] });
-
-    } else if (subcommand === 'discord_user') {
-      const discordUser = interaction.options.getUser('user');
-      const user = findUserByDiscordUserid(discordUser.id);
-      if (!user) {
-        return await interaction.reply({
-          content: 'User not found in database.',
-          ephemeral: true
-        });
-      }
-
-      const robloxEmbed = await createRobloxEmbed(user);
-      const discordEmbed = await createDiscordEmbed(user, interaction);
-      await interaction.reply({ embeds: [robloxEmbed, discordEmbed] });
+    } catch (error) {
+      console.error('❌ Error in execute:', error);
+      await interaction.editReply({
+        content: '❌ An error occurred while processing your request.',
+        ephemeral: true
+      });
     }
   },
 
-async autocomplete(interaction) {
-  try {
-    const focusedOption = interaction.options.getFocused(true);
-    let choices = [];
-
-    // aman-cek subcommand
-    let sub;
+  async autocomplete(interaction) {
     try {
-      sub = interaction.options.getSubcommand();
-    } catch {
-      sub = 'roblox_user'; // default supaya tidak error di Discord
-    }
+      const focusedOption = interaction.options.getFocused(true);
+      console.log(`🔍 Autocomplete focused:`, focusedOption);
 
-    if (focusedOption.name === 'username') {
-      if (sub === 'roblox_user') {
+      if (focusedOption.name !== 'username') {
+        return await interaction.respond([]);
+      }
+
+      const subcommand = interaction.options.getSubcommand();
+      console.log(`📝 Autocomplete subcommand: ${subcommand}`);
+
+      let choices = [];
+
+      if (subcommand === 'roblox_user') {
         choices = getRobloxUsernames();
-      } else if (sub === 'discord_user') {
+      } else if (subcommand === 'discord_user') {
         choices = getDiscordUsernames();
       }
 
-      if (!Array.isArray(choices)) choices = [];
+      console.log(`📋 Available choices: ${choices.length}`);
+
       const filtered = choices
-        .filter(choice =>
-          choice.toLowerCase().includes(focusedOption.value.toLowerCase())
-        )
-        .slice(0, 25);
+        .filter(choice => {
+          if (!choice || typeof choice !== 'string') return false;
+          return choice.toLowerCase().includes(focusedOption.value.toLowerCase());
+        })
+        .slice(0, 25); // Discord limit
+
+      console.log(`✅ Filtered choices: ${filtered.length}`);
+
+      if (filtered.length === 0) {
+        filtered.push('No users found');
+      }
 
       await interaction.respond(
-        filtered.map(choice => ({ name: choice, value: choice }))
+        filtered.map(choice => ({ 
+          name: choice.length > 100 ? choice.substring(0, 97) + '...' : choice,
+          value: choice.length > 100 ? choice.substring(0, 100) : choice
+        }))
       );
-    } else {
-      await interaction.respond([]);
+
+    } catch (error) {
+      console.error('❌ Autocomplete error:', error);
+      
+      try {
+        await interaction.respond([
+          { name: 'Error loading options', value: 'error' }
+        ]);
+      } catch (respondError) {
+        console.error('❌ Failed to send error response:', respondError);
+      }
     }
-  } catch (error) {
-    console.error('❌ Autocomplete error:', error);
-    if (!interaction.responded) {
-      await interaction.respond([]);
-    }
-  }
-},
+  },
 
   getRobloxUsernames,
   getDiscordUsernames,
