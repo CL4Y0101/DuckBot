@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
 const { backupDatabase } = require('../../utils/github/backup');
+const { assignRegisteredRole } = require('../../utils/roblox/roleManager');
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -58,6 +59,8 @@ module.exports = {
       }
 
       fs.writeFileSync(databasePath, JSON.stringify(data, null, 2));
+
+      await assignRegisteredRole(client, interaction.user.id);
 
       setImmediate(async () => {
         try {
