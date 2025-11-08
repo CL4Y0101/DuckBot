@@ -68,7 +68,7 @@ module.exports = {
                     .setCustomId('roblox_username')
                     .setLabel('Masukkan username Roblox kamu:')
                     .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('contoh: luhnox')
+                    .setPlaceholder('Example: luhnox')
                     .setRequired(true);
 
                 const row = new ActionRowBuilder().addComponents(robloxInput);
@@ -80,14 +80,14 @@ module.exports = {
 
         if (interaction.customId === 'reverify_button') {
             const modal = new ModalBuilder()
-                .setCustomId('verify_modal')
+                .setCustomId('reverify_modal')
                 .setTitle('Reverify Your Username');
 
             const robloxInput = new TextInputBuilder()
                 .setCustomId('roblox_username')
                 .setLabel('Masukkan username Roblox kamu:')
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder('contoh: luhnox')
+                .setPlaceholder('Example: luhnox')
                 .setRequired(true);
 
             const row = new ActionRowBuilder().addComponents(robloxInput);

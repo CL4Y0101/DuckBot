@@ -16,7 +16,7 @@ module.exports = {
   async execute(interaction, client) {
     if (!interaction.isModalSubmit()) return;
 
-    if (interaction.customId === 'verify_modal') {
+    if (interaction.customId === 'verify_modal' || interaction.customId === 'reverify_modal') {
       const roblox = interaction.fields.getTextInputValue('roblox_username');
 
       const userData = {
@@ -53,7 +53,7 @@ module.exports = {
         });
       }
 
-      if (existingUser) {
+      if (existingUser && interaction.customId === 'verify_modal') {
         const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
 
         const embed = new EmbedBuilder()
@@ -81,7 +81,14 @@ module.exports = {
           components: [row],
           ephemeral: true
         });
-      } else {
+      }
+
+      if (existingUser && interaction.customId === 'reverify_modal') {
+        existingUser.roblox_username = roblox;
+        existingUser.verified = false;
+        existingUser.roblox_uid = "";
+        existingUser.roblox_nickname = "";
+      } else if (!existingUser) {
         data.push(userData);
       }
 
