@@ -48,7 +48,7 @@ module.exports = {
                 const button = new ButtonBuilder()
                     .setCustomId('reverify_button')
                     .setLabel('Reverify your username')
-                    .setStyle(ButtonStyle.secondary);
+                    .setStyle(ButtonStyle.Secondary);
 
                 const row = new ActionRowBuilder().addComponents(button);
 
