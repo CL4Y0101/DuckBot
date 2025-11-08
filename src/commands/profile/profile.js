@@ -38,6 +38,11 @@ function findUserByDiscordUsername(discordUsername) {
   return users.find(user => user.username === discordUsername);
 }
 
+function findUserByDiscordUserid(discordUserid) {
+  const users = loadDatabase();
+  return users.find(user => user.userid === discordUserid);
+}
+
 async function createRobloxEmbed(user) {
   const embed = new EmbedBuilder()
     .setColor('#393a41');
@@ -83,36 +88,11 @@ async function createDiscordEmbed(user, interaction) {
     console.error('Error fetching Discord user:', error);
   }
 
-  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
-  let description = 'None provided';
-  let createdTimestamp = 'Unknown';
-
-  if (profile) {
-    description = profile.description || 'None provided';
-    createdTimestamp = profile.created ? `<t:${Math.floor(new Date(profile.created).getTime() / 1000)}:F>` : 'Unknown';
-  }
-
-  let discordInfo = '';
-  try {
-    if (interaction.guild) {
-      const discordUser = await interaction.guild.members.fetch(user.userid);
-      if (discordUser) {
-        const discordCreatedTimestamp = Math.floor(discordUser.user.createdTimestamp / 1000);
-        discordInfo = `\n## Discord Information\n### @${user.username}\nAccount Created: <t:${discordCreatedTimestamp}:F>`;
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching Discord user:', error);
-  }
-
   embed.setDescription(
-    `### [${user.roblox_nickname}](https://www.roblox.com/users/${user.roblox_uid}/profile) (${user.roblox_uid})\n` +
-    `## Roblox Information\n` +
-    `### @${user.roblox_username}\n` +
-    `Account Created: ${createdTimestamp}\n` +
-    `## Description\n` +
-    `${description}` +
-    `${discordInfo}`
+    `## Discord Information\n` +
+    `### @${user.username}\n` +
+    `User ID: ${user.userid}\n` +
+    `Verified: ${user.verified ? 'Yes' : 'No'}`
   );
 
   return embed;
@@ -136,20 +116,19 @@ module.exports = {
     .addSubcommand(subcommand =>
       subcommand
         .setName('discord_user')
-        .setDescription('Get profile by Discord username')
-        .addStringOption(option =>
-          option.setName('username')
-            .setDescription('Discord username')
+        .setDescription('Get profile by Discord user')
+        .addUserOption(option =>
+          option.setName('user')
+            .setDescription('Discord user')
             .setRequired(true)
-            .setAutocomplete(true)
         )
     ),
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
-    const username = interaction.options.getString('username');
 
     if (subcommand === 'roblox_user') {
+      const username = interaction.options.getString('username');
       const user = findUserByRobloxUsername(username);
       if (!user) {
         return await interaction.reply({
@@ -162,7 +141,8 @@ module.exports = {
       await interaction.reply({ embeds: [embed] });
 
     } else if (subcommand === 'discord_user') {
-      const user = findUserByDiscordUsername(username);
+      const discordUser = interaction.options.getUser('user');
+      const user = findUserByDiscordUserid(discordUser.id);
       if (!user) {
         return await interaction.reply({
           content: 'User not found in database.',
@@ -170,8 +150,9 @@ module.exports = {
         });
       }
 
-      const embed = await createDiscordEmbed(user);
-      await interaction.reply({ embeds: [embed] });
+      const robloxEmbed = await createRobloxEmbed(user);
+      const discordEmbed = await createDiscordEmbed(user, interaction);
+      await interaction.reply({ embeds: [robloxEmbed, discordEmbed] });
     }
   },
 
