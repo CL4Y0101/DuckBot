@@ -176,5 +176,11 @@ module.exports = {
     const buttons = createButtons(page, totalPages, sort, 'roblox');
 
     await interaction.editReply({ embeds: [embed], components: [buttons] });
-  }
+  },
+
+  loadDatabase,
+  getUsersWithAge,
+  formatAge,
+  createLeaderboardEmbed,
+  createButtons
 };
