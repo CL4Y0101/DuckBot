@@ -88,10 +88,23 @@ async function createDiscordEmbed(user, interaction) {
     console.error('Error fetching Discord user:', error);
   }
 
+  let discordCreatedTimestamp = 'Unknown';
+  try {
+    if (interaction.guild) {
+      const discordUser = await interaction.guild.members.fetch(user.userid);
+      if (discordUser) {
+        discordCreatedTimestamp = `<t:${Math.floor(discordUser.user.createdTimestamp / 1000)}:F>`;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching Discord user:', error);
+  }
+
   embed.setDescription(
     `## Discord Information\n` +
     `### @${user.username}\n` +
     `User ID: ${user.userid}\n` +
+    `Account Created: ${discordCreatedTimestamp}\n` +
     `Verified: ${user.verified ? 'Yes' : 'No'}`
   );
 
