@@ -34,7 +34,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle('🔰 Roblox Username Verification')
       .setDescription('Klik tombol di bawah untuk memverifikasi username Roblox kamu.')
-      .setColor('#2b2d31');
+      .setColor('#393a41');
 
     const button = new ButtonBuilder()
       .setCustomId('verify_button')

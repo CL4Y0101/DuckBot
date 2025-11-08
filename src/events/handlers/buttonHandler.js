@@ -40,7 +40,7 @@ module.exports = {
                         }),
                         url: robloxProfileUrl
                     })
-                    .setColor(existingUser.verified ? '#00ff00' : '#ff0000')
+                    .setColor(existingUser.verified ? '#393a41' : '#393a41')
                     .setTimestamp();
 
                 await interaction.reply({

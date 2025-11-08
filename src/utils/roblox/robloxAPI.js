@@ -58,7 +58,9 @@ class RobloxAPI {
       });
       return {
         name: response.data.name,
-        displayName: response.data.displayName
+        displayName: response.data.displayName,
+        created: response.data.created,
+        description: response.data.description
       };
     } catch (error) {
       console.error('Error fetching Roblox user profile:', error.message);
