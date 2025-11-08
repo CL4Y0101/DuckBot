@@ -11,7 +11,7 @@ const {
 const fs = require('fs');
 const path = require('path');
 
-const databasePath = path.join(__dirname, '../database/username.json');
+const databasePath = path.join(__dirname, '../../database/username.json');
 
 const leaderboardModule = require('../../commands/profile/leaderboard');
 
