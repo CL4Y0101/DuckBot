@@ -2,7 +2,7 @@ const {
   Events
 } = require('discord.js');
 const fs = require('fs');
-const robloxAPI = require('../../utils/robloxAPI');
+const robloxAPI = require('../../utils/roblox/robloxAPI');
 
 module.exports = {
   name: Events.InteractionCreate,
