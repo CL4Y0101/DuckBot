@@ -1,4 +1,3 @@
-// 📁 File: src/utils/github/backup.js
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
@@ -55,7 +54,6 @@ async function localGitCommit() {
       'git commit -m "Auto-backup: update username.json" || echo "⚠️ No changes to commit"'
     );
 
-    // push ke branch main
     const pushResult = await executeCommand('git push origin main');
     if (pushResult) console.log('✅ Local git auto commit & push success!');
   } catch (error) {

@@ -51,14 +51,19 @@ async function getUsersWithAge() {
   return usersWithAge;
 }
 
-function formatAge(ageMs) {
+function formatAge(createdDate) {
+  const ageMs = Date.now() - createdDate.getTime();
   const years = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365));
   const months = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
   const days = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
 
-  if (years > 0) return `${years}y ${months}m`;
-  if (months > 0) return `${months}m ${days}d`;
-  return `${days}d`;
+  let ageText = '';
+  if (years > 0) ageText = `${years}y ${months}m`;
+  else if (months > 0) ageText = `${months}m ${days}d`;
+  else ageText = `${days}d`;
+
+  const timestamp = `<t:${Math.floor(createdDate.getTime() / 1000)}:F>`;
+  return `${ageText} (${timestamp})`;
 }
 
 function createLeaderboardEmbed(users, page, sort, totalPages) {
@@ -76,7 +81,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages) {
   pageUsers.forEach((user, index) => {
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
-    description += `${medal} [${user.roblox_nickname || user.roblox_username}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.age)}\n`;
+    description += `${medal} [${user.roblox_nickname || user.roblox_username}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
   });
 
   embed.setDescription(embed.data.description + '\n\n' + description);
@@ -127,7 +132,6 @@ module.exports = {
       return await interaction.editReply('No users found with valid Roblox profiles.');
     }
 
-    // Sort users
     users.sort((a, b) => sort === 'old' ? a.createdDate - b.createdDate : b.createdDate - a.createdDate);
 
     const totalPages = Math.ceil(users.length / 10);
