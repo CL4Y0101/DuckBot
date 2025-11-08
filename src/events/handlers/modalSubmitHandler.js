@@ -4,6 +4,7 @@ const {
 const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
+const { backupDatabase } = require('../../utils/github/backup');
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -87,6 +88,9 @@ module.exports = {
 
               fs.writeFileSync(databasePath, JSON.stringify(updatedData, null, 2));
               console.log(`Updated Roblox UID for ${roblox}: ${robloxUid}`);
+
+              // Trigger auto-backup after database update
+              backupDatabase().catch(err => console.error('Auto-backup failed:', err));
             }
           } else {
             console.log(`Could not find Roblox UID for username: ${roblox}`);
