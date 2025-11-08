@@ -53,35 +53,7 @@ module.exports = {
         });
       }
 
-      if (existingUser && interaction.customId === 'verify_modal') {
-        const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
 
-        const embed = new EmbedBuilder()
-          .setTitle('🔍 Your Roblox Verification Status')
-          .setDescription(`**Discord:** ${interaction.user.username}\n**Roblox Username:** ${existingUser.roblox_username}\n**Roblox Display Name:** ${existingUser.roblox_nickname || 'Not fetched yet'}\n**Verified:** ${existingUser.verified ? '✅ Yes' : '❌ No'}`)
-          .setAuthor({
-            name: interaction.user.username,
-            iconURL: interaction.user.displayAvatarURL({
-              dynamic: true
-            }),
-            url: robloxProfileUrl
-          })
-          .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
-          .setTimestamp();
-
-        const button = new ButtonBuilder()
-          .setCustomId('reverify_button')
-          .setLabel('Reverify your username')
-          .setStyle(ButtonStyle.Secondary);
-
-        const row = new ActionRowBuilder().addComponents(button);
-
-        return await interaction.reply({
-          embeds: [embed],
-          components: [row],
-          ephemeral: true
-        });
-      }
 
       if (existingUser && interaction.customId === 'reverify_modal') {
         existingUser.roblox_username = roblox;
