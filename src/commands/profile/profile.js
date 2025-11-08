@@ -19,7 +19,6 @@ function loadDatabase() {
     }
     const data = fs.readFileSync(databasePath, 'utf8');
     const parsed = JSON.parse(data);
-    console.log(`📊 Loaded ${parsed.length} users from database`);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error('❌ Error loading database:', error);
