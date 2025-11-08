@@ -189,5 +189,11 @@ module.exports = {
         filtered.map(choice => ({ name: choice, value: choice }))
       );
     }
-  }
+  },
+
+  getRobloxUsernames,
+  getDiscordUsernames,
+  findUserByRobloxUsername,
+  findUserByDiscordUsername,
+  findUserByDiscordUserid
 };
