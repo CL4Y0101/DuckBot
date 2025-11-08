@@ -67,6 +67,25 @@ class RobloxAPI {
       return null;
     }
   }
+
+  async getAvatarUrl(userId) {
+    try {
+      const response = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`, {
+        headers: {
+          'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
+        },
+        timeout: 15000
+      });
+      const data = response.data.data;
+      if (data && data.length > 0) {
+        return data[0].imageUrl;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching Roblox avatar:', error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new RobloxAPI();

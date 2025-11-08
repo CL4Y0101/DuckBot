@@ -40,70 +40,78 @@ function findUserByDiscordUsername(discordUsername) {
 
 async function createRobloxEmbed(user) {
   const embed = new EmbedBuilder()
-    .setTitle(`${user.roblox_nickname} (${user.roblox_uid})`)
-    .setURL(`https://www.roblox.com/users/${user.roblox_uid}/profile`)
     .setColor('#393a41');
 
-  embed.addFields(
-    { name: 'Roblox Information', value: `@${user.roblox_username}`, inline: false }
-  );
-
-  // Fetch additional Roblox profile info
-  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
-  if (profile) {
-    const createdTimestamp = Math.floor(new Date(profile.created).getTime() / 1000);
-    embed.addFields(
-      { name: 'Account Created', value: `<t:${createdTimestamp}:F>`, inline: false },
-      { name: 'Description', value: profile.description || 'None provided', inline: false }
-    );
-  } else {
-    embed.addFields(
-      { name: 'Account Created', value: 'Unknown', inline: false },
-      { name: 'Description', value: 'None provided', inline: false }
-    );
+  const avatarUrl = await robloxAPI.getAvatarUrl(user.roblox_uid);
+  if (avatarUrl) {
+    embed.setThumbnail(avatarUrl);
   }
+
+  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
+  let description = 'None provided';
+  let createdTimestamp = 'Unknown';
+
+  if (profile) {
+    description = profile.description || 'None provided';
+    createdTimestamp = profile.created ? `<t:${Math.floor(new Date(profile.created).getTime() / 1000)}:F>` : 'Unknown';
+  }
+
+  embed.setDescription(
+    `### [${user.roblox_nickname}](https://www.roblox.com/users/${user.roblox_uid}/profile) (${user.roblox_uid})\n` +
+    `## Roblox Information\n` +
+    `### @${user.roblox_username}\n` +
+    `Account Created: ${createdTimestamp}\n` +
+    `## Description\n` +
+    `${description}`
+  );
 
   return embed;
 }
 
 async function createDiscordEmbed(user, interaction) {
   const embed = new EmbedBuilder()
-    .setTitle(`${user.roblox_nickname} (${user.roblox_uid})`)
-    .setURL(`https://www.roblox.com/users/${user.roblox_uid}/profile`)
     .setColor('#393a41');
 
-  embed.addFields(
-    { name: 'Roblox Information', value: `@${user.roblox_username}`, inline: false }
-  );
-
-  // Fetch additional Roblox profile info
-  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
-  if (profile) {
-    const createdTimestamp = Math.floor(new Date(profile.created).getTime() / 1000);
-    embed.addFields(
-      { name: 'Account Created', value: `<t:${createdTimestamp}:F>`, inline: false },
-      { name: 'Description', value: profile.description || 'None provided', inline: false }
-    );
-  } else {
-    embed.addFields(
-      { name: 'Account Created', value: 'Unknown', inline: false },
-      { name: 'Description', value: 'None provided', inline: false }
-    );
-  }
-
-  // Add Discord information
+  // Set Discord avatar as thumbnail
   try {
     const discordUser = await interaction.guild.members.fetch(user.userid);
     if (discordUser) {
-      const discordCreatedTimestamp = Math.floor(discordUser.user.createdTimestamp / 1000);
-      embed.addFields(
-        { name: 'Discord Information', value: `@${user.username}`, inline: false },
-        { name: 'Account Created', value: `<t:${discordCreatedTimestamp}:F>`, inline: false }
-      );
+      embed.setThumbnail(discordUser.user.displayAvatarURL({ dynamic: true, size: 256 }));
     }
   } catch (error) {
     console.error('Error fetching Discord user:', error);
   }
+
+  // Fetch additional Roblox profile info
+  const profile = await robloxAPI.getUserProfile(user.roblox_uid);
+  let description = 'None provided';
+  let createdTimestamp = 'Unknown';
+
+  if (profile) {
+    description = profile.description || 'None provided';
+    createdTimestamp = profile.created ? `<t:${Math.floor(new Date(profile.created).getTime() / 1000)}:F>` : 'Unknown';
+  }
+
+  let discordInfo = '';
+  try {
+    const discordUser = await interaction.guild.members.fetch(user.userid);
+    if (discordUser) {
+      const discordCreatedTimestamp = Math.floor(discordUser.user.createdTimestamp / 1000);
+      discordInfo = `\n## Discord Information\n### @${user.username}\nAccount Created: <t:${discordCreatedTimestamp}:F>`;
+    }
+  } catch (error) {
+    console.error('Error fetching Discord user:', error);
+  }
+
+  embed.setDescription(
+    `### [${user.roblox_nickname}](https://www.roblox.com/users/${user.roblox_uid}/profile) (${user.roblox_uid})\n` +
+    `## Roblox Information\n` +
+    `### @${user.roblox_username}\n` +
+    `Account Created: ${createdTimestamp}\n` +
+    `## Description\n` +
+    `${description}` +
+    `${discordInfo}`
+  );
 
   return embed;
 }
