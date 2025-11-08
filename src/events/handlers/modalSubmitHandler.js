@@ -1,5 +1,9 @@
 const {
-  Events
+  Events,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -50,10 +54,33 @@ module.exports = {
       }
 
       if (existingUser) {
-        existingUser.roblox_username = roblox;
-        existingUser.verified = false;
-        existingUser.roblox_uid = "";
-        existingUser.roblox_nickname = "";
+        const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
+
+        const embed = new EmbedBuilder()
+          .setTitle('🔍 Your Roblox Verification Status')
+          .setDescription(`**Discord:** ${interaction.user.username}\n**Roblox Username:** ${existingUser.roblox_username}\n**Roblox Display Name:** ${existingUser.roblox_nickname || 'Not fetched yet'}\n**Verified:** ${existingUser.verified ? '✅ Yes' : '❌ No'}`)
+          .setAuthor({
+            name: interaction.user.username,
+            iconURL: interaction.user.displayAvatarURL({
+              dynamic: true
+            }),
+            url: robloxProfileUrl
+          })
+          .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
+          .setTimestamp();
+
+        const button = new ButtonBuilder()
+          .setCustomId('reverify_button')
+          .setLabel('Reverify your username')
+          .setStyle(ButtonStyle.Secondary);
+
+        const row = new ActionRowBuilder().addComponents(button);
+
+        return await interaction.reply({
+          embeds: [embed],
+          components: [row],
+          ephemeral: true
+        });
       } else {
         data.push(userData);
       }
