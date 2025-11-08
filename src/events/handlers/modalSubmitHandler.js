@@ -37,12 +37,21 @@ module.exports = {
         data = [];
       }
 
-      const existing = data.find(u => u.userid === interaction.user.id);
-      if (existing) {
-        existing.roblox_username = roblox;
-        existing.verified = false;
-        existing.roblox_uid = "";
-        existing.roblox_nickname = "";
+      const existingUser = data.find(u => u.userid === interaction.user.id);
+      const existingRoblox = data.find(u => u.roblox_username.toLowerCase() === roblox.toLowerCase() && u.userid !== interaction.user.id);
+
+      if (existingRoblox) {
+        return await interaction.reply({
+          content: `❌ Username Roblox **${roblox}** sudah digunakan oleh akun lain. Silakan gunakan username yang berbeda atau hubungi admin untuk verifikasi ulang.`,
+          ephemeral: true
+        });
+      }
+
+      if (existingUser) {
+        existingUser.roblox_username = roblox;
+        existingUser.verified = false;
+        existingUser.roblox_uid = "";
+        existingUser.roblox_nickname = "";
       } else {
         data.push(userData);
       }
