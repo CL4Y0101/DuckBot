@@ -125,6 +125,30 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
+    const allUsers = loadDatabase();
+    const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+
+    if (!currentUser) {
+      const embed = new EmbedBuilder()
+        .setTitle('🔍 Verification Required')
+        .setDescription('You need to verify your Roblox account to view the leaderboard.\n\nClick the button below to start verification.')
+        .setColor('#ff6b6b')
+        .setTimestamp();
+
+      const verifyButton = new ButtonBuilder()
+        .setCustomId('verify_button')
+        .setLabel('Verify Roblox Account')
+        .setStyle(ButtonStyle.Primary);
+
+      const row = new ActionRowBuilder().addComponents(verifyButton);
+
+      return await interaction.editReply({
+        embeds: [embed],
+        components: [row],
+        ephemeral: true
+      });
+    }
+
     const sort = interaction.options.getString('sorting') || 'alphabetical';
     const users = await getUsersWithAge();
 

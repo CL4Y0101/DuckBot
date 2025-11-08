@@ -1,6 +1,9 @@
 const {
   SlashCommandBuilder,
-  EmbedBuilder
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -182,8 +185,22 @@ module.exports = {
         
         const user = findUserByRobloxUsername(username);
         if (!user) {
+          const embed = new EmbedBuilder()
+            .setTitle('🔍 User Not Found')
+            .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
+            .setColor('#ff6b6b')
+            .setTimestamp();
+
+          const verifyButton = new ButtonBuilder()
+            .setCustomId('verify_button')
+            .setLabel('Verify Roblox Account')
+            .setStyle(ButtonStyle.Primary);
+
+          const row = new ActionRowBuilder().addComponents(verifyButton);
+
           return await interaction.editReply({
-            content: `❌ User "${username}" not found in database.`,
+            embeds: [embed],
+            components: [row],
             ephemeral: true
           });
         }
@@ -198,8 +215,22 @@ module.exports = {
         
         const user = findUserByDiscordUserid(discordUser.id);
         if (!user) {
+          const embed = new EmbedBuilder()
+            .setTitle('🔍 User Not Found')
+            .setDescription(`User ${discordUser.tag} is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
+            .setColor('#ff6b6b')
+            .setTimestamp();
+
+          const verifyButton = new ButtonBuilder()
+            .setCustomId('verify_button')
+            .setLabel('Verify Roblox Account')
+            .setStyle(ButtonStyle.Primary);
+
+          const row = new ActionRowBuilder().addComponents(verifyButton);
+
           return await interaction.editReply({
-            content: `❌ User ${discordUser.tag} not found in database.`,
+            embeds: [embed],
+            components: [row],
             ephemeral: true
           });
         }
