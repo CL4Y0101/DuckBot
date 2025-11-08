@@ -15,12 +15,12 @@ class RobloxAPI {
         const response = await axios.post(
           `https://users.roblox.com/v1/usernames/users`, {
             usernames: [username]
-          }, {
+        }, {
             headers: {
               'Content-Type': 'application/json',
               'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
             },
-            timeout: 8000
+            timeout: 15000
           }
         );
 
@@ -54,7 +54,7 @@ class RobloxAPI {
         headers: {
           'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
         },
-        timeout: 8000
+        timeout: 15000
       });
       return {
         name: response.data.name,

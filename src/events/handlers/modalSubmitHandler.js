@@ -2,6 +2,7 @@ const {
   Events
 } = require('discord.js');
 const fs = require('fs');
+const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
 
 module.exports = {
@@ -21,10 +22,12 @@ module.exports = {
         verified: false
       };
 
+      const databasePath = path.join(__dirname, '../../database/username.json');
+
       let data = [];
       try {
-        if (fs.existsSync('./src/database/username.json')) {
-          const fileContent = fs.readFileSync('./src/database/username.json', 'utf8');
+        if (fs.existsSync(databasePath)) {
+          const fileContent = fs.readFileSync(databasePath, 'utf8');
           if (fileContent.trim()) {
             data = JSON.parse(fileContent);
           }
@@ -44,7 +47,7 @@ module.exports = {
         data.push(userData);
       }
 
-      fs.writeFileSync('./src/database/username.json', JSON.stringify(data, null, 2));
+      fs.writeFileSync(databasePath, JSON.stringify(data, null, 2));
 
       setImmediate(async () => {
         try {
@@ -52,8 +55,8 @@ module.exports = {
           if (robloxUid) {
             let updatedData = [];
             try {
-              if (fs.existsSync('./src/database/username.json')) {
-                const fileContent = fs.readFileSync('./src/database/username.json', 'utf8');
+              if (fs.existsSync(databasePath)) {
+                const fileContent = fs.readFileSync(databasePath, 'utf8');
                 if (fileContent.trim()) {
                   updatedData = JSON.parse(fileContent);
                 }
@@ -73,7 +76,7 @@ module.exports = {
                 console.log(`Updated nickname for ${roblox}: ${profile.displayName}`);
               }
 
-              fs.writeFileSync('./src/database/username.json', JSON.stringify(updatedData, null, 2));
+              fs.writeFileSync(databasePath, JSON.stringify(updatedData, null, 2));
               console.log(`Updated Roblox UID for ${roblox}: ${robloxUid}`);
             }
           } else {
