@@ -35,7 +35,7 @@ module.exports = {
 
       console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
-      console.error(error);
+      console.error('❌ Error refreshing commands:', error);
     }
 
     const databasePath = path.join(__dirname, '..', 'database', 'username.json');
@@ -64,8 +64,8 @@ module.exports = {
           `Duck 🦆`
         ];
 
-        const statuses = ['online', 'idle', 'dnd']; // 'online' | 'idle' | 'dnd' | 'invisible'
-        const types = [0, 2]; // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
+        const statuses = ['online', 'idle', 'dnd']; // 'invisible' status is excluded
+        const types = [0, 2]; // 0 = Playing, 2 = Listening
 
         const randomName = activityNames[Math.floor(Math.random() * activityNames.length)];
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -92,6 +92,10 @@ module.exports = {
     await updateVerifications();
 
     startScheduler(client);
-    setInterval(backupDatabase, 1000 * 60 * 30);
+
+    setInterval(async () => {
+      console.log('💾 Auto-backup triggered...');
+      await backupDatabase();
+    }, 1000 * 60 * 30);
   },
 };
