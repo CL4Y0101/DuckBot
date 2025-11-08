@@ -24,13 +24,14 @@ async function verifyUser(userid) {
         if (!user.roblox_nickname) return false;
 
         const nickname = user.roblox_nickname;
+        const base = nickname.slice(-2) === 'DV' ? nickname.slice(0, -2) : nickname;
         const expectedPatterns = [
-            `DV_${nickname}`,
-            `DVx${nickname}`,
-            `DV${nickname}`,
-            `${nickname}_DV`,
-            `${nickname}xDV`,
-            `${nickname}DV`
+            `DV_${base}`,
+            `DVx${base}`,
+            `DV${base}`,
+            `${base}_DV`,
+            `${base}xDV`,
+            `${base}DV`
         ];
 
         const isVerified = expectedPatterns.some(
@@ -68,13 +69,14 @@ async function updateVerifications() {
             if (!profile) continue;
 
             const nickname = profile.displayName;
+            const base = nickname.slice(-2) === 'DV' ? nickname.slice(0, -2) : nickname;
             const patterns = [
-                `DV_${nickname}`,
-                `DVx${nickname}`,
-                `DV${nickname}`,
-                `${nickname}_DV`,
-                `${nickname}xDV`,
-                `${nickname}DV`
+                `DV_${base}`,
+                `DVx${base}`,
+                `DV${base}`,
+                `${base}_DV`,
+                `${base}xDV`,
+                `${base}DV`
             ];
 
             const isVerified = patterns.some(
