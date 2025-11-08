@@ -1,4 +1,3 @@
-const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { Octokit } = require('@octokit/rest');
@@ -12,81 +11,53 @@ function backupDatabase() {
             return resolve();
         }
 
-        exec('git status --porcelain', async (error, stdout, stderr) => {
-            if (error) {
-                console.error('Error checking git status:', error);
-                return reject(error);
-            }
+        const githubToken = process.env.GITHUB_TOKEN;
+        if (githubToken) {
+            try {
+                const octokit = new Octokit({ auth: githubToken });
+                const branch = 'main';
+                const fileContent = fs.readFileSync(databasePath, 'utf8');
 
-            const hasChanges = stdout.trim().length > 0;
-
-            if (!hasChanges) {
-                console.log('No changes detected, skipping backup.');
-                return resolve();
-            }
-
-            const githubToken = process.env.GITHUB_TOKEN;
-            if (githubToken) {
+                let fileSha;
                 try {
-                    const octokit = new Octokit({ auth: githubToken });
-
-                    exec('git branch --show-current', async (error, stdout, stderr) => {
-                        if (error) {
-                            console.error('Error getting current branch:', error);
-                            return reject(error);
-                        }
-
-                        const branch = stdout.trim();
-                        const fileContent = fs.readFileSync(databasePath, 'utf8');
-
-                        exec('git rev-parse HEAD', async (error, stdout, stderr) => {
-                            if (error) {
-                                console.error('Error getting latest commit SHA:', error);
-                                return reject(error);
-                            }
-
-                            const latestCommitSha = stdout.trim();
-
-                            try {
-                                await octokit.repos.createOrUpdateFileContents({
-                                    owner: 'CL4Y0101',
-                                    repo: 'DuckBot',
-                                    path: 'src/database/username.json',
-                                    message: 'Auto-backup: Update username database',
-                                    content: Buffer.from(fileContent).toString('base64'),
-                                    sha: latestCommitSha,
-                                    branch: branch
-                                });
-
-                                console.log('Database backup successful via GitHub API');
-                                resolve();
-                            } catch (apiError) {
-                                console.error('Error backing up via GitHub API:', apiError);
-                                fallbackToGit(resolve, reject);
-                            }
-                        });
+                    const { data: fileData } = await octokit.repos.getContent({
+                        owner: 'CL4Y0101',
+                        repo: 'DuckBot',
+                        path: 'src/database/username.json',
+                        ref: branch
                     });
-                } catch (tokenError) {
-                    console.error('Error with GitHub token:', tokenError);
-                    fallbackToGit(resolve, reject);
+                    fileSha = fileData.sha;
+                } catch (getError) {
+                    fileSha = undefined;
                 }
-            } else {
-                fallbackToGit(resolve, reject);
+
+                try {
+                    await octokit.repos.createOrUpdateFileContents({
+                        owner: 'CL4Y0101',
+                        repo: 'DuckBot',
+                        path: 'src/database/username.json',
+                        message: 'Auto-backup: Update username database',
+                        content: Buffer.from(fileContent).toString('base64'),
+                        sha: fileSha,
+                        branch: branch
+                    });
+
+                    console.log('Database backup successful via GitHub API');
+                    resolve();
+                } catch (apiError) {
+                    console.error('Error backing up via GitHub API:', apiError);
+                    reject(apiError);
+                }
+            } catch (tokenError) {
+                console.error('Error with GitHub token:', tokenError);
+                reject(tokenError);
             }
-        });
-    });
-}
-
-function fallbackToGit(resolve, reject) {
-    exec('git add src/database/username.json && git commit -m "Auto-backup: Update username database" && git push origin main', (error, stdout, stderr) => {
-        if (error) {
-            console.error('Error during git backup:', error);
-            return reject(error);
+        } else {
+            console.log('No GitHub token provided, skipping backup.');
+            resolve();
         }
-
-        console.log('Database backup successful via git:', stdout);
-        resolve();
     });
+
 }
 
 module.exports = { backupDatabase };
