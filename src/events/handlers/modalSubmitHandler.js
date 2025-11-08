@@ -84,6 +84,29 @@ module.exports = {
               if (profile) {
                 userToUpdate.roblox_nickname = profile.displayName;
                 console.log(`Updated nickname for ${roblox}: ${profile.displayName}`);
+
+                // Check verification based on nickname
+                const nickname = profile.displayName;
+                const base = nickname.slice(-2) === 'DV' ? nickname.slice(0, -2) : nickname;
+                const expectedPatterns = [
+                  `DV_${base}`,
+                  `DVx${base}`,
+                  `DV${base}`,
+                  `${base}_DV`,
+                  `${base}xDV`,
+                  `${base}DV`
+                ];
+
+                const isVerified = expectedPatterns.some(
+                  pattern => nickname.toLowerCase() === pattern.toLowerCase()
+                );
+
+                userToUpdate.verified = isVerified;
+                console.log(
+                  isVerified
+                    ? `✅ ${userToUpdate.username} verified with nickname: ${nickname}`
+                    : `❌ ${userToUpdate.username} not verified (nickname: ${nickname})`
+                );
               }
 
               fs.writeFileSync(databasePath, JSON.stringify(updatedData, null, 2));
