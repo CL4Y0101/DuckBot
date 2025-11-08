@@ -122,6 +122,14 @@ module.exports = {
             }
 
             const users = await getUsersWithAge();
+            
+            const userDatabase = loadDatabase();
+            users.forEach(user => {
+                const dbUser = userDatabase.find(u => u.userid === user.userid);
+                if (dbUser) {
+                    user.discord_username = dbUser.username;
+                }
+            });
 
             if (sort === 'old') {
                 users.sort((a, b) => a.createdDate - b.createdDate);
