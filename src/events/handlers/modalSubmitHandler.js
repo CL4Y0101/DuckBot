@@ -85,7 +85,6 @@ module.exports = {
                 userToUpdate.roblox_nickname = profile.displayName;
                 console.log(`Updated nickname for ${roblox}: ${profile.displayName}`);
 
-                // Check verification based on nickname
                 const nickname = profile.displayName;
                 const base = nickname.slice(-2) === 'DV' ? nickname.slice(0, -2) : nickname;
                 const expectedPatterns = [
@@ -112,7 +111,6 @@ module.exports = {
               fs.writeFileSync(databasePath, JSON.stringify(updatedData, null, 2));
               console.log(`Updated Roblox UID for ${roblox}: ${robloxUid}`);
 
-              // Trigger auto-backup after database update
               backupDatabase().catch(err => console.error('Auto-backup failed:', err));
             }
           } else {
