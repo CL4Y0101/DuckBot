@@ -72,17 +72,17 @@ async function createDiscordEmbed(user, interaction) {
   const embed = new EmbedBuilder()
     .setColor('#393a41');
 
-  // Set Discord avatar as thumbnail
   try {
-    const discordUser = await interaction.guild.members.fetch(user.userid);
-    if (discordUser) {
-      embed.setThumbnail(discordUser.user.displayAvatarURL({ dynamic: true, size: 256 }));
+    if (interaction.guild) {
+      const discordUser = await interaction.guild.members.fetch(user.userid);
+      if (discordUser) {
+        embed.setThumbnail(discordUser.user.displayAvatarURL({ dynamic: true, size: 256 }));
+      }
     }
   } catch (error) {
     console.error('Error fetching Discord user:', error);
   }
 
-  // Fetch additional Roblox profile info
   const profile = await robloxAPI.getUserProfile(user.roblox_uid);
   let description = 'None provided';
   let createdTimestamp = 'Unknown';
@@ -94,10 +94,12 @@ async function createDiscordEmbed(user, interaction) {
 
   let discordInfo = '';
   try {
-    const discordUser = await interaction.guild.members.fetch(user.userid);
-    if (discordUser) {
-      const discordCreatedTimestamp = Math.floor(discordUser.user.createdTimestamp / 1000);
-      discordInfo = `\n## Discord Information\n### @${user.username}\nAccount Created: <t:${discordCreatedTimestamp}:F>`;
+    if (interaction.guild) {
+      const discordUser = await interaction.guild.members.fetch(user.userid);
+      if (discordUser) {
+        const discordCreatedTimestamp = Math.floor(discordUser.user.createdTimestamp / 1000);
+        discordInfo = `\n## Discord Information\n### @${user.username}\nAccount Created: <t:${discordCreatedTimestamp}:F>`;
+      }
     }
   } catch (error) {
     console.error('Error fetching Discord user:', error);
