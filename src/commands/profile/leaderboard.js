@@ -66,7 +66,7 @@ function formatAge(createdDate) {
   return `${ageText} (${timestamp})`;
 }
 
-function createLeaderboardEmbed(users, page, sort, totalPages) {
+function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox') {
   const start = (page - 1) * 10;
   const end = start + 10;
   const pageUsers = users.slice(start, end);
@@ -81,7 +81,8 @@ function createLeaderboardEmbed(users, page, sort, totalPages) {
   pageUsers.forEach((user, index) => {
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
-    description += `${medal} [${user.roblox_nickname || user.roblox_username}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
+    const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
+    description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
   });
 
   embed.setDescription(embed.data.description + '\n\n' + description);
@@ -89,22 +90,27 @@ function createLeaderboardEmbed(users, page, sort, totalPages) {
   return embed;
 }
 
-function createButtons(page, totalPages, sort) {
+function createButtons(page, totalPages, sort, displayMode = 'roblox') {
   const row = new ActionRowBuilder();
 
   const prevButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_prev_${page}_${sort}`)
+    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}`)
     .setLabel('Previous')
     .setStyle(ButtonStyle.Primary)
     .setDisabled(page === 1);
 
+  const toggleButton = new ButtonBuilder()
+    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}`)
+    .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
+    .setStyle(ButtonStyle.Secondary);
+
   const nextButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_next_${page}_${sort}`)
+    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}`)
     .setLabel('Next')
     .setStyle(ButtonStyle.Primary)
     .setDisabled(page === totalPages);
 
-  row.addComponents(prevButton, nextButton);
+  row.addComponents(prevButton, toggleButton, nextButton);
   return row;
 }
 
@@ -167,8 +173,8 @@ module.exports = {
     const totalPages = Math.ceil(users.length / 10);
     const page = 1;
 
-    const embed = createLeaderboardEmbed(users, page, sort, totalPages);
-    const buttons = createButtons(page, totalPages, sort);
+    const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox');
+    const buttons = createButtons(page, totalPages, sort, 'roblox');
 
     await interaction.editReply({ embeds: [embed], components: [buttons] });
   }

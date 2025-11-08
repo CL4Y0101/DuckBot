@@ -99,6 +99,7 @@ module.exports = {
             const action = parts[1];
             const currentPage = parseInt(parts[2]);
             const sort = parts[3];
+            const displayMode = parts[4] || 'roblox';
 
             const leaderboardModule = require('../../commands/profile/leaderboard');
             const loadDatabase = leaderboardModule.loadDatabase || (() => []);
@@ -143,14 +144,14 @@ module.exports = {
                 return `${ageText} (${timestamp})`;
             }
 
-            function createLeaderboardEmbed(users, page, sort, totalPages) {
+            function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox') {
                 const start = (page - 1) * 10;
                 const end = start + 10;
                 const pageUsers = users.slice(start, end);
 
                 const embed = new EmbedBuilder()
                     .setTitle('🏆 Roblox Account Age Leaderboard')
-                    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : 'Newest Accounts'}\nPage ${page}/${totalPages}`)
+                    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\nPage ${page}/${totalPages}`)
                     .setColor('#ff6b6b')
                     .setTimestamp();
 
@@ -158,7 +159,8 @@ module.exports = {
                 pageUsers.forEach((user, index) => {
                     const rank = start + index + 1;
                     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
-                    description += `${medal} [${user.roblox_nickname || user.roblox_username}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
+                    const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
+                    description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
                 });
 
                 embed.setDescription(embed.data.description + '\n\n' + description);
@@ -166,38 +168,54 @@ module.exports = {
                 return embed;
             }
 
-            function createButtons(page, totalPages, sort) {
+            function createButtons(page, totalPages, sort, displayMode = 'roblox') {
                 const row = new ActionRowBuilder();
 
                 const prevButton = new ButtonBuilder()
-                    .setCustomId(`leaderboard_prev_${page}_${sort}`)
+                    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}`)
                     .setLabel('Previous')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(page === 1);
 
+                const toggleButton = new ButtonBuilder()
+                    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}`)
+                    .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
+                    .setStyle(ButtonStyle.Secondary);
+
                 const nextButton = new ButtonBuilder()
-                    .setCustomId(`leaderboard_next_${page}_${sort}`)
+                    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}`)
                     .setLabel('Next')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(page === totalPages);
 
-                row.addComponents(prevButton, nextButton);
+                row.addComponents(prevButton, toggleButton, nextButton);
                 return row;
             }
 
             let newPage = currentPage;
+            let newDisplayMode = displayMode;
+
             if (action === 'prev' && currentPage > 1) {
                 newPage = currentPage - 1;
             } else if (action === 'next') {
                 newPage = currentPage + 1;
+            } else if (action === 'toggle') {
+                newDisplayMode = displayMode === 'roblox' ? 'discord' : 'roblox';
             }
 
             const users = await getUsersWithAge();
-            users.sort((a, b) => sort === 'old' ? a.createdDate - b.createdDate : b.createdDate - a.createdDate);
+
+            if (sort === 'old') {
+                users.sort((a, b) => a.createdDate - b.createdDate);
+            } else if (sort === 'new') {
+                users.sort((a, b) => b.createdDate - a.createdDate);
+            } else {
+                users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
+            }
 
             const totalPages = Math.ceil(users.length / 10);
-            const embed = createLeaderboardEmbed(users, newPage, sort, totalPages);
-            const buttons = createButtons(newPage, totalPages, sort);
+            const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode);
+            const buttons = createButtons(newPage, totalPages, sort, newDisplayMode);
 
             await interaction.update({ embeds: [embed], components: [buttons] });
         }
