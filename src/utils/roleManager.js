@@ -4,7 +4,7 @@ const { Client } = require('discord.js');
 
 const databasePath = path.join(__dirname, '../database/username.json');
 
-const VERIFIED_ROLE_ID = 'YOUR_VERIFIED_ROLE_ID_HERE'; // Ganti dengan role ID Discord
+const VERIFIED_ROLE_ID = '1405032359589449800'; // Ganti dengan role ID Discord
 
 async function assignVerifiedRole(client, userid) {
     try {
