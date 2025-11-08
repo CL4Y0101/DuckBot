@@ -3,6 +3,7 @@ const { getCommandFiles } = require('../utils/commandLoader');
 const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
 const { updateVerifications } = require('../utils/roblox/verifyUser');
 const { startScheduler } = require('../utils/roblox/scheduler');
+const { backupDatabase } = require('../utils/github/backup');
 const fs = require('fs');
 const path = require('path');
 
@@ -91,5 +92,6 @@ module.exports = {
     await updateVerifications();
 
     startScheduler(client);
+    setInterval(backupDatabase, 1000 * 60 * 30);
   },
 };
