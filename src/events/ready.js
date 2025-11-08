@@ -12,7 +12,6 @@ module.exports = {
   async execute(client) {
     console.log(`✅ Logged in as ${client.user.tag}`);
 
-    // === REGISTER COMMANDS ===
     const commands = [];
     const deployCommandFiles = getCommandFiles('./src/commands');
 
