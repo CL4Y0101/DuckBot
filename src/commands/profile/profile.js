@@ -29,7 +29,7 @@ function getRobloxUsernames() {
   const usernames = users
     .map(user => user.roblox_username)
     .filter(username => username && typeof username === 'string')
-    .slice(0, 25); // Limit to 25 untuk autocomplete
+    .slice(0, 25);
   console.log(`🎮 Found ${usernames.length} Roblox usernames`);
   return usernames;
 }
@@ -245,7 +245,7 @@ module.exports = {
           if (!choice || typeof choice !== 'string') return false;
           return choice.toLowerCase().includes(focusedOption.value.toLowerCase());
         })
-        .slice(0, 25); // Discord limit
+        .slice(0, 25);
 
       console.log(`✅ Filtered choices: ${filtered.length}`);
 

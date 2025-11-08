@@ -96,7 +96,7 @@ module.exports = {
 
         if (interaction.customId.startsWith('leaderboard_')) {
             const parts = interaction.customId.split('_');
-            const action = parts[1]; // prev or next
+            const action = parts[1];
             const currentPage = parseInt(parts[2]);
             const sort = parts[3];
 

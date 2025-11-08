@@ -73,7 +73,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages) {
 
   const embed = new EmbedBuilder()
     .setTitle('🏆 Roblox Account Age Leaderboard')
-    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : 'Newest Accounts'}\nPage ${page}/${totalPages}`)
+    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\nPage ${page}/${totalPages}`)
     .setColor('#ff6b6b')
     .setTimestamp();
 
@@ -115,7 +115,7 @@ module.exports = {
     .addStringOption(option =>
       option.setName('sorting')
         .setDescription('Sort by account age')
-        .setRequired(true)
+        .setRequired(false)
         .addChoices(
           { name: 'Oldest Accounts', value: 'old' },
           { name: 'Newest Accounts', value: 'new' }
@@ -125,14 +125,20 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const sort = interaction.options.getString('sorting');
+    const sort = interaction.options.getString('sorting') || 'alphabetical';
     const users = await getUsersWithAge();
 
     if (users.length === 0) {
       return await interaction.editReply('No users found with valid Roblox profiles.');
     }
 
-    users.sort((a, b) => sort === 'old' ? a.createdDate - b.createdDate : b.createdDate - a.createdDate);
+    if (sort === 'old') {
+      users.sort((a, b) => a.createdDate - b.createdDate);
+    } else if (sort === 'new') {
+      users.sort((a, b) => b.createdDate - a.createdDate);
+    } else {
+      users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
+    }
 
     const totalPages = Math.ceil(users.length / 10);
     const page = 1;
