@@ -163,7 +163,7 @@ module.exports = {
                     description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
                 });
 
-                embed.setDescription(embed.data.description + '\n\n' + description);
+                embed.setDescription(`${embed.data.description}\n\n${description}`);
 
                 return embed;
             }
