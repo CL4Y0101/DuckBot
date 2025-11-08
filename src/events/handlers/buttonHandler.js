@@ -151,11 +151,11 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                     .setTitle('🏆 Roblox Account Age Leaderboard')
-                    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\nPage ${page}/${totalPages}`)
                     .setColor('#ff6b6b')
                     .setTimestamp();
 
-                let description = '';
+                let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n`;
+
                 pageUsers.forEach((user, index) => {
                     const rank = start + index + 1;
                     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
@@ -163,8 +163,7 @@ module.exports = {
                     description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
                 });
 
-                embed.setDescription(`${embed.data.description}\n\n${description}`);
-
+                embed.setDescription(description);
                 return embed;
             }
 
@@ -217,7 +216,10 @@ module.exports = {
             const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode);
             const buttons = createButtons(newPage, totalPages, sort, newDisplayMode);
 
-            await interaction.update({ embeds: [embed], components: [buttons] });
+            await interaction.update({
+                embeds: [embed],
+                components: [buttons]
+            });
         }
     },
 };

@@ -73,11 +73,11 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
 
   const embed = new EmbedBuilder()
     .setTitle('🏆 Roblox Account Age Leaderboard')
-    .setDescription(`Sorted by: ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\nPage ${page}/${totalPages}`)
     .setColor('#ff6b6b')
     .setTimestamp();
 
-  let description = '';
+  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n`;
+
   pageUsers.forEach((user, index) => {
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
@@ -85,8 +85,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
   });
 
-  embed.setDescription(embed.data.description + '\n\n' + description);
-
+  embed.setDescription(description);
   return embed;
 }
 
