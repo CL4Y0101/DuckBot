@@ -1,22 +1,9 @@
-const {
-  Events
-} = require('discord.js');
-const {
-  REST,
-  Routes
-} = require('discord.js');
-const {
-  getCommandFiles
-} = require('../utils/commandLoader');
-const {
-  updateRobloxUIDs
-} = require('../utils/roblox/updateRobloxUIDs');
-const {
-  updateVerifications
-} = require('../utils/roblox/verifyUser');
-const {
-  startScheduler
-} = require('../utils/roblox/scheduler');
+const { Events, REST, Routes } = require('discord.js');
+const { getCommandFiles } = require('../utils/commandLoader');
+const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
+const { updateVerifications } = require('../utils/roblox/verifyUser');
+const { startScheduler } = require('../utils/roblox/scheduler');
+const fs = require('fs');
 const path = require('path');
 
 module.exports = {
@@ -25,16 +12,7 @@ module.exports = {
   async execute(client) {
     console.log(`✅ Logged in as ${client.user.tag}`);
 
-    client.user.setPresence({
-      activities: [{
-        name: 'Duck 🦆',
-        type: 0, // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
-        type: 2, // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
-      }],
-      status: 'online', // 'online' | 'idle' | 'dnd' | 'invisible'
-      status: 'dnd', // 'online' | 'idle' | 'dnd' | 'invisible'
-    });
-
+    // === REGISTER COMMANDS ===
     const commands = [];
     const deployCommandFiles = getCommandFiles('./src/commands');
 
@@ -45,23 +23,67 @@ module.exports = {
       }
     }
 
-    const rest = new REST({
-      version: '10'
-    }).setToken(process.env.TOKEN);
+    const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
     try {
       console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
       const data = await rest.put(
-        Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), {
-          body: commands
-        },
+        Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+        { body: commands },
       );
 
       console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
       console.error(error);
     }
+
+    const databasePath = path.join(__dirname, '../database/username.json');
+
+    async function updatePresence() {
+      try {
+        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        if (!guild) return;
+
+        const serverCount = client.guilds.cache.size;
+        const memberCount = guild.memberCount;
+
+        let robloxUsers = 0;
+        if (fs.existsSync(databasePath)) {
+          const fileContent = fs.readFileSync(databasePath, 'utf8');
+          if (fileContent.trim()) {
+            const data = JSON.parse(fileContent);
+            robloxUsers = data.length;
+          }
+        }
+
+        const activityNames = [
+          `handler ${serverCount} servers`,
+          `handler ${memberCount} members`,
+          `handler ${robloxUsers} Roblox users`,
+          `Duck 🦆`
+        ];
+
+        const statuses = ['online', 'idle', 'dnd']; // 'online' | 'idle' | 'dnd' | 'invisible'
+        const types = [0, 2]; // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
+
+        const randomName = activityNames[Math.floor(Math.random() * activityNames.length)];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+
+        client.user.setPresence({
+          activities: [{ name: randomName, type: randomType }],
+          status: randomStatus,
+        });
+
+        console.log(`🎮 Presence updated → "${randomName}" [${randomStatus}]`);
+      } catch (err) {
+        console.error('❌ Error updating presence:', err);
+      }
+    }
+
+    await updatePresence();
+    setInterval(updatePresence, 60 * 1000);
 
     console.log('🔄 Checking for missing Roblox UIDs...');
     await updateRobloxUIDs();
