@@ -169,27 +169,46 @@ module.exports = {
     }
   },
 
-  async autocomplete(interaction) {
+async autocomplete(interaction) {
+  try {
     const focusedOption = interaction.options.getFocused(true);
+    let choices = [];
+
+    // aman-cek subcommand
+    let sub;
+    try {
+      sub = interaction.options.getSubcommand();
+    } catch {
+      sub = 'roblox_user'; // default supaya tidak error di Discord
+    }
 
     if (focusedOption.name === 'username') {
-      let choices = [];
-
-      if (interaction.options.getSubcommand() === 'roblox_user') {
+      if (sub === 'roblox_user') {
         choices = getRobloxUsernames();
-      } else if (interaction.options.getSubcommand() === 'discord_user') {
+      } else if (sub === 'discord_user') {
         choices = getDiscordUsernames();
       }
 
-      const filtered = choices.filter(choice =>
-        choice.toLowerCase().includes(focusedOption.value.toLowerCase())
-      ).slice(0, 25);
+      if (!Array.isArray(choices)) choices = [];
+      const filtered = choices
+        .filter(choice =>
+          choice.toLowerCase().includes(focusedOption.value.toLowerCase())
+        )
+        .slice(0, 25);
 
       await interaction.respond(
         filtered.map(choice => ({ name: choice, value: choice }))
       );
+    } else {
+      await interaction.respond([]);
     }
-  },
+  } catch (error) {
+    console.error('❌ Autocomplete error:', error);
+    if (!interaction.responded) {
+      await interaction.respond([]);
+    }
+  }
+},
 
   getRobloxUsernames,
   getDiscordUsernames,
