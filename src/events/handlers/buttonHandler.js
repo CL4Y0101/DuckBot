@@ -4,7 +4,9 @@ const {
     TextInputBuilder,
     TextInputStyle,
     ActionRowBuilder,
-    EmbedBuilder
+    EmbedBuilder,
+    ButtonBuilder,
+    ButtonStyle
 } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -43,8 +45,16 @@ module.exports = {
                     .setColor(existingUser.verified ? '#393a41' : '#393a41')
                     .setTimestamp();
 
+                const button = new ButtonBuilder()
+                    .setCustomId('reverify_button')
+                    .setLabel('Reverify your username')
+                    .setStyle(ButtonStyle.secondary);
+
+                const row = new ActionRowBuilder().addComponents(button);
+
                 await interaction.reply({
                     embeds: [embed],
+                    components: [row],
                     ephemeral: true
                 });
             } else {
@@ -56,7 +66,7 @@ module.exports = {
                     .setCustomId('roblox_username')
                     .setLabel('Masukkan username Roblox kamu:')
                     .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('contoh: Luhnox')
+                    .setPlaceholder('contoh: luhnox')
                     .setRequired(true);
 
                 const row = new ActionRowBuilder().addComponents(robloxInput);
@@ -64,6 +74,24 @@ module.exports = {
 
                 await interaction.showModal(modal);
             }
+        }
+
+        if (interaction.customId === 'reverify_button') {
+            const modal = new ModalBuilder()
+                .setCustomId('verify_modal')
+                .setTitle('Reverify Your Username');
+
+            const robloxInput = new TextInputBuilder()
+                .setCustomId('roblox_username')
+                .setLabel('Masukkan username Roblox kamu:')
+                .setStyle(TextInputStyle.Short)
+                .setPlaceholder('contoh: luhnox')
+                .setRequired(true);
+
+            const row = new ActionRowBuilder().addComponents(robloxInput);
+            modal.addComponents(row);
+
+            await interaction.showModal(modal);
         }
     },
 };
