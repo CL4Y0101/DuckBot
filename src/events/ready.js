@@ -24,7 +24,13 @@ module.exports = {
   once: true,
   async execute(client) {
     console.log(`✅ Logged in as ${client.user.tag}`);
-
+client.user.setPresence({
+  activities: [{
+    name: 'Duck 🦆',
+    type: 0, // 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing
+  }],
+  status: 'online', // 'online' | 'idle' | 'dnd' | 'invisible'
+});
     const commands = [];
     const deployCommandFiles = getCommandFiles('./src/commands');
 
