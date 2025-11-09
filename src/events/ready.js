@@ -36,7 +36,7 @@ module.exports = {
       console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
       console.error('❌ Error refreshing commands:', error);
-    }x
+    }
 
     const databasePath = path.join(__dirname, '..', 'database', 'username.json');
 
