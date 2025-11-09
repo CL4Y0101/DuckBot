@@ -99,25 +99,26 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   return embed;
 }
 
-function createButtons(page, totalPages, sort, displayMode = 'roblox', userId) {
+function createButtons(page, totalPages, sort, displayMode = 'roblox', userId, disabled = false) {
   const row = new ActionRowBuilder();
 
   const prevButton = new ButtonBuilder()
     .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel('Previous')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(page === 1);
+    .setDisabled(page === 1 || disabled);
 
   const toggleButton = new ButtonBuilder()
     .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
-    .setStyle(ButtonStyle.Secondary);
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(disabled);
 
   const nextButton = new ButtonBuilder()
     .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel('Next')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(page === totalPages);
+    .setDisabled(page === totalPages || disabled);
 
   row.addComponents(prevButton, toggleButton, nextButton);
   return row;
@@ -188,7 +189,16 @@ module.exports = {
     const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
     const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
-    await interaction.editReply({ embeds: [embed], components: [buttons] });
+    const response = await interaction.editReply({ embeds: [embed], components: [buttons] });
+
+    setTimeout(async () => {
+      try {
+        const disabledButtons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id, true);
+        await response.edit({ embeds: [embed], components: [disabledButtons] });
+      } catch (error) {
+        console.error('Error disabling buttons:', error);
+      }
+    }, 5 * 60 * 1000);
   },
 
   loadDatabase,
