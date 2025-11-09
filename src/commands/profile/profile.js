@@ -121,9 +121,7 @@ async function createRobloxEmbed(user) {
   }
 
   embed.setDescription(
-    `### \`👤\` [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)\n` +
-    `**Sorted by:** Roblox Account Information\n\n` +
-    `### \`📊\` Account Details\n` +
+    `### \`📊\` Account Details: [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)\n` +
     `-# **User ID:** \`${user.roblox_uid}\`\n` +
     `-# **Username:** \`@${user.roblox_username}\`\n` +
     `-# **Account Age:** \`${accountAge}\`\n` +
@@ -188,8 +186,6 @@ async function createDiscordEmbed(user, interaction) {
   }
 
   embed.setDescription(
-    `### \`👤\` ${user.username}\n` +
-    `**Sorted by:** Discord Account Information\n\n` +
     `### \`📊\` Account Details\n` +
     `-# **User ID:** \`${user.userid}\`\n` +
     `-# **Account Age:** \`${accountAge}\`\n` +

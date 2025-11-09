@@ -45,8 +45,6 @@ module.exports = {
                     })
                     .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
                     .setDescription(
-                        `### \`👤\` ${interaction.user.username}\n` +
-                        `**Sorted by:** Roblox Verification Information\n\n` +
                         `### \`📊\` Account Details\n` +
                         `-# **Discord Username:** \`${interaction.user.username}\`\n` +
                         `-# **Roblox Username:** \`${existingUser.roblox_username}\`\n` +
@@ -105,47 +103,24 @@ module.exports = {
         }
 
         if (interaction.customId.startsWith('leaderboard_')) {
-                const parts = interaction.customId.split('_');
-                const action = parts[1];
-                const currentPage = parseInt(parts[2]);
-                const sort = parts[3];
-                const displayMode = parts[4] || 'roblox';
-                const originalUserId = parts[5];
+            const parts = interaction.customId.split('_');
+            const action = parts[1];
+            const currentPage = parseInt(parts[2]);
+            const sort = parts[3];
+            const displayMode = parts[4] || 'roblox';
+            const originalUserId = parts[5];
 
-                if (interaction.user.id !== originalUserId) {
-                    return await interaction.reply({
-                        content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
-                        ephemeral: true
-                    });
-                }
+            if (interaction.user.id !== originalUserId) {
+                return await interaction.reply({
+                    content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
+                    ephemeral: true
+                });
+            }
 
-                const messageTimestamp = interaction.message.createdTimestamp;
-                const now = Date.now();
-                const timeDiff = now - messageTimestamp;
-                const fiveMinutes = 5 * 60 * 1000;
-
-                if (timeDiff > fiveMinutes) {
-                    const {
-                        loadDatabase,
-                        getUsersWithAge,
-                        createLeaderboardEmbed,
-                        createButtons
-                    } = leaderboardModule;
-
-                    const users = await getUsersWithAge();
-                    const totalPages = Math.ceil(users.length / 10);
-                    const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
-                    const allUsers = loadDatabase();
-                    const currentUser = allUsers.find(u => u.userid === interaction.user.id);
-                    const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
-                    const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
-                    const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
-
-                    return await interaction.update({
-                        embeds: [embed],
-                        components: [disabledButtons]
-                    });
-                }
+            const messageTimestamp = interaction.message.createdTimestamp;
+            const now = Date.now();
+            const timeDiff = now - messageTimestamp;
+            const fiveMinutes = 5 * 60 * 1000;
 
             const {
                 loadDatabase,
@@ -153,6 +128,22 @@ module.exports = {
                 createLeaderboardEmbed,
                 createButtons
             } = leaderboardModule;
+
+            if (timeDiff > fiveMinutes) {
+                const users = await getUsersWithAge();
+                const totalPages = Math.ceil(users.length / 10);
+                const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+                const allUsers = loadDatabase();
+                const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+                const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+                const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
+                const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
+
+                return await interaction.update({
+                    embeds: [embed],
+                    components: [disabledButtons]
+                });
+            }
 
             let newPage = currentPage;
             let newDisplayMode = displayMode;
