@@ -52,9 +52,7 @@ module.exports = {
         `• If you experience any issues, please contact an **Admin** for assistance.`
       )
       .setImage('attachment://profile.png')
-      .setColor('#5865F2')
-      .setTimestamp();
-
+      .setColor('#5865F2');
 
     const button = new ButtonBuilder()
       .setCustomId('verify_button_setup')

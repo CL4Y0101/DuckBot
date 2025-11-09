@@ -241,8 +241,7 @@ module.exports = {
           const embed = new EmbedBuilder()
             .setTitle('`🔍` User Not Found')
             .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
-            .setColor('#ff6b6b')
-            .setTimestamp();
+            .setColor('#ff6b6b');
 
           const verifyButton = new ButtonBuilder()
             .setCustomId('verify_button_profile')
@@ -301,8 +300,7 @@ module.exports = {
           const embed = new EmbedBuilder()
             .setTitle('`🔍` User Not Found')
             .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
-            .setColor('#ff6b6b')
-            .setTimestamp();
+            .setColor('#ff6b6b');
 
           const verifyButton = new ButtonBuilder()
             .setCustomId('verify_button')

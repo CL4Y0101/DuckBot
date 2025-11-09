@@ -44,8 +44,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
           .setDescription(description)
-          .setColor('#2f3136')
-          .setTimestamp();
+          .setColor('#2f3136');
 
         const button = new ButtonBuilder()
           .setLabel('Link')

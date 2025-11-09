@@ -151,8 +151,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle('`🔍` Verification Required')
         .setDescription('You need to verify your Roblox account to view the leaderboard.\n\nClick the button below to start verification.')
-        .setColor('#ff6b6b')
-        .setTimestamp();
+        .setColor('#ff6b6b');
 
       const verifyButton = new ButtonBuilder()
         .setCustomId('verify_button')
