@@ -50,13 +50,27 @@ module.exports = {
 
     const row = new ActionRowBuilder().addComponents(button);
 
-    await channel.send({
-      embeds: [embed],
-      components: [row]
-    });
-    await interaction.reply({
-      content: `✅ Embed verifikasi dikirim ke ${channel}`,
-      ephemeral: true
-    });
+    const messages = await channel.messages.fetch({ limit: 50 });
+    const botMessage = messages.find(msg => msg.author.id === interaction.client.user.id && msg.embeds.length > 0 && msg.embeds[0].title?.includes('Roblox Username Verification'));
+
+    if (botMessage) {
+      await botMessage.edit({
+        embeds: [embed],
+        components: [row]
+      });
+      await interaction.reply({
+        content: `✅ Embed verifikasi diupdate di ${channel}`,
+        ephemeral: true
+      });
+    } else {
+      await channel.send({
+        embeds: [embed],
+        components: [row]
+      });
+      await interaction.reply({
+        content: `✅ Embed verifikasi dikirim ke ${channel}`,
+        ephemeral: true
+      });
+    }
   },
 };
