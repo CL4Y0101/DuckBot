@@ -32,21 +32,29 @@ module.exports = {
   async execute(interaction) {
     const channel = interaction.options.getChannel('channel');
 
-    const attachment = new AttachmentBuilder('src/img/profile.png', { name: 'profile.png' });
+    const attachment = new AttachmentBuilder('src/img/profile.png', {
+      name: 'profile.png'
+    });
 
     const embed = new EmbedBuilder()
-      .setTitle('`🔰` Roblox Username Verification')
+      .setTitle('🔰 Roblox Username Verification')
       .setDescription(
-        `### \`📋\` Instructions\n` +
-        `-# Click the button below to start verifying your Roblox username\n` +
-        `-# Make sure your Roblox account is linked properly\n` +
-        `-# Verification helps us maintain a secure community\n` +
-        `-# To get the role and join Duck Void, your Roblox Display Name must be in one of these formats: \`DV_DisplayName\`, \`DVxDisplayName\`, \`DVDisplayName\`, \`DisplayNameDV\`, \`DisplayNamexDV\`, \`DisplayNameDV\` (where \`DisplayName\` is your original roblox Display Name)\n\n` +
-        `### \`⚠️\` Important Notes\n-# Only verify with your own Roblox account\n-# Contact admins if you encounter any issues`
+        `### 📋 Verification Guide\n` +
+        `> Follow the steps below carefully to verify your Roblox account:\n\n` +
+        `• Click the **Verify** button below to start the verification process.\n` +
+        `• Ensure your Roblox account is correctly linked to your Discord profile.\n` +
+        `• Verification keeps our community safe and authentic.\n` +
+        `• To receive the role and join **Duck Void**, your **Roblox Display Name** must follow one of these formats:\n` +
+        `\`DV_DisplayName\`, \`DVxDisplayName\`, \`DVDisplayName\`, \`DisplayNameDV\`, \`DisplayNamexDV\`, or \`DisplayNameDV\`.\n` +
+        `> *(Replace \`DisplayName\` with your actual Roblox display name)*\n\n` +
+        `### ⚠️ Important Notes\n` +
+        `• Only verify using your **own Roblox account**.\n` +
+        `• If you experience any issues, please contact an **Admin** for assistance.`
       )
       .setImage('attachment://profile.png')
       .setColor('#5865F2')
       .setTimestamp();
+
 
     const button = new ButtonBuilder()
       .setCustomId('verify_button_setup')
