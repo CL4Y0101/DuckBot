@@ -4,7 +4,8 @@ const {
   ButtonBuilder,
   ActionRowBuilder,
   ButtonStyle,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  AttachmentBuilder
 } = require('discord.js');
 
 module.exports = {
@@ -31,6 +32,8 @@ module.exports = {
   async execute(interaction) {
     const channel = interaction.options.getChannel('channel');
 
+    const attachment = new AttachmentBuilder('src/img/profile.png', { name: 'profile.png' });
+
     const embed = new EmbedBuilder()
       .setTitle('`🔰` Roblox Username Verification')
       .setDescription(
@@ -41,7 +44,7 @@ module.exports = {
         `-# To get the role and join Duck Void, your Roblox Display Name must be in one of these formats: \`DV_DisplayName\`, \`DVxDisplayName\`, \`DVDisplayName\`, \`DisplayNameDV\`, \`DisplayNamexDV\`, \`DisplayNameDV\` (where \`DisplayName\` is your original roblox Display Name)\n\n` +
         `### \`⚠️\` Important Notes\n-# Only verify with your own Roblox account\n-# Contact admins if you encounter any issues`
       )
-      .setImage('file://D:/DuckBot/src/img/profile.png')
+      .setImage('attachment://profile.png')
       .setColor('#5865F2')
       .setTimestamp();
 
@@ -68,6 +71,7 @@ module.exports = {
         content: '',
         embeds: [embed],
         components: [row]
+        // files: [attachment]
       });
       await interaction.reply({
         content: `✅ Pesan verifikasi diperbarui di ${channel}`,
@@ -77,6 +81,7 @@ module.exports = {
       await channel.send({
         embeds: [embed],
         components: [row]
+        // files: [attachment]
       });
       await interaction.reply({
         content: `✅ Embed verifikasi dikirim ke ${channel}`,
