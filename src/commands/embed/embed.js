@@ -1,9 +1,9 @@
 const {
     SlashCommandBuilder,
-    EmbedBuilder,
     ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle
 } = require('discord.js');
 
 const channel = '1421698609086464021';
@@ -21,22 +21,29 @@ module.exports = {
             });
         }
 
-        const description = interaction.fields.getTextInputValue('Description Input');
-        const link = interaction.fields.getTextInputValue('Link Input');
+        const modal = new ModalBuilder()
+            .setCustomId('embed_modal')
+            .setTitle('Create Embed');
 
-        const embed = new EmbedBuilder()
-            .setTitle('`🔐` Private Server Link')
-            .setDescription(description)
-            .setColor(0x0099FF);
-        const button = new ButtonBuilder()
-            .setLabel('Click Me')
-            .setStyle(ButtonStyle.Link)
-            .setURL(link);
-        const row = new ActionRowBuilder().addComponents(button);
-        await interaction.reply({
-            embeds: [embed],
-            components: [row]
-        });
+        const descriptionInput = new TextInputBuilder()
+            .setCustomId('description_input')
+            .setLabel('Description')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('Enter the description for the embed')
+            .setRequired(true);
 
+        const linkInput = new TextInputBuilder()
+            .setCustomId('link_input')
+            .setLabel('Link')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Enter the link URL')
+            .setRequired(true);
+
+        const firstRow = new ActionRowBuilder().addComponents(descriptionInput);
+        const secondRow = new ActionRowBuilder().addComponents(linkInput);
+
+        modal.addComponents(firstRow, secondRow);
+
+        await interaction.showModal(modal);
     }
 };

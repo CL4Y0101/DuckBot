@@ -13,7 +13,7 @@ const path = require('path');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
 
-const leaderboardModule = require('../../commands/profile/leaderboard');
+const leaderboardModule = require('../commands/profile/leaderboard');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -68,7 +68,7 @@ module.exports = {
                     .setCustomId('roblox_username')
                     .setLabel('Masukkan username Roblox kamu:')
                     .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('Example: luhnox')
+                    .setPlaceholder('contoh: luhnox')
                     .setRequired(true);
 
                 const row = new ActionRowBuilder().addComponents(robloxInput);
@@ -80,14 +80,14 @@ module.exports = {
 
         if (interaction.customId === 'reverify_button') {
             const modal = new ModalBuilder()
-                .setCustomId('reverify_modal')
+                .setCustomId('verify_modal')
                 .setTitle('Reverify Your Username');
 
             const robloxInput = new TextInputBuilder()
                 .setCustomId('roblox_username')
                 .setLabel('Masukkan username Roblox kamu:')
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder('Example: luhnox')
+                .setPlaceholder('contoh: luhnox')
                 .setRequired(true);
 
             const row = new ActionRowBuilder().addComponents(robloxInput);
@@ -97,11 +97,11 @@ module.exports = {
         }
 
         if (interaction.customId.startsWith('leaderboard_')) {
-            const parts = interaction.customId.split('_');
-            const action = parts[1];
-            const currentPage = parseInt(parts[2]);
-            const sort = parts[3];
-            const displayMode = parts[4] || 'roblox';
+                const parts = interaction.customId.split('_');
+                const action = parts[1];
+                const currentPage = parseInt(parts[2]);
+                const sort = parts[3];
+                const displayMode = parts[4] || 'roblox';
 
             const {
                 loadDatabase,
@@ -122,14 +122,6 @@ module.exports = {
             }
 
             const users = await getUsersWithAge();
-            
-            const userDatabase = loadDatabase();
-            users.forEach(user => {
-                const dbUser = userDatabase.find(u => u.userid === user.userid);
-                if (dbUser) {
-                    user.discord_username = dbUser.username;
-                }
-            });
 
             if (sort === 'old') {
                 users.sort((a, b) => a.createdDate - b.createdDate);

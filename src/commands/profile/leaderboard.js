@@ -19,6 +19,7 @@ function loadDatabase() {
     }
     const data = fs.readFileSync(databasePath, 'utf8');
     const parsed = JSON.parse(data);
+    console.log(`📊 Loaded ${parsed.length} users from database`);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error('❌ Error loading database:', error);
@@ -80,7 +81,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   pageUsers.forEach((user, index) => {
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
-    const displayName = displayMode === 'discord' ? (user.discord_username || user.username) : (user.roblox_nickname || user.roblox_username);
+    const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
     description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
   });
 

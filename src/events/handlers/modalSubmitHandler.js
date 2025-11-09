@@ -1,5 +1,9 @@
 const {
-  Events
+  Events,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -16,8 +20,56 @@ module.exports = {
   async execute(interaction, client) {
     if (!interaction.isModalSubmit()) return;
 
+    if (interaction.customId === 'embed_modal') {
+      try {
+        const description = interaction.fields.getTextInputValue('description_input');
+        const link = interaction.fields.getTextInputValue('link_input');
+
+        console.log(`Embed modal submitted by ${interaction.user.tag} - sending to channel`);
+
+        const targetChannelId = '1421698609086464021';
+        let targetChannel = client.channels.cache.get(targetChannelId);
+        if (!targetChannel) {
+          try {
+            targetChannel = await client.channels.fetch(targetChannelId);
+          } catch (err) {
+            console.error('Failed to fetch target channel for embed:', err);
+          }
+        }
+
+        if (!targetChannel) {
+          await interaction.reply({ content: '❌ Target channel tidak ditemukan. Pastikan bot memiliki akses ke channel tersebut.', ephemeral: true });
+          return;
+        }
+
+        const embed = new EmbedBuilder()
+          .setDescription(description)
+          .setColor('#2f3136')
+          .setTimestamp();
+
+        const button = new ButtonBuilder()
+          .setLabel('Link')
+          .setStyle(ButtonStyle.Link)
+          .setURL(link);
+
+        const row = new ActionRowBuilder().addComponents(button);
+
+        await targetChannel.send({ embeds: [embed], components: [row] });
+        await interaction.reply({ content: '✅ Embed berhasil dikirim.', ephemeral: true });
+        console.log('Embed sent successfully');
+      } catch (error) {
+        console.error('Error handling embed_modal submit:', error);
+        try {
+          await interaction.reply({ content: '❌ Terjadi kesalahan saat mengirim embed.', ephemeral: true });
+        } catch (e) {
+          console.error('Failed to send error reply to interaction:', e);
+        }
+      }
+      return;
+    }
+
     if (interaction.customId === 'verify_modal' || interaction.customId === 'reverify_modal') {
-      const roblox = interaction.fields.getTextInputValue('roblox_username');
+        const roblox = interaction.fields.getTextInputValue('roblox_username');
 
       const userData = {
         userid: interaction.user.id,
