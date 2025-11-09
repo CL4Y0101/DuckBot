@@ -70,8 +70,8 @@ module.exports = {
       await botMessage.edit({
         content: '',
         embeds: [embed],
-        components: [row]
-        // files: [attachment]
+        components: [row],
+        files: [attachment]
       });
       await interaction.reply({
         content: `✅ Pesan verifikasi diperbarui di ${channel}`,
@@ -80,8 +80,8 @@ module.exports = {
     } else {
       await channel.send({
         embeds: [embed],
-        components: [row]
-        // files: [attachment]
+        components: [row],
+        files: [attachment]
       });
       await interaction.reply({
         content: `✅ Embed verifikasi dikirim ke ${channel}`,
