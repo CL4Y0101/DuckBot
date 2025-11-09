@@ -4,8 +4,12 @@ const {
 const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
-const { backupDatabase } = require('../../utils/github/backup');
-const { assignRegisteredRole } = require('../../utils/roblox/roleManager');
+const {
+  backupDatabase
+} = require('../../utils/github/backup');
+const {
+  assignRegisteredRole
+} = require('../../utils/roblox/roleManager');
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -107,9 +111,9 @@ module.exports = {
 
                 userToUpdate.verified = isVerified;
                 console.log(
-                  isVerified
-                    ? `✅ ${userToUpdate.username} verified with nickname: ${nickname}`
-                    : `❌ ${userToUpdate.username} not verified (nickname: ${nickname})`
+                  isVerified ?
+                  `✅ ${userToUpdate.username} verified with nickname: ${nickname}` :
+                  `❌ ${userToUpdate.username} not verified (nickname: ${nickname})`
                 );
               }
 
