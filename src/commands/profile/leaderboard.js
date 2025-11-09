@@ -189,16 +189,7 @@ module.exports = {
     const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
     const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
-    const response = await interaction.editReply({ embeds: [embed], components: [buttons] });
-
-    setTimeout(async () => {
-      try {
-        const disabledButtons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id, true);
-        await response.edit({ embeds: [embed], components: [disabledButtons] });
-      } catch (error) {
-        console.error('Error disabling buttons:', error);
-      }
-    }, 5 * 60 * 1000);
+    await interaction.editReply({ embeds: [embed], components: [buttons] });
   },
 
   loadDatabase,

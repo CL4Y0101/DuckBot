@@ -111,6 +111,34 @@ module.exports = {
                     });
                 }
 
+                const messageTimestamp = interaction.message.createdTimestamp;
+                const now = Date.now();
+                const timeDiff = now - messageTimestamp;
+                const fiveMinutes = 5 * 60 * 1000;
+
+                if (timeDiff > fiveMinutes) {
+                    const {
+                        loadDatabase,
+                        getUsersWithAge,
+                        createLeaderboardEmbed,
+                        createButtons
+                    } = leaderboardModule;
+
+                    const users = await getUsersWithAge();
+                    const totalPages = Math.ceil(users.length / 10);
+                    const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+                    const allUsers = loadDatabase();
+                    const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+                    const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+                    const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
+                    const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
+
+                    return await interaction.update({
+                        embeds: [embed],
+                        components: [disabledButtons]
+                    });
+                }
+
             const {
                 loadDatabase,
                 getUsersWithAge,
