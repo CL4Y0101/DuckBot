@@ -22,27 +22,86 @@ module.exports = {
     async execute(interaction, client) {
         if (!interaction.isButton()) return;
 
-        if (interaction.customId === 'verify_button') {
+        if (interaction.customId === 'verify_button_setup') {
+            const userId = interaction.user.id;
+
+            let data = [];
+            if (fs.existsSync(databasePath)) {
+                const fileContent = fs.readFileSync(databasePath, 'utf8');
+                if (fileContent.trim()) {
+                    data = JSON.parse(fileContent);
+                }
+            }
+
+            const existingUser = data.find(u => u.userid === userId);
+
+            if (existingUser) {
+                const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
+
+                const embed = new EmbedBuilder()
+                    .setTitle('`🔍` Your Roblox Verification Status')
+                    .setAuthor({
+                        name: interaction.user.username,
+                        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+                        url: robloxProfileUrl
+                    })
+                    .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
+                    .setDescription(
+                        `### \`📊\` Account Details\n` +
+                        `-# **Discord Username:** \`${interaction.user.username}\`\n` +
+                        `-# **Roblox Username:** \`${existingUser.roblox_username}\`\n` +
+                        `-# **Roblox Display Name:** \`${existingUser.roblox_nickname || 'Not fetched yet'}\`\n` +
+                        `-# **Duck Void:** ${existingUser.verified ? '✅ Verified' : '❌ Not Verified'}`
+                    );
+
+                const button = new ButtonBuilder()
+                    .setCustomId('reverify_button')
+                    .setLabel('Reverify your username')
+                    .setStyle(ButtonStyle.Secondary);
+
+                const row = new ActionRowBuilder().addComponents(button);
+
+                await interaction.reply({
+                    embeds: [embed],
+                    components: [row],
+                    ephemeral: true
+                });
+            } else {
+                const modal = new ModalBuilder()
+                    .setCustomId('verify_modal')
+                    .setTitle('Verify Your Username');
+
+                const robloxInput = new TextInputBuilder()
+                    .setCustomId('roblox_username')
+                    .setLabel('Masukkan username Roblox kamu:')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('contoh: luhnox')
+                    .setRequired(true);
+
+                const row = new ActionRowBuilder().addComponents(robloxInput);
+                modal.addComponents(row);
+
+                await interaction.showModal(modal);
+            }
+        } else if (interaction.customId === 'verify_button_profile') {
             const userId = interaction.user.id;
             let now;
             let timeDiff;
-            
-            if (interaction.message.flags && 
-                interaction.message.flags.has('EPHEMERAL') && 
-                !interaction.message.inGuild()) {
+
+            if (!interaction.message.inGuild()) {
                 try {
                     const scheduler = require('../../utils/disableButton/sessionScheduler');
                     if (scheduler && typeof scheduler.clear === 'function') {
-                        try { 
-                            scheduler.clear(interaction.message.id); 
-                        } catch(e) { 
-                            scheduler.clear(userId); 
+                        try {
+                            scheduler.clear(interaction.message.id);
+                        } catch(e) {
+                            scheduler.clear(userId);
                         }
                     }
                 } catch (e) {
                     console.error('Failed to clear verify button scheduler:', e);
                 }
-                
+
                 now = Date.now();
                 const fiveMinutes = 5 * 60 * 1000;
                 const lastInteraction = verifySessionTimestamps.get(userId) || interaction.message.createdTimestamp;
@@ -59,11 +118,8 @@ module.exports = {
 
             const existingUser = data.find(u => u.userid === userId);
 
-            if (interaction.message.flags && 
-                interaction.message.flags.has('EPHEMERAL') && 
-                !interaction.message.inGuild() && 
-                timeDiff > 5 * 60 * 1000) {
-                    
+            if (!interaction.message.inGuild() && timeDiff > 5 * 60 * 1000) {
+
                 const disabledButton = new ButtonBuilder()
                     .setCustomId('verify_button_disabled')
                     .setLabel('Verification expired ⏰')
@@ -82,9 +138,7 @@ module.exports = {
                 return;
             }
 
-            if (interaction.message.flags && 
-                interaction.message.flags.has('EPHEMERAL') && 
-                !interaction.message.inGuild()) {
+            if (!interaction.message.inGuild()) {
                 verifySessionTimestamps.set(userId, now);
             }
 

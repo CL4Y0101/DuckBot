@@ -245,7 +245,7 @@ module.exports = {
             .setTimestamp();
 
           const verifyButton = new ButtonBuilder()
-            .setCustomId('verify_button')
+            .setCustomId('verify_button_profile')
             .setLabel('Verify Roblox Account')
             .setStyle(ButtonStyle.Primary);
 

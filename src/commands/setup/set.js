@@ -44,14 +44,21 @@ module.exports = {
       .setTimestamp();
 
     const button = new ButtonBuilder()
-      .setCustomId('verify_button')
+      .setCustomId('verify_button_setup')
       .setLabel('Verify your username')
       .setStyle(ButtonStyle.Success);
 
     const row = new ActionRowBuilder().addComponents(button);
 
     const messages = await channel.messages.fetch({ limit: 50 });
-    const botMessage = messages.find(msg => msg.author.id === interaction.client.user.id && msg.embeds.length > 0 && msg.embeds[0].title?.includes('Roblox Username Verification'));
+    // const botMessage = messages.find(msg => msg.author.id === interaction.client.user.id && msg.embeds.length > 0 && msg.embeds[0].title?.includes('Roblox Username Verification'));
+    const botMessage = messages.find(msg =>
+      msg.author.id === interaction.client.user.id &&
+      (
+        (msg.embeds.length > 0 && msg.embeds[0].title?.includes('Roblox Username Verification')) ||
+        (msg.content.includes('kadaluarsa') && msg.components.length > 0)
+      )
+    );
 
     if (botMessage) {
       await botMessage.edit({
