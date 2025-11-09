@@ -74,12 +74,12 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     .setTitle('`🏆` Roblox Account Age Leaderboard')
     .setColor('#ff6b6b');
 
-  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n-# **Guild**: ${guildName}`;
+  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n-# **Guild**: ${guildName}\n`;
 
   if (currentUser) {
     const userRank = users.findIndex(u => u.userid === currentUser.userid) + 1;
     const topPercentage = ((userRank / users.length) * 100).toFixed(1);
-    description += `### \`📊\` Your Current Stats\n-# **User**: @${currentUser.username}\n-# **Rank**: #${userRank} *(Top ${topPercentage}%)*\n-# **Account Created At**: ${formatAge(currentUser.createdDate)}`;
+    description += `### \`📊\` Your Current Stats\n-# **User**: @${currentUser.username}\n-# **Rank**: #${userRank} *(Top ${topPercentage}%)*\n-# **Account Created At**: ${formatAge(currentUser.createdDate)}\n`;
   }
 
   description += `### \`🏆\` Rankings\n`;
