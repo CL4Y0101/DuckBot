@@ -36,7 +36,6 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                     .setTitle('`🔍` Your Roblox Verification Status')
-                    .setDescription(`**Discord:** ${interaction.user.username}\n**Roblox Username:** ${existingUser.roblox_username}\n**Roblox Display Name:** ${existingUser.roblox_nickname || 'Not fetched yet'}\n**Verified:** ${existingUser.verified ? '✅ Yes' : '❌ No'}`)
                     .setAuthor({
                         name: interaction.user.username,
                         iconURL: interaction.user.displayAvatarURL({
@@ -44,7 +43,16 @@ module.exports = {
                         }),
                         url: robloxProfileUrl
                     })
-                    .setColor(existingUser.verified ? '#393a41' : '#393a41')
+                    .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
+                    .setDescription(
+                        `### \`👤\` ${interaction.user.username}\n` +
+                        `**Sorted by:** Roblox Verification Information\n\n` +
+                        `### \`📊\` Account Details\n` +
+                        `-# **Discord Username:** \`${interaction.user.username}\`\n` +
+                        `-# **Roblox Username:** \`${existingUser.roblox_username}\`\n` +
+                        `-# **Roblox Display Name:** \`${existingUser.roblox_nickname || 'Not fetched yet'}\`\n` +
+                        `-# **Duck Void:** ${existingUser.verified ? '✅ Verified' : '❌ Not Verified'}`
+                    )
                     .setTimestamp();
 
                 const button = new ButtonBuilder()
