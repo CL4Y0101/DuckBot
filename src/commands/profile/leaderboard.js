@@ -89,7 +89,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
     const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
     const robloxProfileLink = user.roblox_uid ? `[${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : displayName;
-    description += `${medal} ${robloxProfileLink}\n-# ${formatAge(user.createdDate)}\n`;
+    description += `${medal} ${robloxProfileLink}\n<:blank:1437120167665729638>-# ${formatAge(user.createdDate)}\n`;
   });
 
   const currentTime = Math.floor(Date.now() / 1000);
