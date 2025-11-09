@@ -88,7 +88,8 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
     const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
-    description += `${medal} ${displayName}\n-# ${formatAge(user.createdDate)}\n`;
+    const robloxProfileLink = user.roblox_uid ? `[${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : displayName;
+    description += `${medal} ${robloxProfileLink}\n-# ${formatAge(user.createdDate)}\n`;
   });
 
   const currentTime = Math.floor(Date.now() / 1000);
@@ -98,22 +99,22 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   return embed;
 }
 
-function createButtons(page, totalPages, sort, displayMode = 'roblox') {
+function createButtons(page, totalPages, sort, displayMode = 'roblox', userId) {
   const row = new ActionRowBuilder();
 
   const prevButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}`)
+    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel('Previous')
     .setStyle(ButtonStyle.Primary)
     .setDisabled(page === 1);
 
   const toggleButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}`)
+    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
     .setStyle(ButtonStyle.Secondary);
 
   const nextButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}`)
+    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}_${userId}`)
     .setLabel('Next')
     .setStyle(ButtonStyle.Primary)
     .setDisabled(page === totalPages);
@@ -185,7 +186,7 @@ module.exports = {
     const currentUserWithAge = users.find(u => u.userid === currentUser.userid);
 
     const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
-    const buttons = createButtons(page, totalPages, sort, 'roblox');
+    const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
     await interaction.editReply({ embeds: [embed], components: [buttons] });
   },

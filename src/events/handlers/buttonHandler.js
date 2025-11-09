@@ -102,6 +102,14 @@ module.exports = {
                 const currentPage = parseInt(parts[2]);
                 const sort = parts[3];
                 const displayMode = parts[4] || 'roblox';
+                const originalUserId = parts[5];
+
+                if (interaction.user.id !== originalUserId) {
+                    return await interaction.reply({
+                        content: '❌ Only the user who initiated this leaderboard can interact with these buttons.',
+                        ephemeral: true
+                    });
+                }
 
             const {
                 loadDatabase,
@@ -137,7 +145,7 @@ module.exports = {
             const currentUser = allUsers.find(u => u.userid === interaction.user.id);
             const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
             const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
-            const buttons = createButtons(newPage, totalPages, sort, newDisplayMode);
+            const buttons = createButtons(newPage, totalPages, sort, newDisplayMode, originalUserId);
 
             await interaction.update({
                 embeds: [embed],
