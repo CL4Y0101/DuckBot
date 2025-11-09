@@ -19,7 +19,6 @@ function loadDatabase() {
     }
     const data = fs.readFileSync(databasePath, 'utf8');
     const parsed = JSON.parse(data);
-    console.log(`📊 Loaded ${parsed.length} users from database`);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error('❌ Error loading database:', error);
@@ -66,24 +65,34 @@ function formatAge(createdDate) {
   return `${ageText} (${timestamp})`;
 }
 
-function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox') {
+function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox', guildName = 'Unknown Guild', currentUser = null) {
   const start = (page - 1) * 10;
   const end = start + 10;
   const pageUsers = users.slice(start, end);
 
   const embed = new EmbedBuilder()
     .setTitle('🏆 Roblox Account Age Leaderboard')
-    .setColor('#ff6b6b')
-    .setTimestamp();
+    .setColor('#ff6b6b');
 
-  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n`;
+  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n-# **Guild**: ${guildName}\n`;
+
+  if (currentUser) {
+    const userRank = users.findIndex(u => u.userid === currentUser.userid) + 1;
+    const topPercentage = ((userRank / users.length) * 100).toFixed(1);
+    description += `### \`:bar_chart:\` Your Current Stats\n-# **User**: @${currentUser.username}\n-# **Rank**: #${userRank} *(Top ${topPercentage}%)*\n-# **Account Created At**: ${formatAge(currentUser.createdDate)}\n`;
+  }
+
+  description += `### \`:trophy:\` Rankings\n`;
 
   pageUsers.forEach((user, index) => {
     const rank = start + index + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
     const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
-    description += `${medal} [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile) - ${formatAge(user.createdDate)}\n`;
+    description += `${medal} ${displayName}\n-# ${formatAge(user.createdDate)}\n`;
   });
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  description += `\n-# Last updated: <t:${currentTime}:R> • Total users in database: ${users.length}`;
 
   embed.setDescription(description);
   return embed;
@@ -172,7 +181,10 @@ module.exports = {
     const totalPages = Math.ceil(users.length / 10);
     const page = 1;
 
-    const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox');
+    const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+    const currentUserWithAge = users.find(u => u.userid === currentUser.userid);
+
+    const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
     const buttons = createButtons(page, totalPages, sort, 'roblox');
 
     await interaction.editReply({ embeds: [embed], components: [buttons] });
