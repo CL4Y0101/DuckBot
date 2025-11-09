@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 
-const sessionsPath = path.join(__dirname, '../database/sessions.json');
+const sessionsPath = path.join(__dirname, '../../database/sessions.json');
 let client = null;
 const timeouts = new Map();
 const sessions = new Map();
