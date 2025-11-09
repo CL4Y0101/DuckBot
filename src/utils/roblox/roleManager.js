@@ -19,7 +19,6 @@ async function assignVerifiedRole(client, userid) {
 
         if (member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedVerified.has(member.user.username)) {
-                console.log(`✅ ${member.user.username} already verified`);
                 loggedVerified.add(member.user.username);
             }
             return true;
@@ -44,7 +43,6 @@ async function assignRegisteredRole(client, userid) {
 
         if (member.roles.cache.has(REGISTERED_ROLE_ID)) {
             if (!loggedRegistered.has(member.user.username)) {
-                console.log(`✅ ${member.user.username} already registered`);
                 loggedRegistered.add(member.user.username);
             }
             return true;
