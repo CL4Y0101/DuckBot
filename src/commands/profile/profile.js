@@ -48,16 +48,16 @@ function getDiscordUsernames() {
 
 function findUserByRobloxUsername(robloxUsername) {
   const users = loadDatabase();
-  return users.find(user => 
-    user.roblox_username && 
+  return users.find(user =>
+    user.roblox_username &&
     user.roblox_username.toLowerCase() === robloxUsername.toLowerCase()
   );
 }
 
 function findUserByDiscordUsername(discordUsername) {
   const users = loadDatabase();
-  return users.find(user => 
-    user.username && 
+  return users.find(user =>
+    user.username &&
     user.username.toLowerCase() === discordUsername.toLowerCase()
   );
 }
@@ -143,7 +143,10 @@ async function createDiscordEmbed(user, interaction) {
     if (interaction.guild) {
       const discordUser = await interaction.guild.members.fetch(user.userid);
       if (discordUser) {
-        embed.setThumbnail(discordUser.user.displayAvatarURL({ dynamic: true, size: 256 }));
+        embed.setThumbnail(discordUser.user.displayAvatarURL({
+          dynamic: true,
+          size: 256
+        }));
       }
     }
   } catch (error) {
@@ -203,24 +206,24 @@ module.exports = {
     .setDescription('Get user profile information')
     .addSubcommand(subcommand =>
       subcommand
-        .setName('roblox_user')
-        .setDescription('Get profile by Roblox username')
-        .addStringOption(option =>
-          option.setName('username')
-            .setDescription('Roblox username')
-            .setRequired(true)
-            .setAutocomplete(true)
-        )
+      .setName('roblox_user')
+      .setDescription('Get profile by Roblox username')
+      .addStringOption(option =>
+        option.setName('username')
+        .setDescription('Roblox username')
+        .setRequired(true)
+        .setAutocomplete(true)
+      )
     )
     .addSubcommand(subcommand =>
       subcommand
-        .setName('discord_user')
-        .setDescription('Get profile by Discord user')
-        .addUserOption(option =>
-          option.setName('user')
-            .setDescription('Discord user')
-            .setRequired(true)
-        )
+      .setName('discord_user')
+      .setDescription('Get profile by Discord user')
+      .addUserOption(option =>
+        option.setName('user')
+        .setDescription('Discord user')
+        .setRequired(true)
+      )
     ),
 
   async execute(interaction) {
@@ -232,7 +235,7 @@ module.exports = {
       if (subcommand === 'roblox_user') {
         const username = interaction.options.getString('username');
         console.log(`🔍 Searching for Roblox user: ${username}`);
-        
+
         const user = findUserByRobloxUsername(username);
         if (!user) {
           const embed = new EmbedBuilder()
@@ -248,26 +251,43 @@ module.exports = {
 
           const row = new ActionRowBuilder().addComponents(verifyButton);
 
-          return await interaction.editReply({
+          const sentMessage = await interaction.editReply({
             embeds: [embed],
             components: [row],
             ephemeral: true
           });
+
+          setTimeout(async () => {
+            try {
+              const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
+              const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+
+              await sentMessage.edit({
+                embeds: [embed],
+                components: [disabledRow]
+              });
+            } catch (error) {
+              console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
+            }
+          }, 5 * 60 * 1000);
+          return;
         }
 
         console.log(`✅ Found user:`, user);
         const embed = await createRobloxEmbed(user);
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({
+          embeds: [embed]
+        });
 
       } else if (subcommand === 'discord_user') {
         const discordUser = interaction.options.getUser('user');
         console.log(`🔍 Searching for Discord user: ${discordUser.tag}`);
-        
+
         const user = findUserByDiscordUserid(discordUser.id);
         if (!user) {
           const embed = new EmbedBuilder()
             .setTitle('`🔍` User Not Found')
-            .setDescription(`User ${discordUser.tag} is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
+            .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
             .setColor('#ff6b6b')
             .setTimestamp();
 
@@ -278,17 +298,34 @@ module.exports = {
 
           const row = new ActionRowBuilder().addComponents(verifyButton);
 
-          return await interaction.editReply({
+          const sentMessage = await interaction.editReply({
             embeds: [embed],
             components: [row],
             ephemeral: true
           });
+
+          setTimeout(async () => {
+            try {
+              const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
+              const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+
+              await sentMessage.edit({
+                embeds: [embed],
+                components: [disabledRow]
+              });
+            } catch (error) {
+              console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
+            }
+          }, 5 * 60 * 1000);
+          return;
         }
 
         console.log(`✅ Found user:`, user);
         const robloxEmbed = await createRobloxEmbed(user);
         const discordEmbed = await createDiscordEmbed(user, interaction);
-        await interaction.editReply({ embeds: [robloxEmbed, discordEmbed] });
+        await interaction.editReply({
+          embeds: [robloxEmbed, discordEmbed]
+        });
       }
     } catch (error) {
       console.error('❌ Error in execute:', error);
@@ -335,7 +372,7 @@ module.exports = {
       }
 
       await interaction.respond(
-        filtered.map(choice => ({ 
+        filtered.map(choice => ({
           name: choice.length > 100 ? choice.substring(0, 97) + '...' : choice,
           value: choice.length > 100 ? choice.substring(0, 100) : choice
         }))
@@ -343,11 +380,12 @@ module.exports = {
 
     } catch (error) {
       console.error('❌ Autocomplete error:', error);
-      
+
       try {
-        await interaction.respond([
-          { name: 'Error loading options', value: 'error' }
-        ]);
+        await interaction.respond([{
+          name: 'Error loading options',
+          value: 'error'
+        }]);
       } catch (respondError) {
         console.error('❌ Failed to send error response:', respondError);
       }

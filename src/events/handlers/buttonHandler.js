@@ -12,8 +12,10 @@ const fs = require('fs');
 const path = require('path');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
-
 const leaderboardModule = require('../../commands/profile/leaderboard');
+
+const leaderboardSessionTimestamps = new Map();
+const verifySessionTimestamps = new Map();
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -21,6 +23,12 @@ module.exports = {
         if (!interaction.isButton()) return;
 
         if (interaction.customId === 'verify_button') {
+            const userId = interaction.user.id;
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            const lastInteraction = verifySessionTimestamps.get(userId) || interaction.message.createdTimestamp;
+            const timeDiff = now - lastInteraction;
+
             let data = [];
             if (fs.existsSync(databasePath)) {
                 const fileContent = fs.readFileSync(databasePath, 'utf8');
@@ -29,7 +37,28 @@ module.exports = {
                 }
             }
 
-            const existingUser = data.find(u => u.userid === interaction.user.id);
+            const existingUser = data.find(u => u.userid === userId);
+
+            if (timeDiff > fiveMinutes) {
+                const disabledButton = new ButtonBuilder()
+                    .setCustomId('verify_button_disabled')
+                    .setLabel('Verification expired ⏰')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true);
+
+                const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+
+                await interaction.update({
+                    content: '⚠️ Tombol verifikasi ini sudah kadaluarsa setelah 5 menit.',
+                    components: [disabledRow],
+                    embeds: []
+                });
+
+                verifySessionTimestamps.delete(userId);
+                return;
+            }
+
+            verifySessionTimestamps.set(userId, now);
 
             if (existingUser) {
                 const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
@@ -38,9 +67,7 @@ module.exports = {
                     .setTitle('`🔍` Your Roblox Verification Status')
                     .setAuthor({
                         name: interaction.user.username,
-                        iconURL: interaction.user.displayAvatarURL({
-                            dynamic: true
-                        }),
+                        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
                         url: robloxProfileUrl
                     })
                     .setColor(existingUser.verified ? '#00ff00' : '#ff6b6b')
@@ -101,8 +128,6 @@ module.exports = {
             await interaction.showModal(modal);
         }
 
-        const leaderboardSessionTimestamps = new Map();
-
         if (interaction.customId.startsWith('leaderboard_')) {
             const parts = interaction.customId.split('_');
             const action = parts[1];
@@ -155,22 +180,14 @@ module.exports = {
             let newPage = currentPage;
             let newDisplayMode = displayMode;
 
-            if (action === 'prev' && currentPage > 1) {
-                newPage = currentPage - 1;
-            } else if (action === 'next') {
-                newPage = currentPage + 1;
-            } else if (action === 'toggle') {
-                newDisplayMode = displayMode === 'roblox' ? 'discord' : 'roblox';
-            }
+            if (action === 'prev' && currentPage > 1) newPage = currentPage - 1;
+            else if (action === 'next') newPage = currentPage + 1;
+            else if (action === 'toggle') newDisplayMode = displayMode === 'roblox' ? 'discord' : 'roblox';
 
             const users = await getUsersWithAge();
-            if (sort === 'old') {
-                users.sort((a, b) => a.createdDate - b.createdDate);
-            } else if (sort === 'new') {
-                users.sort((a, b) => b.createdDate - a.createdDate);
-            } else {
-                users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
-            }
+            if (sort === 'old') users.sort((a, b) => a.createdDate - b.createdDate);
+            else if (sort === 'new') users.sort((a, b) => b.createdDate - a.createdDate);
+            else users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
 
             const totalPages = Math.ceil(users.length / 10);
             const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
