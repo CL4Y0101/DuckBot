@@ -101,6 +101,8 @@ module.exports = {
             await interaction.showModal(modal);
         }
 
+        const leaderboardSessionTimestamps = new Map();
+
         if (interaction.customId.startsWith('leaderboard_')) {
             const parts = interaction.customId.split('_');
             const action = parts[1];
@@ -116,9 +118,9 @@ module.exports = {
                 });
             }
 
-            const messageTimestamp = interaction.message.createdTimestamp;
+            const lastInteraction = leaderboardSessionTimestamps.get(originalUserId) || interaction.message.createdTimestamp;
             const now = Date.now();
-            const timeDiff = now - messageTimestamp;
+            const timeDiff = now - lastInteraction;
             const fiveMinutes = 5 * 60 * 1000;
 
             const {
@@ -135,14 +137,20 @@ module.exports = {
                 const allUsers = loadDatabase();
                 const currentUser = allUsers.find(u => u.userid === interaction.user.id);
                 const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+
                 const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
                 const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
 
-                return await interaction.update({
+                await interaction.update({
                     embeds: [embed],
                     components: [disabledButtons]
                 });
+
+                leaderboardSessionTimestamps.delete(originalUserId);
+                return;
             }
+
+            leaderboardSessionTimestamps.set(originalUserId, now);
 
             let newPage = currentPage;
             let newDisplayMode = displayMode;
@@ -156,7 +164,6 @@ module.exports = {
             }
 
             const users = await getUsersWithAge();
-
             if (sort === 'old') {
                 users.sort((a, b) => a.createdDate - b.createdDate);
             } else if (sort === 'new') {
@@ -170,6 +177,7 @@ module.exports = {
             const allUsers = loadDatabase();
             const currentUser = allUsers.find(u => u.userid === interaction.user.id);
             const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+
             const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
             const buttons = createButtons(newPage, totalPages, sort, newDisplayMode, originalUserId);
 
