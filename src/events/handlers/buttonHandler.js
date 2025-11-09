@@ -24,6 +24,13 @@ module.exports = {
 
         if (interaction.customId === 'verify_button') {
             const userId = interaction.user.id;
+            try {
+                const scheduler = require('../../utils/sessionScheduler');
+                if (scheduler && typeof scheduler.clear === 'function') {
+                    try { scheduler.clear(interaction.message.id); } catch(e) { scheduler.clear(userId); }
+                }
+            } catch (e) {
+            }
             const now = Date.now();
             const fiveMinutes = 5 * 60 * 1000;
             const lastInteraction = verifySessionTimestamps.get(userId) || interaction.message.createdTimestamp;
@@ -136,6 +143,19 @@ module.exports = {
             const displayMode = parts[4] || 'roblox';
             const originalUserId = parts[5];
 
+                try {
+                    const scheduler = require('../../utils/sessionScheduler');
+                    if (scheduler && typeof scheduler.clear === 'function') {
+                        try {
+                            scheduler.clear(interaction.message.id);
+                        } catch (e) {
+                            scheduler.clear(originalUserId);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to clear leaderboard disable timeout:', err);
+                }
+
             if (interaction.user.id !== originalUserId) {
                 return await interaction.reply({
                     content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
@@ -202,6 +222,26 @@ module.exports = {
                 embeds: [embed],
                 components: [buttons]
             });
+
+            try {
+                const scheduler = require('../../utils/sessionScheduler');
+                scheduler.schedule({
+                    key: interaction.message.id,
+                    channelId: interaction.message.channelId,
+                    messageId: interaction.message.id,
+                    type: 'leaderboard',
+                    meta: {
+                        originalUserId,
+                        page: newPage,
+                        totalPages,
+                        sort,
+                        displayMode: newDisplayMode
+                    },
+                    expiresAt: Date.now() + 5 * 60 * 1000
+                });
+            } catch (err) {
+                console.error('Failed to schedule leaderboard auto-disable after interaction:', err);
+            }
         }
     }
 };

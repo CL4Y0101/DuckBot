@@ -92,6 +92,13 @@ module.exports = {
     await updateVerifications();
 
     startScheduler(client);
+    try {
+      const sessionScheduler = require('../utils/sessionScheduler');
+      sessionScheduler.init(client);
+      console.log('✅ Session scheduler initialized');
+    } catch (err) {
+      console.error('❌ Failed to initialize session scheduler:', err);
+    }
 
     setInterval(async () => {
       console.log('💾 Auto-backup triggered...');

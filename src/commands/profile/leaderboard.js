@@ -11,6 +11,8 @@ const robloxAPI = require('../../utils/roblox/robloxAPI');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
 
+const sessionScheduler = require('../../utils/sessionScheduler');
+
 function loadDatabase() {
   try {
     if (!fs.existsSync(databasePath)) {
@@ -99,30 +101,31 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   return embed;
 }
 
-function createButtons(page, totalPages, sort, displayMode = 'roblox', userId, disabled = false) {
+function createButtons(page, totalPages, sort, displayMode = 'roblox', originalUserId = '', disabled = false) {
   const row = new ActionRowBuilder();
 
   const prevButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${userId}`)
+    .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel('Previous')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(page === 1 || disabled);
+    .setDisabled(disabled || page === 1);
 
   const toggleButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}_${userId}`)
+    .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
     .setStyle(ButtonStyle.Secondary)
     .setDisabled(disabled);
 
   const nextButton = new ButtonBuilder()
-    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}_${userId}`)
+    .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel('Next')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(page === totalPages || disabled);
+    .setDisabled(disabled || page === totalPages);
 
   row.addComponents(prevButton, toggleButton, nextButton);
   return row;
 }
+ 
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -189,7 +192,27 @@ module.exports = {
     const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
     const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
-    await interaction.editReply({ embeds: [embed], components: [buttons] });
+      await interaction.editReply({ embeds: [embed], components: [buttons] });
+
+      try {
+        const sentMessage = await interaction.fetchReply();
+        sessionScheduler.schedule({
+          key: sentMessage.id,
+          channelId: sentMessage.channelId,
+          messageId: sentMessage.id,
+          type: 'leaderboard',
+          meta: {
+            originalUserId: interaction.user.id,
+            page,
+            totalPages,
+            sort,
+            displayMode: 'roblox'
+          },
+          expiresAt: Date.now() + 5 * 60 * 1000
+        });
+      } catch (err) {
+        console.error('Failed to fetch reply for leaderboard scheduling:', err);
+      }
   },
 
   loadDatabase,
