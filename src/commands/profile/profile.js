@@ -258,7 +258,7 @@ module.exports = {
           });
 
           try {
-            const scheduler = require('../../utils/sessionScheduler');
+            const scheduler = require('../../utils/disableButton/sessionScheduler');
             scheduler.schedule({
               key: sentMessage.id,
               channelId: sentMessage.channelId,

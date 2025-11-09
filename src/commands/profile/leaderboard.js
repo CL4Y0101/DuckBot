@@ -11,7 +11,7 @@ const robloxAPI = require('../../utils/roblox/robloxAPI');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
 
-const sessionScheduler = require('../../utils/sessionScheduler');
+const sessionScheduler = require('../../utils/disableButton/sessionScheduler');
 
 function loadDatabase() {
   try {

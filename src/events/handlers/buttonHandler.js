@@ -25,7 +25,7 @@ module.exports = {
         if (interaction.customId === 'verify_button') {
             const userId = interaction.user.id;
             try {
-                const scheduler = require('../../utils/sessionScheduler');
+                const scheduler = require('../../utils/disableButton/sessionScheduler');
                 if (scheduler && typeof scheduler.clear === 'function') {
                     try { scheduler.clear(interaction.message.id); } catch(e) { scheduler.clear(userId); }
                 }
@@ -144,7 +144,7 @@ module.exports = {
             const originalUserId = parts[5];
 
                 try {
-                    const scheduler = require('../../utils/sessionScheduler');
+                    const scheduler = require('../../utils/disableButton/sessionScheduler');
                     if (scheduler && typeof scheduler.clear === 'function') {
                         try {
                             scheduler.clear(interaction.message.id);
@@ -224,7 +224,7 @@ module.exports = {
             });
 
             try {
-                const scheduler = require('../../utils/sessionScheduler');
+                const scheduler = require('../../utils/disableButton/sessionScheduler');
                 scheduler.schedule({
                     key: interaction.message.id,
                     channelId: interaction.message.channelId,

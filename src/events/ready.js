@@ -93,7 +93,7 @@ module.exports = {
 
     startScheduler(client);
     try {
-      const sessionScheduler = require('../utils/sessionScheduler');
+      const sessionScheduler = require('../utils/disableButton/sessionScheduler');
       sessionScheduler.init(client);
       console.log('✅ Session scheduler initialized');
     } catch (err) {
