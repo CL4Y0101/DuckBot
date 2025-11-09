@@ -185,7 +185,7 @@ module.exports = {
         const user = findUserByRobloxUsername(username);
         if (!user) {
           const embed = new EmbedBuilder()
-            .setTitle('🔍 User Not Found')
+            .setTitle('`🔍` User Not Found')
             .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
             .setColor('#ff6b6b')
             .setTimestamp();
@@ -215,7 +215,7 @@ module.exports = {
         const user = findUserByDiscordUserid(discordUser.id);
         if (!user) {
           const embed = new EmbedBuilder()
-            .setTitle('🔍 User Not Found')
+            .setTitle('`🔍` User Not Found')
             .setDescription(`User ${discordUser.tag} is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
             .setColor('#ff6b6b')
             .setTimestamp();

@@ -35,7 +35,7 @@ module.exports = {
                 const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
 
                 const embed = new EmbedBuilder()
-                    .setTitle('🔍 Your Roblox Verification Status')
+                    .setTitle('`🔍` Your Roblox Verification Status')
                     .setDescription(`**Discord:** ${interaction.user.username}\n**Roblox Username:** ${existingUser.roblox_username}\n**Roblox Display Name:** ${existingUser.roblox_nickname || 'Not fetched yet'}\n**Verified:** ${existingUser.verified ? '✅ Yes' : '❌ No'}`)
                     .setAuthor({
                         name: interaction.user.username,
@@ -132,7 +132,11 @@ module.exports = {
             }
 
             const totalPages = Math.ceil(users.length / 10);
-            const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode);
+            const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+            const allUsers = loadDatabase();
+            const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+            const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+            const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
             const buttons = createButtons(newPage, totalPages, sort, newDisplayMode);
 
             await interaction.update({
