@@ -69,7 +69,8 @@ function findUserByDiscordUserid(discordUserid) {
 
 async function createRobloxEmbed(user) {
   const embed = new EmbedBuilder()
-    .setTitle('Roblox Profile Information');
+    .setTitle('`🎮` Roblox Profile Information')
+    .setColor('#ff6b6b');
 
   try {
     const avatarUrl = await robloxAPI.getAvatarUrl(user.roblox_uid);
@@ -83,6 +84,10 @@ async function createRobloxEmbed(user) {
   let description = 'None provided';
   let createdTimestamp = 'Unknown';
   let displayName = user.roblox_nickname || user.roblox_username;
+  let isBanned = false;
+  let isPremium = false;
+  let followerCount = 'Unknown';
+  let followingCount = 'Unknown';
 
   try {
     const profile = await robloxAPI.getUserProfile(user.roblox_uid);
@@ -94,17 +99,38 @@ async function createRobloxEmbed(user) {
       if (profile.displayName) {
         displayName = profile.displayName;
       }
+      isBanned = profile.isBanned || false;
+      isPremium = profile.hasPremium || false;
     }
   } catch (error) {
     console.error('Error getting Roblox profile:', error);
   }
 
+  let accountAge = 'Unknown';
+  if (createdTimestamp !== 'Unknown') {
+    const createdDate = new Date(createdTimestamp.match(/\d+/)[0] * 1000);
+    const now = new Date();
+    const ageMs = now - createdDate;
+    const years = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365));
+    const months = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+    const days = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+
+    if (years > 0) accountAge = `${years}y ${months}m`;
+    else if (months > 0) accountAge = `${months}m ${days}d`;
+    else accountAge = `${days}d`;
+  }
+
   embed.setDescription(
-    `### [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)\n` +
-    `**User ID:** ${user.roblox_uid}\n` +
-    `**Username:** @${user.roblox_username}\n` +
-    `**Account Created:** ${createdTimestamp}\n\n` +
-    `**Description:**\n${description}`
+    `### \`👤\` [${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)\n` +
+    `**Sorted by:** Roblox Account Information\n\n` +
+    `### \`📊\` Account Details\n` +
+    `-# **User ID:** \`${user.roblox_uid}\`\n` +
+    `-# **Username:** \`@${user.roblox_username}\`\n` +
+    `-# **Account Age:** \`${accountAge}\`\n` +
+    `-# **Account Created:** ${createdTimestamp}\n` +
+    `-# **Premium Status:** ${isPremium ? '✅ Yes' : '❌ No'}\n` +
+    `-# **Account Status:** ${isBanned ? '🚫 Banned' : '✅ Active'}\n\n` +
+    `### \`📝\` Profile Description\n-# ${description.length > 500 ? description.substring(0, 497) + '...' : description}`
   );
 
   return embed;
@@ -113,7 +139,7 @@ async function createRobloxEmbed(user) {
 async function createDiscordEmbed(user, interaction) {
   const embed = new EmbedBuilder()
     .setColor('#5865F2')
-    .setTitle('Discord Profile Information');
+    .setTitle('`💬` Discord Profile Information');
 
   try {
     if (interaction.guild) {
@@ -127,20 +153,49 @@ async function createDiscordEmbed(user, interaction) {
   }
 
   let discordCreatedTimestamp = 'Unknown';
+  let accountAge = 'Unknown';
+  let joinDate = 'Unknown';
+
   try {
     const discordUser = await interaction.client.users.fetch(user.userid);
     if (discordUser) {
       discordCreatedTimestamp = `<t:${Math.floor(discordUser.createdTimestamp / 1000)}:F>`;
+
+      const createdDate = new Date(discordUser.createdTimestamp);
+      const now = new Date();
+      const ageMs = now - createdDate;
+      const years = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365));
+      const months = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+      const days = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+
+      if (years > 0) accountAge = `${years}y ${months}m`;
+      else if (months > 0) accountAge = `${months}m ${days}d`;
+      else accountAge = `${days}d`;
     }
   } catch (error) {
     console.error('Error fetching Discord user creation date:', error);
   }
 
+  try {
+    if (interaction.guild) {
+      const member = await interaction.guild.members.fetch(user.userid);
+      if (member) {
+        joinDate = `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching member join date:', error);
+  }
+
   embed.setDescription(
-    `**Username:** ${user.username}\n` +
-    `**User ID:** ${user.userid}\n` +
-    `**Account Created:** ${discordCreatedTimestamp}\n` +
-    `**Verified:** ${user.verified ? '✅ Yes' : '❌ No'}`
+    `### \`👤\` ${user.username}\n` +
+    `**Sorted by:** Discord Account Information\n\n` +
+    `### \`📊\` Account Details\n` +
+    `-# **User ID:** \`${user.userid}\`\n` +
+    `-# **Account Age:** \`${accountAge}\`\n` +
+    `-# **Account Created:** ${discordCreatedTimestamp}\n` +
+    (joinDate !== 'Unknown' ? `-# **Server Joined:** ${joinDate}\n` : '') +
+    `-# **Roblox Verified:** ${user.verified ? '✅ Yes' : '❌ No'}`
   );
 
   return embed;
