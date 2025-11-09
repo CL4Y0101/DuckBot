@@ -37,9 +37,11 @@ module.exports = {
         `### \`📋\` Instructions\n` +
         `-# Click the button below to start verifying your Roblox username\n` +
         `-# Make sure your Roblox account is linked properly\n` +
-        `-# Verification helps us maintain a secure community\n\n` +
+        `-# Verification helps us maintain a secure community\n` +
+        `-# To get the role and join Duck Void, your Roblox Display Name must be in one of these formats: \`DV_DisplayName\`, \`DVxDisplayName\`, \`DVDisplayName\`, \`DisplayNameDV\`, \`DisplayNamexDV\`, \`DisplayNameDV\` (where \`DisplayName\` is your original roblox Display Name)\n\n` +
         `### \`⚠️\` Important Notes\n-# Only verify with your own Roblox account\n-# Contact admins if you encounter any issues`
       )
+      .setImage('file://D:/DuckBot/src/img/profile.png')
       .setColor('#5865F2')
       .setTimestamp();
 
