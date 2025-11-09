@@ -13,7 +13,7 @@ const path = require('path');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
 
-const leaderboardModule = require('../commands/profile/leaderboard');
+const leaderboardModule = require('../../commands/profile/leaderboard');
 
 module.exports = {
     name: Events.InteractionCreate,
