@@ -191,7 +191,7 @@ async function createDiscordEmbed(user, interaction) {
     `-# **Account Age:** \`${accountAge}\`\n` +
     `-# **Account Created:** ${discordCreatedTimestamp}\n` +
     (joinDate !== 'Unknown' ? `-# **Server Joined:** ${joinDate}\n` : '') +
-    `-# **Duck Void:** ${user.verified ? '✅ Yes' : '❌ No'}`
+    `-# **Duck Void:** ${user.verified ? '✅ Verified' : '❌ Not Verified'}`
   );
 
   return embed;

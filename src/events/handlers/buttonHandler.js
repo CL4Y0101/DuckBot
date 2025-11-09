@@ -50,8 +50,7 @@ module.exports = {
                         `-# **Roblox Username:** \`${existingUser.roblox_username}\`\n` +
                         `-# **Roblox Display Name:** \`${existingUser.roblox_nickname || 'Not fetched yet'}\`\n` +
                         `-# **Duck Void:** ${existingUser.verified ? '✅ Verified' : '❌ Not Verified'}`
-                    )
-                    .setTimestamp();
+                    );
 
                 const button = new ButtonBuilder()
                     .setCustomId('reverify_button')
