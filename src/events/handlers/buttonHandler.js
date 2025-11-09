@@ -106,7 +106,7 @@ module.exports = {
 
                 if (interaction.user.id !== originalUserId) {
                     return await interaction.reply({
-                        content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> Please use the </leaderboard:1436827056015937728> command to start your own session.',
+                        content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
                         ephemeral: true
                     });
                 }
