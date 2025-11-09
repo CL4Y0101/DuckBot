@@ -37,9 +37,9 @@ module.exports = {
     });
 
     const embed = new EmbedBuilder()
-      .setTitle('🔰 Roblox Username Verification')
+      .setTitle('`🔰` Roblox Username Verification')
       .setDescription(
-        `### 📋 Verification Guide\n` +
+        `### \`📋\` Verification Guide\n` +
         `> Follow the steps below carefully to verify your Roblox account:\n\n` +
         `• Click the **Verify** button below to start the verification process.\n` +
         `• Ensure your Roblox account is correctly linked to your Discord profile.\n` +
@@ -47,7 +47,7 @@ module.exports = {
         `• To receive the role and join **Duck Void**, your **Roblox Display Name** must follow one of these formats:\n` +
         `\`DV_DisplayName\`, \`DVxDisplayName\`, \`DVDisplayName\`, \`DisplayNameDV\`, \`DisplayNamexDV\`, or \`DisplayNameDV\`.\n` +
         `> *(Replace \`DisplayName\` with your actual Roblox display name)*\n\n` +
-        `### ⚠️ Important Notes\n` +
+        `### \`⚠️\` Important Notes\n` +
         `• Only verify using your **own Roblox account**.\n` +
         `• If you experience any issues, please contact an **Admin** for assistance.`
       )
