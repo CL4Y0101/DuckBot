@@ -24,17 +24,30 @@ module.exports = {
 
         if (interaction.customId === 'verify_button') {
             const userId = interaction.user.id;
-            try {
-                const scheduler = require('../../utils/disableButton/sessionScheduler');
-                if (scheduler && typeof scheduler.clear === 'function') {
-                    try { scheduler.clear(interaction.message.id); } catch(e) { scheduler.clear(userId); }
+            let now;
+            let timeDiff;
+            
+            if (interaction.message.flags && 
+                interaction.message.flags.has('EPHEMERAL') && 
+                !interaction.message.inGuild()) {
+                try {
+                    const scheduler = require('../../utils/disableButton/sessionScheduler');
+                    if (scheduler && typeof scheduler.clear === 'function') {
+                        try { 
+                            scheduler.clear(interaction.message.id); 
+                        } catch(e) { 
+                            scheduler.clear(userId); 
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to clear verify button scheduler:', e);
                 }
-            } catch (e) {
+                
+                now = Date.now();
+                const fiveMinutes = 5 * 60 * 1000;
+                const lastInteraction = verifySessionTimestamps.get(userId) || interaction.message.createdTimestamp;
+                timeDiff = now - lastInteraction;
             }
-            const now = Date.now();
-            const fiveMinutes = 5 * 60 * 1000;
-            const lastInteraction = verifySessionTimestamps.get(userId) || interaction.message.createdTimestamp;
-            const timeDiff = now - lastInteraction;
 
             let data = [];
             if (fs.existsSync(databasePath)) {
@@ -46,7 +59,11 @@ module.exports = {
 
             const existingUser = data.find(u => u.userid === userId);
 
-            if (timeDiff > fiveMinutes) {
+            if (interaction.message.flags && 
+                interaction.message.flags.has('EPHEMERAL') && 
+                !interaction.message.inGuild() && 
+                timeDiff > 5 * 60 * 1000) {
+                    
                 const disabledButton = new ButtonBuilder()
                     .setCustomId('verify_button_disabled')
                     .setLabel('Verification expired ⏰')
@@ -65,7 +82,11 @@ module.exports = {
                 return;
             }
 
-            verifySessionTimestamps.set(userId, now);
+            if (interaction.message.flags && 
+                interaction.message.flags.has('EPHEMERAL') && 
+                !interaction.message.inGuild()) {
+                verifySessionTimestamps.set(userId, now);
+            }
 
             if (existingUser) {
                 const robloxProfileUrl = existingUser.roblox_uid ? `https://www.roblox.com/users/${existingUser.roblox_uid}/profile` : null;
