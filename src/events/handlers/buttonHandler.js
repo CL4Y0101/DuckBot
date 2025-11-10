@@ -306,7 +306,7 @@ module.exports = {
                 const currentUser = allUsers.find(u => u.userid === interaction.user.id);
                 const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
 
-                const embed = leaderboardModule.createLeaderboardEmbed(users, page, sort, totalPages, newDisplay, guildName, currentUserWithAge, cacheTime);
+                const embed = leaderboardModule.createLeaderboardEmbed(users, page, sort, totalPages, newDisplay, guildName, currentUserWithAge, Date.now());
                 const buttons = leaderboardModule.createButtons(page, totalPages, sort, newDisplay, originalUserId);
 
                 try {
