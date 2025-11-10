@@ -262,10 +262,18 @@ module.exports = {
                     const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
                     const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
 
-                    await interaction.update({
-                        embeds: [embed],
-                        components: [disabledButtons]
-                    });
+                    try {
+                        await interaction.update({
+                            embeds: [embed],
+                            components: [disabledButtons]
+                        });
+                    } catch (updateError) {
+                        if (updateError.code === 10062) {
+                            // Interaction expired, no need to respond
+                            return;
+                        }
+                        throw updateError;
+                    }
 
                     leaderboardSessionTimestamps.delete(originalUserId);
                     return;
