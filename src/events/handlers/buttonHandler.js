@@ -17,6 +17,10 @@ const leaderboardModule = require('../../commands/profile/leaderboard');
 const leaderboardSessionTimestamps = new Map();
 const verifySessionTimestamps = new Map();
 
+let cachedUsers = null;
+let cacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000;
+
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction, client) {
@@ -216,6 +220,8 @@ module.exports = {
 
         if (interaction.customId.startsWith('leaderboard_')) {
             try {
+                await interaction.deferUpdate();
+
                 const parts = interaction.customId.split('_');
                 const action = parts[1];
                 const currentPage = parseInt(parts[2]);
@@ -223,10 +229,15 @@ module.exports = {
                 const displayMode = parts[4] || 'roblox';
                 const originalUserId = parts[5];
                 if (interaction.user.id !== originalUserId) {
-                    return await interaction.reply({
-                        content: '❌ Only the original user can control this leaderboard.',
-                        ephemeral: true
-                    });
+                    try {
+                        await interaction.reply({
+                            content: '❌ Only the original user can control this leaderboard.\n> Please use </leaderboard:1436827056015937728> to create your own leaderboard.',
+                            ephemeral: true
+                        });
+                    } catch (e) {
+                        console.error('Failed to reply to unauthorized user:', e);
+                    }
+                    return;
                 }
 
                 const lastInteraction = leaderboardSessionTimestamps.get(originalUserId) || interaction.message.createdTimestamp;
@@ -243,11 +254,16 @@ module.exports = {
                         originalUserId,
                         true
                     );
-                    return await interaction.update({
-                        content: '⏰ Session expired. Please use `/leaderboard` again.',
-                        components: [disabled],
-                        embeds: []
-                    });
+                    try {
+                        await interaction.message.edit({
+                            content: '⏰ Session expired. Please use </leaderboard:1436827056015937728> again.',
+                            components: [disabled],
+                            embeds: []
+                        });
+                    } catch (e) {
+                        console.error('Failed to edit expired session:', e);
+                    }
+                    return;
                 }
                 leaderboardSessionTimestamps.set(originalUserId, now);
 
@@ -264,7 +280,15 @@ module.exports = {
                     console.error('Failed to clear leaderboard disable timeout:', err);
                 }
 
-                const users = await leaderboardModule.getUsersWithAge();
+                let users;
+                const currentTime = Date.now();
+                if (cachedUsers && (currentTime - cacheTime) < CACHE_DURATION) {
+                    users = cachedUsers;
+                } else {
+                    users = await leaderboardModule.getUsersWithAge();
+                    cachedUsers = users;
+                    cacheTime = currentTime;
+                }
                 if (sort === 'old') users.sort((a, b) => a.createdDate - b.createdDate);
                 else if (sort === 'new') users.sort((a, b) => b.createdDate - a.createdDate);
                 else users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
@@ -282,13 +306,17 @@ module.exports = {
                 const currentUser = allUsers.find(u => u.userid === interaction.user.id);
                 const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
 
-                const embed = leaderboardModule.createLeaderboardEmbed(users, page, sort, totalPages, newDisplay, guildName, currentUserWithAge);
+                const embed = leaderboardModule.createLeaderboardEmbed(users, page, sort, totalPages, newDisplay, guildName, currentUserWithAge, cacheTime);
                 const buttons = leaderboardModule.createButtons(page, totalPages, sort, newDisplay, originalUserId);
 
-                await interaction.update({
-                    embeds: [embed],
-                    components: [buttons]
-                });
+                try {
+                    await interaction.message.edit({
+                        embeds: [embed],
+                        components: [buttons]
+                    });
+                } catch (e) {
+                    console.error('Failed to edit leaderboard:', e);
+                }
 
                 try {
                     const sessionScheduler = require('../../utils/disableButton/sessionScheduler');
@@ -313,11 +341,6 @@ module.exports = {
                 }
             } catch (e) {
                 console.error('Leaderboard interaction error:', e);
-                if (!interaction.replied)
-                    await interaction.reply({
-                        content: '⚠️ Error occurred, please try again.',
-                        ephemeral: true
-                    });
             }
         }
     }

@@ -57,13 +57,24 @@ function formatAge(createdDate) {
   return `${text} (<t:${Math.floor(createdDate.getTime() / 1000)}:F>)`;
 }
 
-function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox', guildName = 'Unknown', currentUser = null) {
+function formatTimeAgo(timestamp) {
+  const diff = Date.now() - timestamp;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  if (hours > 0) return `${hours} hours ago`;
+  if (minutes > 0) return `${minutes} minutes ago`;
+  return `${seconds} seconds ago`;
+}
+
+function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox', guildName = 'Unknown', currentUser = null, lastUpdated = null) {
   const start = (page - 1) * 10;
   const end = start + 10;
   const currentPageUsers = users.slice(start, end);
 
   const embed = new EmbedBuilder()
-    .setTitle('🏆 Roblox Account Age Leaderboard')
+    .setTitle('`🏆` Roblox Account Age Leaderboard')
     .setColor('#00aaff');
 
   let desc = `**Sort:** ${sort === 'old' ? 'Oldest' : sort === 'new' ? 'Newest' : 'A–Z'} | **Page:** ${page}/${totalPages}\n-# Guild: ${guildName}\n`;
@@ -71,17 +82,21 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   if (currentUser) {
     const rank = users.findIndex(u => u.userid === currentUser.userid) + 1;
     const percent = ((rank / users.length) * 100).toFixed(1);
-    desc += `\n### 📊 Your Stats\n-# **User:** @${currentUser.username}\n-# **Rank:** #${rank} *(Top ${percent}%)*\n-# **Created:** ${formatAge(currentUser.createdDate)}\n`;
+    desc += `\n### \`📊\` Your Stats\n-# **User:** @${currentUser.username}\n-# **Rank:** #${rank} *(Top ${percent}%)*\n-# **Created:** ${formatAge(currentUser.createdDate)}\n`;
   }
 
-  desc += `\n### 🏆 Rankings\n`;
+  desc += `\n### \`🏆\` Rankings\n`;
   for (let i = 0; i < currentPageUsers.length; i++) {
     const user = currentPageUsers[i];
     const rank = start + i + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
     const name = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
     const link = user.roblox_uid ? `[${name}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : name;
-    desc += `${medal} ${link}\n-# ${formatAge(user.createdDate)}\n`;
+    desc += `${medal} ${link}\n-# <:blank:1437120167665729638>${formatAge(user.createdDate)}\n`;
+  }
+
+  if (lastUpdated) {
+    desc += `\n-# Last updated: ${formatTimeAgo(lastUpdated)} • Total users in database: ${users.length}`;
   }
 
   embed.setDescription(desc);
@@ -154,7 +169,7 @@ module.exports = {
     const guildName = interaction.guild ? interaction.guild.name : 'Unknown';
     const currentUserWithAge = users.find(u => u.userid === currentUser.userid);
 
-    const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
+    const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge, Date.now());
     const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
     await interaction.editReply({ embeds: [embed], components: [buttons] });
