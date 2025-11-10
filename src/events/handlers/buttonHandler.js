@@ -211,12 +211,13 @@ module.exports = {
         }
 
         if (interaction.customId.startsWith('leaderboard_')) {
-            const parts = interaction.customId.split('_');
-            const action = parts[1];
-            const currentPage = parseInt(parts[2]);
-            const sort = parts[3];
-            const displayMode = parts[4] || 'roblox';
-            const originalUserId = parts[5];
+            try {
+                const parts = interaction.customId.split('_');
+                const action = parts[1];
+                const currentPage = parseInt(parts[2]);
+                const sort = parts[3];
+                const displayMode = parts[4] || 'roblox';
+                const originalUserId = parts[5];
 
                 try {
                     const scheduler = require('../../utils/disableButton/sessionScheduler');
@@ -231,91 +232,106 @@ module.exports = {
                     console.error('Failed to clear leaderboard disable timeout:', err);
                 }
 
-            if (interaction.user.id !== originalUserId) {
-                return await interaction.reply({
-                    content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
-                    ephemeral: true
-                });
-            }
+                if (interaction.user.id !== originalUserId) {
+                    return await interaction.reply({
+                        content: '❌ Only the user who initiated this leaderboard can interact with these buttons.\n> -# Please use the </leaderboard:1436827056015937728> command to start your own session.',
+                        ephemeral: true
+                    });
+                }
 
-            const lastInteraction = leaderboardSessionTimestamps.get(originalUserId) || interaction.message.createdTimestamp;
-            const now = Date.now();
-            const timeDiff = now - lastInteraction;
-            const fiveMinutes = 5 * 60 * 1000;
+                const lastInteraction = leaderboardSessionTimestamps.get(originalUserId) || interaction.message.createdTimestamp;
+                const now = Date.now();
+                const timeDiff = now - lastInteraction;
+                const fiveMinutes = 5 * 60 * 1000;
 
-            const {
-                loadDatabase,
-                getUsersWithAge,
-                createLeaderboardEmbed,
-                createButtons
-            } = leaderboardModule;
+                const {
+                    loadDatabase,
+                    getUsersWithAge,
+                    createLeaderboardEmbed,
+                    createButtons
+                } = leaderboardModule;
 
-            if (timeDiff > fiveMinutes) {
+                if (timeDiff > fiveMinutes) {
+                    const users = await getUsersWithAge();
+                    const totalPages = Math.ceil(users.length / 10);
+                    const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+                    const allUsers = loadDatabase();
+                    const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+                    const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
+
+                    const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
+                    const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
+
+                    await interaction.update({
+                        embeds: [embed],
+                        components: [disabledButtons]
+                    });
+
+                    leaderboardSessionTimestamps.delete(originalUserId);
+                    return;
+                }
+
+                leaderboardSessionTimestamps.set(originalUserId, now);
+
+                let newPage = currentPage;
+                let newDisplayMode = displayMode;
+
+                if (action === 'prev' && currentPage > 1) newPage = currentPage - 1;
+                else if (action === 'next') newPage = currentPage + 1;
+                else if (action === 'toggle') newDisplayMode = displayMode === 'roblox' ? 'discord' : 'roblox';
+
                 const users = await getUsersWithAge();
+                if (sort === 'old') users.sort((a, b) => a.createdDate - b.createdDate);
+                else if (sort === 'new') users.sort((a, b) => b.createdDate - a.createdDate);
+                else users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
+
                 const totalPages = Math.ceil(users.length / 10);
                 const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
                 const allUsers = loadDatabase();
                 const currentUser = allUsers.find(u => u.userid === interaction.user.id);
                 const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
 
-                const embed = createLeaderboardEmbed(users, currentPage, sort, totalPages, displayMode, guildName, currentUserWithAge);
-                const disabledButtons = createButtons(currentPage, totalPages, sort, displayMode, originalUserId, true);
+                const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
+                const buttons = createButtons(newPage, totalPages, sort, newDisplayMode, originalUserId);
 
                 await interaction.update({
                     embeds: [embed],
-                    components: [disabledButtons]
+                    components: [buttons]
                 });
 
-                leaderboardSessionTimestamps.delete(originalUserId);
-                return;
-            }
-
-            leaderboardSessionTimestamps.set(originalUserId, now);
-
-            let newPage = currentPage;
-            let newDisplayMode = displayMode;
-
-            if (action === 'prev' && currentPage > 1) newPage = currentPage - 1;
-            else if (action === 'next') newPage = currentPage + 1;
-            else if (action === 'toggle') newDisplayMode = displayMode === 'roblox' ? 'discord' : 'roblox';
-
-            const users = await getUsersWithAge();
-            if (sort === 'old') users.sort((a, b) => a.createdDate - b.createdDate);
-            else if (sort === 'new') users.sort((a, b) => b.createdDate - a.createdDate);
-            else users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
-
-            const totalPages = Math.ceil(users.length / 10);
-            const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
-            const allUsers = loadDatabase();
-            const currentUser = allUsers.find(u => u.userid === interaction.user.id);
-            const currentUserWithAge = users.find(u => u.userid === currentUser?.userid);
-
-            const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
-            const buttons = createButtons(newPage, totalPages, sort, newDisplayMode, originalUserId);
-
-            await interaction.update({
-                embeds: [embed],
-                components: [buttons]
-            });
-
-            try {
-                const scheduler = require('../../utils/disableButton/sessionScheduler');
-                scheduler.schedule({
-                    key: interaction.message.id,
-                    channelId: interaction.message.channelId,
-                    messageId: interaction.message.id,
-                    type: 'leaderboard',
-                    meta: {
-                        originalUserId,
-                        page: newPage,
-                        totalPages,
-                        sort,
-                        displayMode: newDisplayMode
-                    },
-                    expiresAt: Date.now() + 5 * 60 * 1000
-                });
-            } catch (err) {
-                console.error('Failed to schedule leaderboard auto-disable after interaction:', err);
+                try {
+                    const scheduler = require('../../utils/disableButton/sessionScheduler');
+                    scheduler.schedule({
+                        key: interaction.message.id,
+                        channelId: interaction.message.channelId,
+                        messageId: interaction.message.id,
+                        type: 'leaderboard',
+                        meta: {
+                            originalUserId,
+                            page: newPage,
+                            totalPages,
+                            sort,
+                            displayMode: newDisplayMode
+                        },
+                        expiresAt: Date.now() + 5 * 60 * 1000
+                    });
+                } catch (err) {
+                    console.error('Failed to schedule leaderboard auto-disable after interaction:', err);
+                }
+            } catch (error) {
+                console.error('Error handling leaderboard button interaction:', error);
+                if (error.code === 10062) {
+                    // Interaction expired, no need to respond
+                    return;
+                }
+                try {
+                    await interaction.reply({
+                        content: '❌ An error occurred while processing your request. Please try again.',
+                        ephemeral: true
+                    });
+                } catch (replyError) {
+                    console.error('Failed to send error reply:', replyError);
+                }
             }
         }
     }
