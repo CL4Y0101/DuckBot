@@ -121,6 +121,16 @@ function schedule(session) {
   }
 }
 
+function clearTimeoutOnly(key) {
+  try {
+    clearTimeoutForKey(key);
+    return timeouts.has(key);
+  } catch (err) {
+    console.error('Failed to clear timeout for session:', err);
+    return false;
+  }
+}
+
 function clear(key) {
   try {
     clearTimeoutForKey(key);

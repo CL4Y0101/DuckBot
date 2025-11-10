@@ -221,11 +221,11 @@ module.exports = {
 
                 try {
                     const scheduler = require('../../utils/disableButton/sessionScheduler');
-                    if (scheduler && typeof scheduler.clear === 'function') {
+                    if (scheduler && typeof scheduler.clearTimeoutOnly === 'function') {
                         try {
-                            scheduler.clear(interaction.message.id);
+                            scheduler.clearTimeoutOnly(interaction.message.id);
                         } catch (e) {
-                            scheduler.clear(originalUserId);
+                            scheduler.clearTimeoutOnly(originalUserId);
                         }
                     }
                 } catch (err) {
