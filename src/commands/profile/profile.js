@@ -316,7 +316,7 @@ module.exports = {
         if (!user) {
           const embed = new EmbedBuilder()
             .setTitle('`🔍` User Not Found')
-            .setDescription(`User "${username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
+            .setDescription(`User "${discordUser.username}" is not verified in our database.\n\nIf this is you, please verify your Roblox account first.`)
             .setColor('#ff6b6b');
 
           const verifyButton = new ButtonBuilder()
