@@ -77,12 +77,12 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     .setTitle('`🏆` Roblox Account Age Leaderboard')
     .setColor('#00aaff');
 
-  let desc = `**Sort:** ${sort === 'old' ? 'Oldest' : sort === 'new' ? 'Newest' : 'A–Z'} | **Page:** ${page}/${totalPages}\n-# Guild: ${guildName}\n`;
+  let desc = `**Sort**: ${sort === 'old' ? 'Oldest' : sort === 'new' ? 'Newest' : 'A–Z'} | **Page**: ${page}/${totalPages}\n-# **Guild**: ${guildName}\n`;
 
   if (currentUser) {
     const rank = users.findIndex(u => u.userid === currentUser.userid) + 1;
     const percent = ((rank / users.length) * 100).toFixed(1);
-    desc += `\n### \`📊\` Your Stats\n-# **User:** @${currentUser.username}\n-# **Rank:** #${rank} *(Top ${percent}%)*\n-# **Created:** ${formatAge(currentUser.createdDate)}\n`;
+    desc += `\n### \`📊\` Your Stats\n-# **User**: @${currentUser.username}\n-# **Rank**: #${rank} *(Top ${percent}%)*\n-# **Created**: ${formatAge(currentUser.createdDate)}\n`;
   }
 
   desc += `\n### \`🏆\` Rankings\n`;
@@ -92,7 +92,11 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
     const name = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
     const link = user.roblox_uid ? `[${name}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : name;
-    desc += `${medal} ${link}\n-# <:blank:1437120167665729638>${formatAge(user.createdDate)}\n`;
+    let displayMedalLink = `${medal} ${link}`;
+    if (currentUser && user.userid === currentUser.userid) {
+      displayMedalLink = `<a:blue_arrow_right:1437420636153577493> ${medal} ${link} <a:blue_arrow_left:1437420744815542293>`;
+    }
+    desc += `${displayMedalLink}\n-# <:blank:1437120167665729638>${formatAge(user.createdDate)}\n`;
   }
 
   if (lastUpdated) {
@@ -107,7 +111,7 @@ function createButtons(page, totalPages, sort, displayMode, originalUserId, disa
   const row = new ActionRowBuilder();
   const prev = new ButtonBuilder()
     .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${originalUserId}`)
-    .setLabel('Previous')
+    .setLabel('Prev')
     .setStyle(ButtonStyle.Primary)
     .setDisabled(disabled || page <= 1);
 
