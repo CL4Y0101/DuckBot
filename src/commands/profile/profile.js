@@ -263,24 +263,41 @@ module.exports = {
               channelId: sentMessage.channelId,
               messageId: sentMessage.id,
               type: 'verify',
-              meta: { originalUserId: interaction.user.id },
+              meta: {
+                originalUserId: interaction.user.id
+              },
               expiresAt: Date.now() + 5 * 60 * 1000
             });
           } catch (err) {
             console.error('Failed to schedule verify auto-disable:', err);
-            setTimeout(async () => {
-              try {
-                const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
-                const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+            try {
+              const scheduler = require('../../utils/disableButton/sessionScheduler');
+              scheduler.schedule({
+                key: sentMessage.id,
+                channelId: sentMessage.channelId,
+                messageId: sentMessage.id,
+                type: 'verify',
+                meta: {
+                  originalUserId: interaction.user.id
+                },
+                expiresAt: Date.now() + 5 * 60 * 1000
+              });
+            } catch (err) {
+              console.error('Failed to schedule verify auto-disable:', err);
+              setTimeout(async () => {
+                try {
+                  const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
+                  const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
 
-                await sentMessage.edit({
-                  embeds: [embed],
-                  components: [disabledRow]
-                });
-              } catch (error) {
-                console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
-              }
-            }, 5 * 60 * 1000);
+                  await sentMessage.edit({
+                    embeds: [embed],
+                    components: [disabledRow]
+                  });
+                } catch (error) {
+                  console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
+                }
+              }, 5 * 60 * 1000);
+            }
           }
           return;
         }
@@ -315,19 +332,34 @@ module.exports = {
             ephemeral: true
           });
 
-          setTimeout(async () => {
-            try {
-              const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
-              const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+          try {
+            const scheduler = require('../../utils/disableButton/sessionScheduler');
+            scheduler.schedule({
+              key: sentMessage.id,
+              channelId: sentMessage.channelId,
+              messageId: sentMessage.id,
+              type: 'verify',
+              meta: {
+                originalUserId: interaction.user.id
+              },
+              expiresAt: Date.now() + 5 * 60 * 1000
+            });
+          } catch (err) {
+            console.error('Failed to schedule verify auto-disable:', err);
+            setTimeout(async () => {
+              try {
+                const disabledButton = ButtonBuilder.from(verifyButton).setDisabled(true);
+                const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
 
-              await sentMessage.edit({
-                embeds: [embed],
-                components: [disabledRow]
-              });
-            } catch (error) {
-              console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
-            }
-          }, 5 * 60 * 1000);
+                await sentMessage.edit({
+                  embeds: [embed],
+                  components: [disabledRow]
+                });
+              } catch (error) {
+                console.warn('⚠️ Gagal menonaktifkan tombol verify_button:', error.message);
+              }
+            }, 5 * 60 * 1000);
+          }
           return;
         }
 
