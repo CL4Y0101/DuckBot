@@ -96,7 +96,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
   }
 
   if (lastUpdated) {
-    desc += `\n-# Last updated: ${formatTimeAgo(lastUpdated)} • Total users in database: ${users.length}`;
+    desc += `\n-# Last updated: <t:${Math.floor(lastUpdated / 1000)}:R> • Total users in database: ${users.length}`;
   }
 
   embed.setDescription(desc);
