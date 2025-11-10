@@ -335,7 +335,6 @@ module.exports = {
             } catch (error) {
                 console.error('Error handling leaderboard button interaction:', error);
                 if (error.code === 10062) {
-                    // Interaction expired, no need to respond
                     return;
                 }
                 try {
