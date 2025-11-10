@@ -8,29 +8,25 @@ const {
 const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
+const sessionScheduler = require('../../utils/disableButton/sessionScheduler');
 
 const databasePath = path.join(__dirname, '../../database/username.json');
 
-const sessionScheduler = require('../../utils/disableButton/sessionScheduler');
-
 function loadDatabase() {
+  if (!fs.existsSync(databasePath)) return [];
   try {
-    if (!fs.existsSync(databasePath)) {
-      console.log('❌ Database file not found:', databasePath);
-      return [];
-    }
-    const data = fs.readFileSync(databasePath, 'utf8');
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error('❌ Error loading database:', error);
+    const content = fs.readFileSync(databasePath, 'utf8');
+    const data = JSON.parse(content);
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Failed to load database:', err);
     return [];
   }
 }
 
 async function getUsersWithAge() {
   const users = loadDatabase();
-  const usersWithAge = [];
+  const list = [];
 
   for (const user of users) {
     if (!user.roblox_uid) continue;
@@ -38,103 +34,91 @@ async function getUsersWithAge() {
       const profile = await robloxAPI.getUserProfile(user.roblox_uid);
       if (profile && profile.created) {
         const createdDate = new Date(profile.created);
-        usersWithAge.push({
+        list.push({
           ...user,
           createdDate,
           age: Date.now() - createdDate.getTime()
         });
       }
-    } catch (error) {
-      console.error(`Error fetching profile for ${user.roblox_username}:`, error);
+    } catch (e) {
+      console.warn(`Failed to fetch ${user.roblox_username}:`, e.message);
     }
   }
-
-  return usersWithAge;
+  return list;
 }
 
 function formatAge(createdDate) {
-  const ageMs = Date.now() - createdDate.getTime();
-  const years = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365));
-  const months = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-  const days = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+  const diff = Date.now() - createdDate.getTime();
+  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+  const months = Math.floor((diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+  const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
 
-  let ageText = '';
-  if (years > 0) ageText = `${years}y ${months}m`;
-  else if (months > 0) ageText = `${months}m ${days}d`;
-  else ageText = `${days}d`;
-
-  const timestamp = `<t:${Math.floor(createdDate.getTime() / 1000)}:F>`;
-  return `${ageText} (${timestamp})`;
+  let text = years > 0 ? `${years}y ${months}m` : months > 0 ? `${months}m ${days}d` : `${days}d`;
+  return `${text} (<t:${Math.floor(createdDate.getTime() / 1000)}:F>)`;
 }
 
-function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox', guildName = 'Unknown Guild', currentUser = null) {
+function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'roblox', guildName = 'Unknown', currentUser = null) {
   const start = (page - 1) * 10;
   const end = start + 10;
-  const pageUsers = users.slice(start, end);
+  const currentPageUsers = users.slice(start, end);
 
   const embed = new EmbedBuilder()
-    .setTitle('`🏆` Roblox Account Age Leaderboard')
-    .setColor('#ff6b6b');
+    .setTitle('🏆 Roblox Account Age Leaderboard')
+    .setColor('#00aaff');
 
-  let description = `**Sorted by:** ${sort === 'old' ? 'Oldest Accounts' : sort === 'new' ? 'Newest Accounts' : 'Alphabetical (A-Z)'}\n**Page:** ${page}/${totalPages}\n\n-# **Guild**: ${guildName}\n`;
+  let desc = `**Sort:** ${sort === 'old' ? 'Oldest' : sort === 'new' ? 'Newest' : 'A–Z'} | **Page:** ${page}/${totalPages}\n-# Guild: ${guildName}\n`;
 
   if (currentUser) {
-    const userRank = users.findIndex(u => u.userid === currentUser.userid) + 1;
-    const topPercentage = ((userRank / users.length) * 100).toFixed(1);
-    description += `### \`📊\` Your Current Stats\n-# **User**: @${currentUser.username}\n-# **Rank**: #${userRank} *(Top ${topPercentage}%)*\n-# **Account Created At**: ${formatAge(currentUser.createdDate)}\n`;
+    const rank = users.findIndex(u => u.userid === currentUser.userid) + 1;
+    const percent = ((rank / users.length) * 100).toFixed(1);
+    desc += `\n### 📊 Your Stats\n-# **User:** @${currentUser.username}\n-# **Rank:** #${rank} *(Top ${percent}%)*\n-# **Created:** ${formatAge(currentUser.createdDate)}\n`;
   }
 
-  description += `### \`🏆\` Rankings\n`;
-
-  pageUsers.forEach((user, index) => {
-    const rank = start + index + 1;
+  desc += `\n### 🏆 Rankings\n`;
+  for (let i = 0; i < currentPageUsers.length; i++) {
+    const user = currentPageUsers[i];
+    const rank = start + i + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`;
-    const displayName = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
-    const robloxProfileLink = user.roblox_uid ? `[${displayName}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : displayName;
-    description += `${medal} ${robloxProfileLink}\n-# <:blank:1437120167665729638>${formatAge(user.createdDate)}\n`;
-  });
+    const name = displayMode === 'discord' ? user.username : (user.roblox_nickname || user.roblox_username);
+    const link = user.roblox_uid ? `[${name}](https://www.roblox.com/users/${user.roblox_uid}/profile)` : name;
+    desc += `${medal} ${link}\n-# ${formatAge(user.createdDate)}\n`;
+  }
 
-  const currentTime = Math.floor(Date.now() / 1000);
-  description += `\n-# Last updated: <t:${currentTime}:R> • Total users in database: ${users.length}`;
-
-  embed.setDescription(description);
+  embed.setDescription(desc);
   return embed;
 }
 
-function createButtons(page, totalPages, sort, displayMode = 'roblox', originalUserId = '', disabled = false) {
+function createButtons(page, totalPages, sort, displayMode, originalUserId, disabled = false) {
   const row = new ActionRowBuilder();
-
-  const prevButton = new ButtonBuilder()
+  const prev = new ButtonBuilder()
     .setCustomId(`leaderboard_prev_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel('Previous')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(disabled || page === 1);
+    .setDisabled(disabled || page <= 1);
 
-  const toggleButton = new ButtonBuilder()
+  const toggle = new ButtonBuilder()
     .setCustomId(`leaderboard_toggle_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel(displayMode === 'roblox' ? 'Show Discord Names' : 'Show Roblox Names')
     .setStyle(ButtonStyle.Secondary)
     .setDisabled(disabled);
 
-  const nextButton = new ButtonBuilder()
+  const next = new ButtonBuilder()
     .setCustomId(`leaderboard_next_${page}_${sort}_${displayMode}_${originalUserId}`)
     .setLabel('Next')
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(disabled || page === totalPages);
+    .setDisabled(disabled || page >= totalPages);
 
-  row.addComponents(prevButton, toggleButton, nextButton);
+  row.addComponents(prev, toggle, next);
   return row;
 }
- 
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('leaderboard')
     .setDescription('Display Roblox account age leaderboard')
-    .addStringOption(option =>
-      option.setName('sorting')
-        .setDescription('Sort by account age')
-        .setRequired(false)
+    .addStringOption(o =>
+      o.setName('sorting')
+        .setDescription('Sort by oldest or newest accounts')
         .addChoices(
           { name: 'Oldest Accounts', value: 'old' },
           { name: 'Newest Accounts', value: 'new' }
@@ -144,74 +128,46 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const allUsers = loadDatabase();
-    const currentUser = allUsers.find(u => u.userid === interaction.user.id);
+    const db = loadDatabase();
+    const currentUser = db.find(u => u.userid === interaction.user.id);
 
     if (!currentUser) {
       const embed = new EmbedBuilder()
-        .setTitle('`🔍` Verification Required')
-        .setDescription('You need to verify your Roblox account to view the leaderboard.\n\nClick the button below to start verification.')
-        .setColor('#ff6b6b');
-
-      const verifyButton = new ButtonBuilder()
-        .setCustomId('verify_button')
-        .setLabel('Verify Roblox Account')
-        .setStyle(ButtonStyle.Primary);
-
-      const row = new ActionRowBuilder().addComponents(verifyButton);
-
-      return await interaction.editReply({
-        embeds: [embed],
-        components: [row],
-        ephemeral: true
-      });
+        .setTitle('🔍 Verification Required')
+        .setDescription('You must verify your Roblox account first!')
+        .setColor('#ff5555');
+      return await interaction.editReply({ embeds: [embed] });
     }
 
     const sort = interaction.options.getString('sorting') || 'alphabetical';
     const users = await getUsersWithAge();
 
-    if (users.length === 0) {
-      return await interaction.editReply('No users found with valid Roblox profiles.');
-    }
+    if (!users.length)
+      return await interaction.editReply('No valid users found.');
 
-    if (sort === 'old') {
-      users.sort((a, b) => a.createdDate - b.createdDate);
-    } else if (sort === 'new') {
-      users.sort((a, b) => b.createdDate - a.createdDate);
-    } else {
-      users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
-    }
+    if (sort === 'old') users.sort((a, b) => a.createdDate - b.createdDate);
+    else if (sort === 'new') users.sort((a, b) => b.createdDate - a.createdDate);
+    else users.sort((a, b) => (a.roblox_nickname || a.roblox_username).localeCompare(b.roblox_nickname || b.roblox_username));
 
     const totalPages = Math.ceil(users.length / 10);
     const page = 1;
-
-    const guildName = interaction.guild ? interaction.guild.name : 'Unknown Guild';
+    const guildName = interaction.guild ? interaction.guild.name : 'Unknown';
     const currentUserWithAge = users.find(u => u.userid === currentUser.userid);
 
     const embed = createLeaderboardEmbed(users, page, sort, totalPages, 'roblox', guildName, currentUserWithAge);
     const buttons = createButtons(page, totalPages, sort, 'roblox', interaction.user.id);
 
-      await interaction.editReply({ embeds: [embed], components: [buttons] });
+    await interaction.editReply({ embeds: [embed], components: [buttons] });
 
-      try {
-        const sentMessage = await interaction.fetchReply();
-        sessionScheduler.schedule({
-          key: sentMessage.id,
-          channelId: sentMessage.channelId,
-          messageId: sentMessage.id,
-          type: 'leaderboard',
-          meta: {
-            originalUserId: interaction.user.id,
-            page,
-            totalPages,
-            sort,
-            displayMode: 'roblox'
-          },
-          expiresAt: Date.now() + 5 * 60 * 1000
-        });
-      } catch (err) {
-        console.error('Failed to fetch reply for leaderboard scheduling:', err);
-      }
+    const sent = await interaction.fetchReply();
+    sessionScheduler.schedule({
+      key: sent.id,
+      channelId: sent.channelId,
+      messageId: sent.id,
+      type: 'leaderboard',
+      meta: { originalUserId: interaction.user.id, page, totalPages, sort, displayMode: 'roblox' },
+      expiresAt: Date.now() + 5 * 60 * 1000
+    });
   },
 
   loadDatabase,
