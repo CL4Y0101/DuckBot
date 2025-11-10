@@ -269,7 +269,6 @@ module.exports = {
                         });
                     } catch (updateError) {
                         if (updateError.code === 10062) {
-                            // Interaction expired, no need to respond
                             return;
                         }
                         throw updateError;
@@ -302,10 +301,17 @@ module.exports = {
                 const embed = createLeaderboardEmbed(users, newPage, sort, totalPages, newDisplayMode, guildName, currentUserWithAge);
                 const buttons = createButtons(newPage, totalPages, sort, newDisplayMode, originalUserId);
 
-                await interaction.update({
-                    embeds: [embed],
-                    components: [buttons]
-                });
+                try {
+                    await interaction.update({
+                        embeds: [embed],
+                        components: [buttons]
+                    });
+                } catch (updateError) {
+                    if (updateError.code === 10062) {
+                        return;
+                    }
+                    throw updateError;
+                }
 
                 try {
                     const scheduler = require('../../utils/disableButton/sessionScheduler');
