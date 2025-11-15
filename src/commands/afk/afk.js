@@ -222,19 +222,35 @@ module.exports = {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('Currently AFK Users')
+        .setTitle('`😴` Currently AFK Users')
         .setColor('#FFA500')
         .setTimestamp();
 
-      let description = '';
-      for (const user of afkUsers) {
+      let desc = `### \`📊\` AFK Status\n`;
+      for (let i = 0; i < afkUsers.length; i++) {
+        const user = afkUsers[i];
         const member = interaction.guild.members.cache.get(user.userId);
         const username = member ? member.user.username : 'Unknown User';
         const timeAgo = Math.floor((Date.now() - user.timestamp) / 1000);
-        description += `• **${username}**: ${user.reason} (${timeAgo}s ago)\n`;
+        const hours = Math.floor(timeAgo / 3600);
+        const minutes = Math.floor((timeAgo % 3600) / 60);
+        const seconds = timeAgo % 60;
+
+        let timeString;
+        if (hours > 0) {
+          timeString = `${hours}h ${minutes}m ago`;
+        } else if (minutes > 0) {
+          timeString = `${minutes}m ${seconds}s ago`;
+        } else {
+          timeString = `${seconds}s ago`;
+        }
+
+        desc += `**${i + 1}.** ${username}\n-# ${user.reason} • <t:${Math.floor(user.timestamp / 1000)}:R>\n`;
       }
 
-      embed.setDescription(description);
+      desc += `\n-# Total AFK users: ${afkUsers.length}`;
+
+      embed.setDescription(desc);
 
       await interaction.reply({ embeds: [embed], ephemeral: true });
     }
