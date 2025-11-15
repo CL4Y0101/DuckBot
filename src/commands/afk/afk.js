@@ -185,7 +185,7 @@ module.exports = {
           nicknameChanged = true;
         }
       } catch (error) {
-        console.error('Error setting AFK nickname:', error);
+        // console.error('Error setting AFK nickname:', error);
         if (error.code === 50013) {
         }
       }

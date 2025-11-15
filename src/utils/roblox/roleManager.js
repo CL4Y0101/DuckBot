@@ -15,7 +15,7 @@ async function assignVerifiedRole(client, userid) {
         if (!guild) return console.log('❌ Guild not found'), false;
 
         const member = await guild.members.fetch(userid).catch(() => null);
-        if (!member) return console.log(`❌ Member ${userid} not found`), false;
+        // if (!member) return console.log(`❌ Member ${userid} not found`), false;
 
         if (member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedVerified.has(member.user.username)) {
@@ -39,7 +39,7 @@ async function assignRegisteredRole(client, userid) {
         if (!guild) return console.log('❌ Guild not found'), false;
 
         const member = await guild.members.fetch(userid).catch(() => null);
-        if (!member) return console.log(`❌ Member ${userid} not found`), false;
+        // if (!member) return console.log(`❌ Member ${userid} not found`), false;
 
         if (member.roles.cache.has(REGISTERED_ROLE_ID)) {
             if (!loggedRegistered.has(member.user.username)) {
@@ -63,7 +63,7 @@ async function removeVerifiedRole(client, userid) {
         if (!guild) return console.log('❌ Guild not found'), false;
 
         const member = await guild.members.fetch(userid).catch(() => null);
-        if (!member) return console.log(`❌ Member ${userid} not found`), false;
+        // if (!member) return console.log(`❌ Member ${userid} not found`), false;
 
         if (!member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedNoVerified.has(member.user.username)) {
