@@ -52,7 +52,7 @@ async function assignRegisteredRole(client, userid) {
         console.log(`✅ Assigned registered role to ${member.user.username}`);
         return true;
     } catch (e) {
-        console.error(`❌ Error assigning registered role: ${e.message}`);
+        // console.error(`❌ Error assigning registered role: ${e.message}`);
         return false;
     }
 }
