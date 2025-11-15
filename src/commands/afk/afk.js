@@ -117,18 +117,27 @@ module.exports = {
 
       setAFK(interaction.user.id, reason);
 
+      let nicknameChanged = false;
       try {
         const member = interaction.guild.members.cache.get(interaction.user.id);
         if (member) {
           const originalName = member.displayName;
           const afkName = `[AFK] ${originalName}`;
           await member.setNickname(afkName);
+          nicknameChanged = true;
         }
       } catch (error) {
         console.error('Error setting AFK nickname:', error);
+        if (error.code === 50013) {
+          console.log('Bot lacks permission to change nickname due to role hierarchy');
+        }
       }
 
-      await interaction.reply(`✅ You are now AFK: ${reason}`);
+      const response = nicknameChanged
+        ? `✅ You are now AFK: ${reason}`
+        : `✅ You are now AFK: ${reason}\n⚠️ *Nickname couldn't be changed due to role hierarchy. The bot needs a higher role position than you.*`;
+
+      await interaction.reply(response);
 
     } else if (subcommand === 'remove') {
       const targetUser = interaction.options.getUser('user');
