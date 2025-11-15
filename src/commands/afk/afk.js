@@ -4,6 +4,51 @@ const path = require('path');
 
 const afkPath = path.join(__dirname, '../../database/afk.json');
 
+function loadConfig() {
+  try {
+    const configPath = path.join(__dirname, '../../../config.yml');
+    const fileContents = fs.readFileSync(configPath, 'utf8');
+    const lines = fileContents.split('\n');
+    const config = {};
+    let currentSection = null;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('#') || trimmed === '') continue;
+
+      if (trimmed.endsWith(':')) {
+        currentSection = trimmed.slice(0, -1);
+        config[currentSection] = {};
+      } else if (currentSection && trimmed.includes(':')) {
+        const [key, ...valueParts] = trimmed.split(':');
+        let value = valueParts.join(':').trim();
+
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1);
+        }
+
+        if (value.startsWith('[') && value.endsWith(']')) {
+          try {
+            value = JSON.parse(value);
+          } catch {
+            value = [];
+          }
+        }
+        else if (value === 'true') value = true;
+        else if (value === 'false') value = false;
+        else if (!isNaN(value)) value = Number(value);
+
+        config[currentSection][key.trim()] = value;
+      }
+    }
+
+    return config;
+  } catch (error) {
+    console.error('Error loading config:', error);
+    return { afk: { prefix: '!' } };
+  }
+}
+
 function loadAFK() {
   try {
     if (!fs.existsSync(afkPath)) return [];
@@ -104,6 +149,19 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    const config = loadConfig();
+    const afkConfig = config.afk || {};
+
+    if (afkConfig.commandChannelOnly && afkConfig.commandChannels) {
+      if (!afkConfig.commandChannels.includes(interaction.channel.id)) {
+        await interaction.reply({
+          content: `❌ AFK commands can only be used in designated channels.`,
+          ephemeral: true
+        });
+        return;
+      }
+    }
+
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'set') {
@@ -129,13 +187,12 @@ module.exports = {
       } catch (error) {
         console.error('Error setting AFK nickname:', error);
         if (error.code === 50013) {
-          console.log('Bot lacks permission to change nickname due to role hierarchy');
         }
       }
 
       const response = nicknameChanged
         ? `✅ You are now AFK: ${reason}`
-        : `✅ You are now AFK: ${reason}\n⚠️ *Nickname couldn't be changed due to role hierarchy. The bot needs a higher role position than you.*`;
+        : `✅ You are now AFK: ${reason}\n-# ⚠️ *Nickname couldn't be changed due to role hierarchy. The bot needs a higher role position than you.*`;
 
       await interaction.reply(response);
 

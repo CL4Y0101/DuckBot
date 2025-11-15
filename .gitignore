@@ -1,3 +1,4 @@
 node_modules/
 .env
 src/database/sessions.json
+src/database/afk.json
