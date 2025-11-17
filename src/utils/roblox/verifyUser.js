@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('./robloxAPI');
 
-const databasePath = path.join(__dirname, '../database/username.json');
-const guildDatabasePath = path.join(__dirname, '../database/guild.json');
+const databasePath = path.join(__dirname, '../../database/username.json');
+const guildDatabasePath = path.join(__dirname, '../../database/guild.json');
 
 class VerificationService {
     constructor() {
@@ -20,6 +20,11 @@ class VerificationService {
             
             if (!user) {
                 console.log(`❌ User ${normalizedUserid} not found in database (total users in DB: ${data.length})`);
+                // Tambahan debug: show first few userids
+                if (data.length > 0) {
+                    const sampleIds = data.slice(0, 3).map(u => u.userid).join(', ');
+                    console.log(`   Sample user IDs in DB: ${sampleIds}...`);
+                }
                 return false;
             }
 
@@ -99,9 +104,26 @@ class VerificationService {
         const guildConfig = this.loadGuildConfig(guildid);
         const patterns = this.generatePatterns(nickname, guildConfig);
         
-        return patterns.some(pattern => 
+        // Check jika pattern match
+        const patternMatch = patterns.some(pattern => 
             this.matchPattern(nickname, pattern)
         );
+        
+        // Jika pattern match, return true
+        if (patternMatch) return true;
+        
+        // Jika tidak, check apakah nickname mengandung salah satu suffix (case-insensitive)
+        if (guildConfig && Object.keys(guildConfig).length > 0) {
+            const suffixes = Object.keys(guildConfig).filter(k => guildConfig[k]);
+            const nicknameLower = nickname.toLowerCase();
+            
+            // Check jika nickname contain any suffix
+            return suffixes.some(suffix => nicknameLower.includes(suffix.toLowerCase()));
+        }
+        
+        // Default suffixes
+        const nicknameLower = nickname.toLowerCase();
+        return nicknameLower.includes('dv');
     }
 
     generatePatterns(nickname, guildConfig) {
@@ -122,16 +144,42 @@ class VerificationService {
     }
 
     createSuffixPatterns(displayName, suffix) {
-        return [
+        const patterns = [
             `${suffix}_${displayName}`,
             `${suffix}x${displayName}`,
             `${suffix}${displayName}`,
             `${displayName}_${suffix}`,
             `${displayName}x${suffix}`,
-            `${displayName}${suffix}`,
-            ...(suffix !== suffix.toLowerCase() ? this.createSuffixPatterns(displayName, suffix.toLowerCase()) : []),
-            ...(suffix !== suffix.toUpperCase() ? this.createSuffixPatterns(displayName, suffix.toUpperCase()) : [])
+            `${displayName}${suffix}`
         ];
+        
+        // Add lowercase variant if different from original
+        const lowerSuffix = suffix.toLowerCase();
+        if (lowerSuffix !== suffix) {
+            patterns.push(
+                `${lowerSuffix}_${displayName}`,
+                `${lowerSuffix}x${displayName}`,
+                `${lowerSuffix}${displayName}`,
+                `${displayName}_${lowerSuffix}`,
+                `${displayName}x${lowerSuffix}`,
+                `${displayName}${lowerSuffix}`
+            );
+        }
+        
+        // Add uppercase variant if different from original
+        const upperSuffix = suffix.toUpperCase();
+        if (upperSuffix !== suffix && upperSuffix !== lowerSuffix) {
+            patterns.push(
+                `${upperSuffix}_${displayName}`,
+                `${upperSuffix}x${displayName}`,
+                `${upperSuffix}${displayName}`,
+                `${displayName}_${upperSuffix}`,
+                `${displayName}x${upperSuffix}`,
+                `${displayName}${upperSuffix}`
+            );
+        }
+        
+        return patterns;
     }
 
     matchPattern(nickname, pattern) {
@@ -166,11 +214,33 @@ class VerificationService {
 
     loadDatabase() {
         try {
-            if (!fs.existsSync(databasePath)) return [];
+            if (!fs.existsSync(databasePath)) {
+                console.warn(`⚠️ Database file not found at: ${databasePath}`);
+                return [];
+            }
+            
             const content = fs.readFileSync(databasePath, 'utf8');
-            return content.trim() ? JSON.parse(content) : [];
+            
+            if (!content.trim()) {
+                console.warn(`⚠️ Database file is empty at: ${databasePath}`);
+                return [];
+            }
+            
+            try {
+                const data = JSON.parse(content);
+                if (!Array.isArray(data)) {
+                    console.error(`❌ Database is not an array! Type: ${typeof data}`);
+                    return [];
+                }
+                return data;
+            } catch (parseError) {
+                console.error(`❌ Error parsing JSON from database: ${parseError.message}`);
+                console.error(`❌ File content length: ${content.length} characters`);
+                console.error(`❌ First 200 chars: ${content.substring(0, 200)}`);
+                return [];
+            }
         } catch (error) {
-            console.error('❌ Error loading database:', error);
+            console.error('❌ Error loading database file:', error);
             return [];
         }
     }
