@@ -40,24 +40,39 @@ async function runVerificationCheck() {
     if (!isRunning) return;
 
     const startTime = Date.now();
+    const MAX_TIMEOUT = 4 * 60 * 1000; // 4 minutes max (Heroku has 30s dyno timeout for workers)
     
     try {
         console.log('🔄 Running scheduled verification check...');
 
-        await verificationService.updateVerifications(process.env.GUILD_ID);
+        
+        const verificationPromise = (async () => {
+            await verificationService.updateVerifications(process.env.GUILD_ID);
 
-        if (client) {
-            await updateRoles(client);
-        }
+            if (client) {
+                await updateRoles(client);
+            }
+        })();
+
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Verification check timeout - exceeded max duration')), MAX_TIMEOUT)
+        );
+
+        await Promise.race([verificationPromise, timeoutPromise]);
 
         const duration = Date.now() - startTime;
         console.log(`✅ Scheduled verification check completed in ${duration}ms`);
 
     } catch (error) {
-        console.error('❌ Error in scheduled verification check:', error);
+        const duration = Date.now() - startTime;
+        console.error(`❌ Error in scheduled verification check (duration: ${duration}ms):`, error.message);
         
         if (error.response) {
             console.error('📡 API Response:', error.response.status, error.response.statusText);
+        }
+
+        if (error.message.includes('timeout')) {
+            console.warn('⚠️ Verification check timed out, will retry on next interval');
         }
     }
 }

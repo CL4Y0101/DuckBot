@@ -120,14 +120,35 @@ async function updateRoles(client) {
             userid: String(user.userid)
         }));
 
-        for (const user of normalizedUsers) {
+        
+        for (let i = 0; i < normalizedUsers.length; i++) {
+            const user = normalizedUsers[i];
+            
             try {
                 if (!user.userid) {
                     console.warn(`⚠️ Skipping user with no userid: ${user.username}`);
                     continue;
                 }
 
-                const member = await guild.members.fetch(user.userid).catch(() => null);
+                
+                if (i > 0 && i % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                const memberFetchPromise = guild.members.fetch(user.userid).catch(() => null);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Member fetch timeout')), 5000)
+                );
+                
+                let member;
+                try {
+                    member = await Promise.race([memberFetchPromise, timeoutPromise]);
+                } catch (timeoutError) {
+                    console.warn(`⚠️ Timeout fetching member ${user.userid} (${user.username})`);
+                    errorCount++;
+                    continue;
+                }
+
                 if (!member) {
                     console.log(`ℹ️ Member ${user.userid} (${user.username}) not in guild`);
                     continue;
@@ -140,9 +161,9 @@ async function updateRoles(client) {
                 const isVerified = await verificationService.verifyUser(user.userid, guild.id);
                 
                 if (isVerified) {
-                    await assignVerifiedRole(guild.client, user.userid);
+                    await assignVerifiedRole(client, user.userid);
                 } else {
-                    await removeVerifiedRole(guild.client, user.userid);
+                    await removeVerifiedRole(client, user.userid);
                 }
                 
                 updatedCount++;

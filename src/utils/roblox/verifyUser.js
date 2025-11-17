@@ -12,7 +12,6 @@ class VerificationService {
 
     async verifyUser(userid, guildid = null) {
         try {
-            // Normalize userid ke string untuk konsistensi
             const normalizedUserid = String(userid);
             
             const data = this.loadDatabase();
@@ -20,7 +19,6 @@ class VerificationService {
             
             if (!user) {
                 console.log(`❌ User ${normalizedUserid} not found in database (total users in DB: ${data.length})`);
-                // Tambahan debug: show first few userids
                 if (data.length > 0) {
                     const sampleIds = data.slice(0, 3).map(u => u.userid).join(', ');
                     console.log(`   Sample user IDs in DB: ${sampleIds}...`);
@@ -60,9 +58,18 @@ class VerificationService {
             const data = this.loadDatabase();
             let updated = false;
             let processed = 0;
+            let skipped = 0;
 
             for (const user of data) {
-                if (!user.roblox_uid) continue;
+                if (!user.roblox_uid) {
+                    skipped++;
+                    continue;
+                }
+
+                if (user.verified) {
+                    skipped++;
+                    continue;
+                }
 
                 await this.updateUserProfile(user);
                 
@@ -88,9 +95,9 @@ class VerificationService {
 
             if (updated) {
                 this.saveDatabase(data);
-                console.log(`💾 Database updated - ${processed} users processed`);
+                console.log(`💾 Database updated - ${processed} users checked, ${skipped} skipped`);
             } else {
-                console.log(`ℹ️ No verification changes - ${processed} users checked`);
+                console.log(`ℹ️ No verification changes - ${processed} users checked, ${skipped} skipped`);
             }
 
         } catch (err) {
@@ -104,24 +111,19 @@ class VerificationService {
         const guildConfig = this.loadGuildConfig(guildid);
         const patterns = this.generatePatterns(nickname, guildConfig);
         
-        // Check jika pattern match
         const patternMatch = patterns.some(pattern => 
             this.matchPattern(nickname, pattern)
         );
         
-        // Jika pattern match, return true
         if (patternMatch) return true;
         
-        // Jika tidak, check apakah nickname mengandung salah satu suffix (case-insensitive)
         if (guildConfig && Object.keys(guildConfig).length > 0) {
             const suffixes = Object.keys(guildConfig).filter(k => guildConfig[k]);
             const nicknameLower = nickname.toLowerCase();
             
-            // Check jika nickname contain any suffix
             return suffixes.some(suffix => nicknameLower.includes(suffix.toLowerCase()));
         }
         
-        // Default suffixes
         const nicknameLower = nickname.toLowerCase();
         return nicknameLower.includes('dv');
     }
@@ -153,7 +155,6 @@ class VerificationService {
             `${displayName}${suffix}`
         ];
         
-        // Add lowercase variant if different from original
         const lowerSuffix = suffix.toLowerCase();
         if (lowerSuffix !== suffix) {
             patterns.push(
@@ -166,7 +167,6 @@ class VerificationService {
             );
         }
         
-        // Add uppercase variant if different from original
         const upperSuffix = suffix.toUpperCase();
         if (upperSuffix !== suffix && upperSuffix !== lowerSuffix) {
             patterns.push(
@@ -202,7 +202,13 @@ class VerificationService {
     async updateUserProfile(user) {
         try {
             if (user.roblox_uid) {
-                const profile = await robloxAPI.getUserProfile(user.roblox_uid);
+                
+                const profilePromise = robloxAPI.getUserProfile(user.roblox_uid);
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Roblox API timeout')), 10000)
+                );
+
+                const profile = await Promise.race([profilePromise, timeoutPromise]);
                 if (profile?.displayName) {
                     user.roblox_nickname = profile.displayName;
                 }
