@@ -6,12 +6,12 @@ const path = require('path');
 
 module.exports = {
     name: Events.GuildMemberRemove,
-    async execute(member) {
+    async execute(member, client) {
         try {
             if (member.user.bot) return;
 
             const channelId = '985908885938376744';
-            const channel = member.guild.channels.cache.get(channelId);
+            const channel = client.channels.cache.get(channelId) || member.guild.channels.cache.get(channelId);
             
             if (!channel) {
                 console.log('Channel not found');

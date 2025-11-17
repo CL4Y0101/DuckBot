@@ -3,16 +3,16 @@ const { createCanvas, loadImage } = require('canvas');
 const GIFEncoder = require('gifencoder');
 const fs = require('fs');
 const path = require('path');
-const inviteTracker = require('../utils/inviteTracker');
+const inviteTracker = require('../../utils/inviteTracker');
 
 module.exports = {
     name: Events.GuildMemberAdd,
-    async execute(member) {
+    async execute(member, client) {
         try {
             if (member.user.bot) return;
 
             const channelId = '985908716496896051';
-            const channel = member.guild.channels.cache.get(channelId);
+            const channel = client.channels.cache.get(channelId) || member.guild.channels.cache.get(channelId);
 
             if (!channel) {
                 console.log('Channel not found');
@@ -47,7 +47,7 @@ module.exports = {
                 files: [welcomeBanner]
             });
 
-            await inviteTracker.trackMemberJoin(member.client, member);
+            await inviteTracker.trackMemberJoin(client, member);
 
         } catch (error) {
             console.error('❌ Error sending welcome message:', error);
