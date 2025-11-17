@@ -25,8 +25,6 @@ module.exports = {
         const description = interaction.fields.getTextInputValue('description_input');
         const link = interaction.fields.getTextInputValue('link_input');
 
-        console.log(`Embed modal submitted by ${interaction.user.tag} - sending to channel`);
-
         const targetChannelId = '1421698609086464021';
         let targetChannel = client.channels.cache.get(targetChannelId);
         if (!targetChannel) {
@@ -55,7 +53,6 @@ module.exports = {
 
         await targetChannel.send({ embeds: [embed], components: [row] });
         await interaction.reply({ content: '✅ Embed berhasil dikirim.', ephemeral: true });
-        console.log('Embed sent successfully');
       } catch (error) {
         console.error('Error handling embed_modal submit:', error);
         try {
@@ -174,10 +171,10 @@ module.exports = {
               backupDatabase().catch(err => console.error('Auto-backup failed:', err));
             }
           } else {
-            console.log(`Could not find Roblox UID for username: ${roblox}`);
+            console.log(`❌ Could not find Roblox UID for username: ${roblox}`);
           }
         } catch (error) {
-          console.error('Error updating Roblox UID:', error);
+          console.error('❌ Error updating Roblox UID:', error);
         }
       });
 

@@ -33,7 +33,7 @@ module.exports = {
         { body: commands },
       );
 
-      console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+      console.log(`✅ Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
       console.error('❌ Error refreshing commands:', error);
     }
@@ -76,7 +76,6 @@ module.exports = {
           status: randomStatus,
         });
 
-        console.log(`🎮 Presence updated → "${randomName}" [${randomStatus}]`);
       } catch (err) {
         console.error('❌ Error updating presence:', err);
       }
@@ -85,23 +84,19 @@ module.exports = {
     await updatePresence();
     setInterval(updatePresence, 60 * 1000);
 
-    console.log('🔄 Checking for missing Roblox UIDs...');
     await updateRobloxUIDs();
 
-    console.log('🔍 Checking for auto-verifications...');
     await updateVerifications();
 
     startScheduler(client);
     try {
       const sessionScheduler = require('../utils/disableButton/sessionScheduler');
       sessionScheduler.init(client);
-      console.log('✅ Session scheduler initialized');
     } catch (err) {
       console.error('❌ Failed to initialize session scheduler:', err);
     }
 
     setInterval(async () => {
-      console.log('💾 Auto-backup triggered...');
       await backupDatabase();
     }, 1000 * 60 * 30);
   },

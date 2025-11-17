@@ -32,7 +32,6 @@ function getRobloxUsernames() {
     .map(user => user.roblox_username)
     .filter(username => username && typeof username === 'string')
     .slice(0, 25);
-  console.log(`🎮 Found ${usernames.length} Roblox usernames`);
   return usernames;
 }
 
@@ -42,7 +41,6 @@ function getDiscordUsernames() {
     .map(user => user.username)
     .filter(username => username && typeof username === 'string')
     .slice(0, 25);
-  console.log(`💬 Found ${usernames.length} Discord usernames`);
   return usernames;
 }
 
@@ -234,7 +232,6 @@ module.exports = {
     try {
       if (subcommand === 'roblox_user') {
         const username = interaction.options.getString('username');
-        console.log(`🔍 Searching for Roblox user: ${username}`);
 
         const user = findUserByRobloxUsername(username);
         if (!user) {
@@ -302,7 +299,6 @@ module.exports = {
           return;
         }
 
-        console.log(`✅ Found user:`, user);
         const embed = await createRobloxEmbed(user);
         await interaction.editReply({
           embeds: [embed]
@@ -310,7 +306,6 @@ module.exports = {
 
       } else if (subcommand === 'discord_user') {
         const discordUser = interaction.options.getUser('user');
-        console.log(`🔍 Searching for Discord user: ${discordUser.tag}`);
 
         const user = findUserByDiscordUserid(discordUser.id);
         if (!user) {
@@ -363,7 +358,6 @@ module.exports = {
           return;
         }
 
-        console.log(`✅ Found user:`, user);
         const robloxEmbed = await createRobloxEmbed(user);
         const discordEmbed = await createDiscordEmbed(user, interaction);
         await interaction.editReply({
@@ -382,14 +376,12 @@ module.exports = {
   async autocomplete(interaction) {
     try {
       const focusedOption = interaction.options.getFocused(true);
-      console.log(`🔍 Autocomplete focused:`, focusedOption);
 
       if (focusedOption.name !== 'username') {
         return await interaction.respond([]);
       }
 
       const subcommand = interaction.options.getSubcommand();
-      console.log(`📝 Autocomplete subcommand: ${subcommand}`);
 
       let choices = [];
 
@@ -399,16 +391,12 @@ module.exports = {
         choices = getDiscordUsernames();
       }
 
-      console.log(`📋 Available choices: ${choices.length}`);
-
       const filtered = choices
         .filter(choice => {
           if (!choice || typeof choice !== 'string') return false;
           return choice.toLowerCase().includes(focusedOption.value.toLowerCase());
         })
         .slice(0, 25);
-
-      console.log(`✅ Filtered choices: ${filtered.length}`);
 
       if (filtered.length === 0) {
         filtered.push('No users found');

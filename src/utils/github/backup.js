@@ -37,8 +37,6 @@ function getFileHash(filePath) {
  * Backup via local git commit & push
  */
 async function localGitCommit() {
-  console.log('📦 Local Git mode detected. Attempting commit...');
-
   try {
     await executeCommand('git config user.name "DuckBot"');
     await executeCommand('git config user.email "bot@duckbot.com"');
@@ -65,7 +63,6 @@ async function localGitCommit() {
  * Backup via GitHub API (fallback)
  */
 async function apiBackup() {
-  console.log('🌐 Fallback mode: Using GitHub API backup...');
   const githubToken = process.env.GITHUB_TOKEN;
 
   if (!githubToken) {
@@ -102,7 +99,6 @@ async function apiBackup() {
       branch,
     });
 
-    console.log('✅ GitHub API backup successful!');
   } catch (error) {
     console.error('❌ Error during GitHub API backup:', error.message);
   }
@@ -113,18 +109,15 @@ async function apiBackup() {
  */
 async function backupDatabase() {
   if (!fs.existsSync(databasePath)) {
-    console.log('⚠️ Database file does not exist, skipping backup.');
     return;
   }
 
   const newHash = getFileHash(databasePath);
   if (newHash === lastHash) {
-    console.log('🔁 No file changes detected. Skipping backup.');
     return;
   }
   lastHash = newHash;
 
-  console.log('🧩 Database change detected, starting backup...');
   const isGitRepo = fs.existsSync(path.join(process.cwd(), '.git'));
 
   if (isGitRepo) {

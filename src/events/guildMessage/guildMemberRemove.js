@@ -18,8 +18,6 @@ module.exports = {
                 return;
             }
 
-            console.log(`🚀 Starting leave banner creation for ${member.user.tag}`);
-
             const processingMsg = await channel.send(`😢 ${member.user.username} has left the server...`);
 
             const leaveBanner = await createAnimatedLeaveBanner(member);
@@ -43,7 +41,6 @@ module.exports = {
                 files: [leaveBanner]
             });
 
-            console.log(`✅ Leave message sent for ${member.user.tag}`);
         } catch (error) {
             console.error('❌ Error sending leave message:', error);
             
@@ -62,12 +59,9 @@ async function createAnimatedLeaveBanner(member) {
             const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
             
             if (!fs.existsSync(bannerPath)) {
-                console.log('❌ Background GIF not found, using simple banner');
                 const simpleBanner = await createSimpleBanner(member, 'goodbye');
                 return resolve(simpleBanner);
             }
-
-            console.log('🔄 Processing GIF background...');
 
             const width = 800;
             const height = 300;
@@ -88,21 +82,16 @@ async function createAnimatedLeaveBanner(member) {
                     size: 128,
                     forceStatic: true 
                 });
-                console.log('🔄 Loading avatar...');
                 avatarImage = await loadImage(avatarUrl);
-                console.log('✅ Avatar loaded');
             } catch (error) {
                 console.log('❌ Error loading avatar:', error.message);
                 avatarImage = null;
             }
 
             try {
-                console.log('🔄 Loading background frame...');
                 const backgroundImage = await loadImage(bannerPath);
-                console.log('✅ Background frame loaded');
 
                 const totalFrames = 8;
-                console.log(`🔄 Creating ${totalFrames} frames...`);
 
                 for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                     ctx.clearRect(0, 0, width, height);
@@ -154,18 +143,14 @@ async function createAnimatedLeaveBanner(member) {
                     ctx.font = 'bold 18px Arial';
                     ctx.fillText(`Members Left: ${member.guild.memberCount}`, 550, 200);
 
-                    console.log(`📊 Frame ${frameIndex + 1}/${totalFrames} created`);
                     encoder.addFrame(ctx);
                 }
 
-                console.log('✅ All frames created, finishing GIF...');
                 encoder.finish();
 
                 const gifBuffer = encoder.out.getData();
-                console.log('✅ GIF buffer created');
 
                 const attachment = new AttachmentBuilder(gifBuffer, { name: 'leave_banner.gif' });
-                console.log('✅ Attachment created');
 
                 resolve(attachment);
 
@@ -184,8 +169,6 @@ async function createAnimatedLeaveBanner(member) {
 }
 
 async function createSimpleBanner(member, type) {
-    console.log(`🔄 Creating simple ${type} banner...`);
-    
     const canvas = createCanvas(600, 200);
     const ctx = canvas.getContext('2d');
 
@@ -256,6 +239,5 @@ async function createSimpleBanner(member, type) {
         name: type === 'leave' ? 'leave_banner.png' : 'leave_banner.png' 
     });
 
-    console.log('✅ Simple banner created');
     return attachment;
 }

@@ -7,7 +7,6 @@ async function createWelcomeBanner(member, bannerPath) {
   return new Promise(async (resolve, reject) => {
     try {
       if (!fs.existsSync(bannerPath)) {
-        console.log('Banner GIF not found, creating static banner');
         const staticBanner = await createStaticWelcomeBanner(member);
         return resolve(staticBanner);
       }
@@ -28,7 +27,6 @@ async function createLeaveBanner(member, bannerPath) {
   return new Promise(async (resolve, reject) => {
     try {
       if (!fs.existsSync(bannerPath)) {
-        console.log('Banner GIF not found, creating static banner');
         const staticBanner = await createStaticLeaveBanner(member);
         return resolve(staticBanner);
       }
@@ -72,7 +70,7 @@ async function createStaticWelcomeBanner(member) {
     const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128 }));
     ctx.drawImage(avatar, 90, 90, 120, 120);
   } catch (error) {
-    console.log('Error loading avatar:', error);
+    console.log('❌ Error loading avatar:', error);
   }
   ctx.restore();
 
@@ -128,7 +126,7 @@ async function createStaticLeaveBanner(member) {
     const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128 }));
     ctx.drawImage(avatar, 90, 90, 120, 120);
   } catch (error) {
-    console.log('Error loading avatar:', error);
+    console.log('❌ Error loading avatar:', error);
   }
   ctx.restore();
 

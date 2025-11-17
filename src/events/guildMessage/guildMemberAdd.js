@@ -18,8 +18,6 @@ module.exports = {
                 return;
             }
 
-            console.log(`🚀 Starting welcome banner creation for ${member.user.tag}`);
-
             const processingMsg = await channel.send(`🎊 Welcome ${member.user}`);
 
             const welcomeBanner = await createAnimatedWelcomeBanner(member);
@@ -47,8 +45,6 @@ module.exports = {
                 embeds: [welcomeEmbed],
                 files: [welcomeBanner]
             });
-
-            console.log(`✅ Welcome message sent for ${member.user.tag}`);
         } catch (error) {
             console.error('❌ Error sending welcome message:', error);
             
@@ -72,8 +68,6 @@ async function createAnimatedWelcomeBanner(member) {
                 return resolve(simpleBanner);
             }
 
-            console.log('🔄 Processing GIF background...');
-
             const width = 800;
             const height = 300;
             
@@ -93,21 +87,16 @@ async function createAnimatedWelcomeBanner(member) {
                     size: 128,
                     forceStatic: true 
                 });
-                console.log('🔄 Loading avatar...');
                 avatarImage = await loadImage(avatarUrl);
-                console.log('✅ Avatar loaded');
             } catch (error) {
                 console.log('❌ Error loading avatar:', error.message);
                 avatarImage = null;
             }
 
             try {
-                console.log('🔄 Loading background frame...');
                 const backgroundImage = await loadImage(bannerPath);
-                console.log('✅ Background frame loaded');
 
                 const totalFrames = 8;
-                console.log(`🔄 Creating ${totalFrames} frames...`);
 
                 for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                     ctx.clearRect(0, 0, width, height);
@@ -157,19 +146,14 @@ async function createAnimatedWelcomeBanner(member) {
                     ctx.font = 'bold 18px Arial';
                     ctx.fillText(`Member #${member.guild.memberCount}`, 550, 200);
 
-                    console.log(`📊 Frame ${frameIndex + 1}/${totalFrames} created`);
-
                     encoder.addFrame(ctx);
                 }
 
-                console.log('✅ All frames created, finishing GIF...');
                 encoder.finish();
 
                 const gifBuffer = encoder.out.getData();
-                console.log('✅ GIF buffer created');
 
                 const attachment = new AttachmentBuilder(gifBuffer, { name: 'welcome_banner.gif' });
-                console.log('✅ Attachment created');
 
                 resolve(attachment);
 
@@ -188,8 +172,6 @@ async function createAnimatedWelcomeBanner(member) {
 }
 
 async function createSimpleBanner(member, type) {
-    console.log(`🔄 Creating simple ${type} banner...`);
-    
     const canvas = createCanvas(600, 200);
     const ctx = canvas.getContext('2d');
 
@@ -260,6 +242,5 @@ async function createSimpleBanner(member, type) {
         name: type === 'welcome' ? 'welcome_banner.png' : 'leave_banner.png' 
     });
 
-    console.log('✅ Simple banner created');
     return attachment;
 }
