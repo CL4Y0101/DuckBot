@@ -2,27 +2,58 @@ const fs = require('fs');
 const path = require('path');
 const verificationService = require('./verifyUser');
 const databasePath = path.join(__dirname, '../../database/username.json');
+const guildDatabasePath = path.join(__dirname, '../../database/guild.json');
 
 if (!verificationService || typeof verificationService.verifyUser !== 'function') {
     console.error('❌ Critical Error: verificationService tidak ter-load dengan benar');
     process.exit(1);
 }
 
-const VERIFIED_ROLE_ID = '1405032359589449800';
-const REGISTERED_ROLE_ID = '996367985759486042';
+// Function to get role IDs from guild config
+function getRoleIds(guildId) {
+    try {
+        if (!fs.existsSync(guildDatabasePath)) {
+            return {
+                verified: '1405032359589449800',
+                registered: '996367985759486042'
+            };
+        }
+        const guildData = JSON.parse(fs.readFileSync(guildDatabasePath, 'utf8'));
+        const guildConfig = guildData[guildId];
+        if (guildConfig && guildConfig.Roles) {
+            return {
+                verified: guildConfig.Roles.verified || '1405032359589449800',
+                registered: guildConfig.Roles.registered || '996367985759486042'
+            };
+        }
+        return {
+            verified: '1405032359589449800',
+            registered: '996367985759486042'
+        };
+    } catch (error) {
+        console.error('❌ Error loading guild config:', error);
+        return {
+            verified: '1405032359589449800',
+            registered: '996367985759486042'
+        };
+    }
+}
 
 const loggedRegistered = new Set();
 const loggedVerified = new Set();
 const loggedNoVerified = new Set();
 
-async function assignVerifiedRole(client, userid) {
+async function assignVerifiedRole(client, userid, guildId = null) {
     try {
         if (!client || !client.isReady()) {
             return false;
         }
 
-        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        const guild = client.guilds.cache.get(guildId || process.env.GUILD_ID);
         if (!guild) return false;
+
+        const roleIds = getRoleIds(guild.id);
+        const VERIFIED_ROLE_ID = roleIds.verified;
 
         const member = await guild.members.fetch(userid).catch(() => null);
         if (!member) return false;
@@ -45,22 +76,25 @@ async function assignVerifiedRole(client, userid) {
     }
 }
 
-async function assignRegisteredRole(client, userid) {
+async function assignRegisteredRole(client, userid, guildId = null) {
     try {
-        const guild = client.guilds.cache.first();
+        const guild = client.guilds.cache.get(guildId || process.env.GUILD_ID);
         if (!guild) return console.log('❌ Guild not found'), false;
+
+        const roleIds = getRoleIds(guild.id);
+        const UNVERIFIED_ROLE_ID = roleIds.registered;
 
         const member = await guild.members.fetch(userid).catch(() => null);
         // if (!member) return console.log(`❌ Member ${userid} not found`), false;
 
-        if (member.roles.cache.has(REGISTERED_ROLE_ID)) {
+        if (member.roles.cache.has(UNVERIFIED_ROLE_ID)) {
             if (!loggedRegistered.has(member.user.username)) {
                 loggedRegistered.add(member.user.username);
             }
             return true;
         }
 
-        await member.roles.add(REGISTERED_ROLE_ID);
+        await member.roles.add(UNVERIFIED_ROLE_ID);
         console.log(`✅ Assigned registered role to ${member.user.username}`);
         return true;
     } catch (e) {
@@ -69,14 +103,17 @@ async function assignRegisteredRole(client, userid) {
     }
 }
 
-async function removeVerifiedRole(client, userid) {
+async function removeVerifiedRole(client, userid, guildId = null) {
     try {
         if (!client || !client.isReady()) {
             return false;
         }
 
-        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        const guild = client.guilds.cache.get(guildId || process.env.GUILD_ID);
         if (!guild) return false;
+
+        const roleIds = getRoleIds(guild.id);
+        const VERIFIED_ROLE_ID = roleIds.verified;
 
         const member = await guild.members.fetch(userid).catch(() => null);
         if (!member) return false;
@@ -192,4 +229,4 @@ async function updateRoles(client) {
         console.error('❌ Error in role update process:', error);
     }
 }
-module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles, VERIFIED_ROLE_ID, REGISTERED_ROLE_ID };
+module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles };
