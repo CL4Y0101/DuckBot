@@ -4,6 +4,7 @@ const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
 const verificationService = require('../utils/roblox/verifyUser'); // Updated import
 const { startScheduler } = require('../utils/roblox/scheduler');
 const { backupDatabase } = require('../utils/github/backup');
+const inviteTracker = require('../utils/inviteTracker');
 const fs = require('fs');
 const path = require('path');
 
@@ -133,6 +134,10 @@ module.exports = {
       console.log('💾 Initializing backup system...');
       await this.initializeBackupSystem();
       console.log('✅ Backup system initialized');
+
+      console.log('📨 Initializing invite tracking...');
+      await inviteTracker.initializeGuild(client, process.env.GUILD_ID);
+      console.log('✅ Invite tracking initialized');
 
     } catch (error) {
       console.error('❌ Error initializing services:', error);

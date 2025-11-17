@@ -3,6 +3,7 @@ const { createCanvas, loadImage } = require('canvas');
 const GIFEncoder = require('gifencoder');
 const fs = require('fs');
 const path = require('path');
+const inviteTracker = require('../utils/inviteTracker');
 
 module.exports = {
     name: Events.GuildMemberAdd,
@@ -45,9 +46,12 @@ module.exports = {
                 embeds: [welcomeEmbed],
                 files: [welcomeBanner]
             });
+
+            await inviteTracker.trackMemberJoin(member.client, member);
+
         } catch (error) {
             console.error('❌ Error sending welcome message:', error);
-            
+
             const channelId = '985908716496896051';
             const channel = member.guild.channels.cache.get(channelId);
             if (channel) {

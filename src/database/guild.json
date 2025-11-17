@@ -6,7 +6,11 @@
                 "unverified": "985901036063486514"
             },
             "DV": true,
-            "dv": true
+            "dv": true,
+            "tracking": {
+                "enabled": true,
+                "channel": "1012734651489595476"
+            }
         }
     }
 ]
