@@ -17,7 +17,7 @@ module.exports = {
                 return;
             }
 
-            const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
+            const bannerPath = path.join(__dirname, '../../img/banner_discord.gif');
             const leaveBanner = await createLeaveBanner(member, bannerPath);
 
             const leaveEmbed = new EmbedBuilder()

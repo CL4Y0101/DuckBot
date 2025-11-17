@@ -23,7 +23,7 @@ module.exports = {
                 return;
             }
 
-            const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
+            const bannerPath = path.join(__dirname, '../../img/banner_discord.gif');
             const welcomeBanner = await createWelcomeBanner(member, bannerPath);
 
             const welcomeEmbed = new EmbedBuilder()
