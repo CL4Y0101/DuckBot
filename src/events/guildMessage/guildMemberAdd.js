@@ -19,8 +19,6 @@ module.exports = {
                 return;
             }
 
-            const processingMsg = await channel.send(`🎊 Welcome ${member.user}`);
-
             const welcomeBanner = await createAnimatedWelcomeBanner(member);
 
             const welcomeEmbed = new EmbedBuilder()
@@ -41,7 +39,7 @@ module.exports = {
                 .setThumbnail(member.user.displayAvatarURL({ format: 'png', size: 128 }))
                 .setTimestamp();
 
-            await processingMsg.edit({
+            await channel.send({
                 content: `🎊 Welcome ${member.user}!`,
                 embeds: [welcomeEmbed],
                 files: [welcomeBanner]

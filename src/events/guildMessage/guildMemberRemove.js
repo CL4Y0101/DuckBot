@@ -18,8 +18,6 @@ module.exports = {
                 return;
             }
 
-            const processingMsg = await channel.send(`😢 ${member.user.username} has left the server...`);
-
             const leaveBanner = await createAnimatedLeaveBanner(member);
 
             const leaveEmbed = new EmbedBuilder()
@@ -35,7 +33,7 @@ module.exports = {
                 .setThumbnail(member.user.displayAvatarURL({ format: 'png', size: 128 }))
                 .setTimestamp();
 
-            await processingMsg.edit({
+            await channel.send({
                 content: `😢 ${member.user.username} has left the server...`,
                 embeds: [leaveEmbed],
                 files: [leaveBanner]

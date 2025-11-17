@@ -186,6 +186,23 @@ class InviteTracker {
             }
 
             const inviter = inviterId ? await client.users.fetch(inviterId).catch(() => null) : null;
+
+            let computedTotalInvites = 0;
+            let computedSuccessfulInvites = 0;
+            const guildCache = this.inviteCache.get(member.guild.id);
+            if (guildCache && guildCache.invites) {
+                for (const [code, inv] of guildCache.invites) {
+                    try {
+                        const invObj = inv || {};
+                        const invUses = Number(invObj.uses) || 0;
+                        if (String(invObj.inviter) === String(inviterId)) {
+                            computedTotalInvites += invUses;
+                        }
+                    } catch (e) {
+                    }
+                }
+            }
+
             const userStats = this.inviteCache.get(member.guild.id)?.users?.get(inviterId);
 
             const embed = {
@@ -209,7 +226,7 @@ class InviteTracker {
                     },
                     {
                         name: '📊 Total Invites',
-                        value: userStats ? `${userStats.successfulInvites}` : '0',
+                        value: `${computedTotalInvites}`,
                         inline: true
                     },
                     {
