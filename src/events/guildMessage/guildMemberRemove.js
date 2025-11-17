@@ -9,7 +9,7 @@ module.exports = {
         try {
             if (member.user.bot) return;
 
-            const channelId = '1242479609054363739';
+            const channelId = '985908885938376744';
             const channel = member.guild.channels.cache.get(channelId);
             
             if (!channel) {
