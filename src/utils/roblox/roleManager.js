@@ -1,9 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+const verificationService = require('./verifyUser');
 const databasePath = path.join(__dirname, '../../database/username.json');
 
-const VERIFIED_ROLE_ID = '1405032359589449800'; // Ganti dengan role ID Discord
-const REGISTERED_ROLE_ID = '996367985759486042'; // Role untuk user yang sudah terdaftar/verifikasi
+if (!verificationService || typeof verificationService.verifyUser !== 'function') {
+    console.error('❌ Critical Error: verificationService tidak ter-load dengan benar');
+    process.exit(1);
+}
+
+const VERIFIED_ROLE_ID = '1405032359589449800';
+const REGISTERED_ROLE_ID = '996367985759486042';
 
 const loggedRegistered = new Set();
 const loggedVerified = new Set();
@@ -84,22 +90,73 @@ async function removeVerifiedRole(client, userid) {
 
 async function updateRoles(client) {
     try {
-        console.log('🔄 Syncing roles with verification status...');
-        const data = JSON.parse(fs.readFileSync(databasePath, 'utf8') || '[]');
-
-        for (const user of data) {
-            await assignRegisteredRole(client, user.userid);
-
-            if (user.verified) await assignVerifiedRole(client, user.userid);
-            else await removeVerifiedRole(client, user.userid);
-
-            await new Promise(r => setTimeout(r, 1000));
+        console.log('🎭 Starting role update process...');
+        
+        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        if (!guild) {
+            console.log('❌ Guild not found for role updates');
+            return;
         }
 
-        console.log('✅ Role sync completed');
-    } catch (e) {
-        console.error('❌ Error updating roles:', e);
+        const fs = require('fs');
+        
+        if (!fs.existsSync(databasePath)) {
+            console.log('❌ Database file not found for role updates');
+            return;
+        }
+
+        const fileContent = fs.readFileSync(databasePath, 'utf8');
+        if (!fileContent.trim()) {
+            console.log('ℹ️ No users in database for role updates');
+            return;
+        }
+
+        const users = JSON.parse(fileContent);
+        let updatedCount = 0;
+        let errorCount = 0;
+
+        const normalizedUsers = users.map(user => ({
+            ...user,
+            userid: String(user.userid)
+        }));
+
+        for (const user of normalizedUsers) {
+            try {
+                if (!user.userid) {
+                    console.warn(`⚠️ Skipping user with no userid: ${user.username}`);
+                    continue;
+                }
+
+                const member = await guild.members.fetch(user.userid).catch(() => null);
+                if (!member) {
+                    console.log(`ℹ️ Member ${user.userid} (${user.username}) not in guild`);
+                    continue;
+                }
+
+                if (!verificationService || typeof verificationService.verifyUser !== 'function') {
+                    throw new Error('verificationService.verifyUser is not a function');
+                }
+
+                const isVerified = await verificationService.verifyUser(user.userid, guild.id);
+                
+                if (isVerified) {
+                    await assignVerifiedRole(guild.client, user.userid);
+                } else {
+                    await removeVerifiedRole(guild.client, user.userid);
+                }
+                
+                updatedCount++;
+                
+            } catch (error) {
+                console.error(`❌ Error updating roles for user ${user.userid} (${user.username}):`, error.message);
+                errorCount++;
+            }
+        }
+
+        console.log(`✅ Role update completed: ${updatedCount} users processed, ${errorCount} errors`);
+
+    } catch (error) {
+        console.error('❌ Error in role update process:', error);
     }
 }
-
 module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles, VERIFIED_ROLE_ID, REGISTERED_ROLE_ID };
