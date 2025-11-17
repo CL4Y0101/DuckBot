@@ -20,7 +20,7 @@ module.exports = {
 
             console.log(`🚀 Starting welcome banner creation for ${member.user.tag}`);
 
-            const processingMsg = await channel.send('🔄 Creating welcome banner...');
+            const processingMsg = await channel.send(`🎊 Welcome ${member.user}`);
 
             const welcomeBanner = await createAnimatedWelcomeBanner(member);
 

@@ -20,7 +20,7 @@ module.exports = {
 
             console.log(`🚀 Starting leave banner creation for ${member.user.tag}`);
 
-            const processingMsg = await channel.send('🔄 Creating goodbye banner...');
+            const processingMsg = await channel.send(`😢 ${member.user.username} has left the server...`);
 
             const leaveBanner = await createAnimatedLeaveBanner(member);
 
