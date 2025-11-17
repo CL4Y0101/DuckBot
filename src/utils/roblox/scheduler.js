@@ -40,17 +40,23 @@ async function runVerificationCheck() {
     if (!isRunning) return;
 
     const startTime = Date.now();
-    const MAX_TIMEOUT = 4 * 60 * 1000; // 4 minutes max (Heroku has 30s dyno timeout for workers)
+    const MAX_TIMEOUT = 4 * 60 * 1000; // 4 minutes max
     
     try {
         console.log('🔄 Running scheduled verification check...');
 
-        
+        if (!client || !client.isReady()) {
+            console.warn('⚠️ Discord client not ready, skipping verification check');
+            return;
+        }
+
         const verificationPromise = (async () => {
             await verificationService.updateVerifications(process.env.GUILD_ID);
 
-            if (client) {
+            if (client && client.isReady()) {
                 await updateRoles(client);
+            } else {
+                console.warn('⚠️ Discord client disconnected during verification, skipping role update');
             }
         })();
 

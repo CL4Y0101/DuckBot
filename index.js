@@ -22,4 +22,20 @@ client.commands = new Collection();
 loadCommands(client, './src/commands');
 loadEvents(client, './src/events');
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+});
+
+client.on('error', error => {
+  console.error('❌ Discord Client Error:', error);
+});
+
+client.on('warn', warning => {
+  console.warn('⚠️ Discord Client Warning:', warning);
+});
+
 client.login(process.env.TOKEN);

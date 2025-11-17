@@ -17,11 +17,15 @@ const loggedNoVerified = new Set();
 
 async function assignVerifiedRole(client, userid) {
     try {
-        const guild = client.guilds.cache.first();
-        if (!guild) return console.log('❌ Guild not found'), false;
+        if (!client || !client.isReady()) {
+            return false;
+        }
+
+        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        if (!guild) return false;
 
         const member = await guild.members.fetch(userid).catch(() => null);
-        // if (!member) return console.log(`❌ Member ${userid} not found`), false;
+        if (!member) return false;
 
         if (member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedVerified.has(member.user.username)) {
@@ -30,7 +34,9 @@ async function assignVerifiedRole(client, userid) {
             return true;
         }
 
-        await member.roles.add(VERIFIED_ROLE_ID);
+        await member.roles.add(VERIFIED_ROLE_ID).catch(err => {
+            console.error(`⚠️ Failed to add role to ${member.user.username}:`, err.message);
+        });
         console.log(`✅ Assigned verified role to ${member.user.username}`);
         return true;
     } catch (e) {
@@ -65,11 +71,15 @@ async function assignRegisteredRole(client, userid) {
 
 async function removeVerifiedRole(client, userid) {
     try {
-        const guild = client.guilds.cache.first();
-        if (!guild) return console.log('❌ Guild not found'), false;
+        if (!client || !client.isReady()) {
+            return false;
+        }
+
+        const guild = client.guilds.cache.get(process.env.GUILD_ID);
+        if (!guild) return false;
 
         const member = await guild.members.fetch(userid).catch(() => null);
-        // if (!member) return console.log(`❌ Member ${userid} not found`), false;
+        if (!member) return false;
 
         if (!member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedNoVerified.has(member.user.username)) {
@@ -79,7 +89,9 @@ async function removeVerifiedRole(client, userid) {
             return true;
         }
 
-        await member.roles.remove(VERIFIED_ROLE_ID);
+        await member.roles.remove(VERIFIED_ROLE_ID).catch(err => {
+            console.error(`⚠️ Failed to remove role from ${member.user.username}:`, err.message);
+        });
         console.log(`❌ Removed verified role from ${member.user.username}`);
         return true;
     } catch (e) {
