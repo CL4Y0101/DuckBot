@@ -108,14 +108,6 @@ async function apiBackup() {
  * Fungsi utama backup database
  */
 async function backupDatabase() {
-  if (process.env.SKIP_GITHUB_BACKUP === 'true') {
-    console.log('⚠️ SKIP_GITHUB_BACKUP is set - skipping GitHub backup to avoid triggering auto-deploy.');
-    return;
-  }
-  if (process.env.DYNO) {
-    console.log('⚠️ Detected Heroku dyno - skipping GitHub backup to prevent auto-deploy restarts.');
-    return;
-  }
 
   if (!fs.existsSync(databasePath)) {
     return;
