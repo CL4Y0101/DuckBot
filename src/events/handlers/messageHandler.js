@@ -167,6 +167,14 @@ module.exports = {
 
       const setMessage = (afkConfig.setAFKMessage || '✅ You are now AFK: {reason}').replace('{reason}', reason);
       await message.reply(setMessage);
+    } else if (commandName === 'welcome') {
+      const { execute } = require('../guildMessage/guildMemberAdd');
+      await execute(message.member);
+    } else if (commandName === 'leave') {
+      const { execute } = require('../guildMessage/guildMemberRemove');
+      await execute(message.member);
     }
   },
 };
+
+
