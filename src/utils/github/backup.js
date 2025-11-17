@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const util = require('util');
-const { Octokit } = require('@octokit/rest');
+
 const crypto = require('crypto');
 
 const execPromise = util.promisify(exec);
@@ -74,6 +74,7 @@ async function apiBackup() {
   }
 
   try {
+    const { Octokit } = await import('@octokit/rest');
     const octokit = new Octokit({ auth: githubToken });
     const branch = 'main';
     const fileContent = fs.readFileSync(databasePath, 'utf8');
