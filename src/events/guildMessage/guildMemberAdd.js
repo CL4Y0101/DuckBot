@@ -20,25 +20,28 @@ module.exports = {
 
             console.log(`🚀 Starting welcome banner creation for ${member.user.tag}`);
 
-            // Kirim pesan "processing" dulu
             const processingMsg = await channel.send('🔄 Creating welcome banner...');
 
             const welcomeBanner = await createAnimatedWelcomeBanner(member);
 
             const welcomeEmbed = new EmbedBuilder()
                 .setColor('#00FF00')
-                .setTitle(`🎉 Welcome to ${member.guild.name}!`)
-                .setDescription(`Hello ${member.user.username}! Welcome to our server!\n\nWe're glad to have you here! 🥳`)
+                .setTitle(`\`🎉\` Welcome to ${member.guild.name}!`)
+                .setDescription(`Hello ${member.user.username}! 🎉 Welcome to ${member.guild.name}!\n\nWe're thrilled to have you join our amazing community! Here you'll find fun events, great people, and lots of exciting activities.\n\nMake sure to check out our channels and get verified to unlock all features! 🥳`)
                 .addFields(
-                    { name: '📅 Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
-                    { name: '👥 Member Count', value: `#${member.guild.memberCount}`, inline: true },
-                    { name: '📝 Server Rules', value: 'Please read the rules channel!', inline: true }
+                    { name: '\`📅\` Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+                    { name: '\`👥\` Member Count', value: `#${member.guild.memberCount}`, inline: true },
+                    { name: '\`📝\` Server Rules', value: 'Please read the rules channel!', inline: true },
+                    { name: '\`📢\` Announcements', value: '<#985916540178280449>', inline: true },
+                    { name: '\`📋\` Rules', value: '<#985916584319135804>', inline: true },
+                    { name: '\`🎊\` Events', value: '<#986252524774367322>', inline: true },
+                    { name: '\`🛒\` Merchandise', value: '<#1029746217862836275>', inline: true },
+                    { name: '\`✅\` Verification', value: '<#1022687833686810664>\n\n*Verify to get Duck Void role and become a main member!*', inline: false }
                 )
                 .setImage('attachment://welcome_banner.gif')
                 .setThumbnail(member.user.displayAvatarURL({ format: 'png', size: 128 }))
                 .setTimestamp();
 
-            // Edit pesan processing menjadi hasil akhir
             await processingMsg.edit({
                 content: `🎊 Welcome ${member.user}!`,
                 embeds: [welcomeEmbed],
@@ -49,7 +52,6 @@ module.exports = {
         } catch (error) {
             console.error('❌ Error sending welcome message:', error);
             
-            // Fallback ke simple message jika error
             const channelId = '985908716496896051';
             const channel = member.guild.channels.cache.get(channelId);
             if (channel) {
@@ -81,15 +83,14 @@ async function createAnimatedWelcomeBanner(member) {
 
             encoder.start();
             encoder.setRepeat(0);
-            encoder.setDelay(150); // Lebih lambat untuk performance
-            encoder.setQuality(5); // Quality lebih rendah untuk performance
+            encoder.setDelay(150);
+            encoder.setQuality(5);
 
-            // Load avatar terlebih dahulu
             let avatarImage;
             try {
                 const avatarUrl = member.user.displayAvatarURL({ 
-                    extension: 'jpg', // Gunakan JPG untuk performance
-                    size: 128, // Size lebih kecil
+                    extension: 'jpg',
+                    size: 128,
                     forceStatic: true 
                 });
                 console.log('🔄 Loading avatar...');
@@ -101,30 +102,24 @@ async function createAnimatedWelcomeBanner(member) {
             }
 
             try {
-                // Gunakan approach yang lebih sederhana - hanya frame pertama
                 console.log('🔄 Loading background frame...');
                 const backgroundImage = await loadImage(bannerPath);
                 console.log('✅ Background frame loaded');
 
-                // Hanya buat 8 frame untuk performance (bukan 120 frame)
                 const totalFrames = 8;
                 console.log(`🔄 Creating ${totalFrames} frames...`);
 
                 for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                     ctx.clearRect(0, 0, width, height);
 
-                    // Draw background (frame pertama saja untuk performance)
                     ctx.drawImage(backgroundImage, 0, 0, width, height);
 
-                    // Overlay untuk readability
                     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                     ctx.fillRect(0, 0, width, height);
 
-                    // Avatar dengan border animasi
                     if (avatarImage) {
                         ctx.save();
                         
-                        // Border animasi sederhana
                         const borderHue = (frameIndex * 45) % 360;
                         ctx.strokeStyle = `hsl(${borderHue}, 100%, 65%)`;
                         ctx.lineWidth = 4;
@@ -132,7 +127,6 @@ async function createAnimatedWelcomeBanner(member) {
                         ctx.arc(150, 150, 60, 0, Math.PI * 2);
                         ctx.stroke();
 
-                        // Draw avatar
                         ctx.beginPath();
                         ctx.arc(150, 150, 58, 0, Math.PI * 2);
                         ctx.closePath();
@@ -140,35 +134,29 @@ async function createAnimatedWelcomeBanner(member) {
                         ctx.drawImage(avatarImage, 92, 92, 116, 116);
                         ctx.restore();
                     }
-
-                    // Text dengan efek sederhana
+                    
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 32px Arial';
                     ctx.textAlign = 'center';
                     
-                    // "WELCOME" dengan efek bounce sederhana
                     const bounceOffset = Math.sin(frameIndex * 0.8) * 3;
                     ctx.fillText('🎉 WELCOME 🎉', 550, 100 + bounceOffset);
 
-                    // Username
                     ctx.font = 'bold 24px Arial';
                     const username = member.user.username.length > 12 
                         ? member.user.username.substring(0, 12) + '...' 
                         : member.user.username;
                     ctx.fillText(username, 550, 140);
 
-                    // Server name
                     ctx.font = '20px Arial';
                     const serverName = member.guild.name.length > 15
                         ? member.guild.name.substring(0, 15) + '...'
                         : member.guild.name;
                     ctx.fillText(`to ${serverName}`, 550, 170);
 
-                    // Member count
                     ctx.font = 'bold 18px Arial';
                     ctx.fillText(`Member #${member.guild.memberCount}`, 550, 200);
 
-                    // Progress indicator
                     console.log(`📊 Frame ${frameIndex + 1}/${totalFrames} created`);
 
                     encoder.addFrame(ctx);
@@ -187,7 +175,6 @@ async function createAnimatedWelcomeBanner(member) {
 
             } catch (error) {
                 console.log('❌ Error in GIF processing:', error.message);
-                // Fallback ke banner sederhana
                 const simpleBanner = await createSimpleBanner(member, 'welcome');
                 resolve(simpleBanner);
             }
@@ -206,7 +193,6 @@ async function createSimpleBanner(member, type) {
     const canvas = createCanvas(600, 200);
     const ctx = canvas.getContext('2d');
 
-    // Background sederhana
     const gradient = ctx.createLinearGradient(0, 0, 600, 200);
     if (type === 'welcome') {
         gradient.addColorStop(0, '#667eea');
@@ -218,7 +204,6 @@ async function createSimpleBanner(member, type) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 600, 200);
 
-    // Load avatar kecil
     try {
         const avatarUrl = member.user.displayAvatarURL({ 
             extension: 'jpg', 
@@ -227,7 +212,6 @@ async function createSimpleBanner(member, type) {
         });
         const avatar = await loadImage(avatarUrl);
         
-        // Draw avatar circle
         ctx.save();
         ctx.beginPath();
         ctx.arc(80, 100, 30, 0, Math.PI * 2);
@@ -236,7 +220,6 @@ async function createSimpleBanner(member, type) {
         ctx.drawImage(avatar, 50, 70, 60, 60);
         ctx.restore();
 
-        // Avatar border
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -246,7 +229,6 @@ async function createSimpleBanner(member, type) {
         console.log('❌ Error loading avatar for simple banner:', error.message);
     }
 
-    // Text sederhana
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';

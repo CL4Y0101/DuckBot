@@ -20,25 +20,23 @@ module.exports = {
 
             console.log(`🚀 Starting leave banner creation for ${member.user.tag}`);
 
-            // Kirim pesan processing dulu
             const processingMsg = await channel.send('🔄 Creating goodbye banner...');
 
             const leaveBanner = await createAnimatedLeaveBanner(member);
 
             const leaveEmbed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(`😢 Goodbye from ${member.guild.name}!`)
+                .setTitle(`\`😢\` Goodbye from ${member.guild.name}!`)
                 .setDescription(`**${member.user.username}** has left the server.\n\nWe're sad to see you go! 😔`)
                 .addFields(
-                    { name: '📅 Joined Server', value: member.joinedAt ? `<t:${Math.floor(member.joinedAt.getTime() / 1000)}:R>` : 'Unknown', inline: true },
-                    { name: '👥 Members Left', value: `#${member.guild.memberCount}`, inline: true },
-                    { name: '📝 Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true }
+                    { name: '\`📅\` Joined Server', value: member.joinedAt ? `<t:${Math.floor(member.joinedAt.getTime() / 1000)}:R>` : 'Unknown', inline: true },
+                    { name: '\`👥\` Members Left', value: `#${member.guild.memberCount}`, inline: true },
+                    { name: '\`📝\` Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true }
                 )
                 .setImage('attachment://leave_banner.gif')
                 .setThumbnail(member.user.displayAvatarURL({ format: 'png', size: 128 }))
                 .setTimestamp();
 
-            // Edit pesan processing menjadi hasil akhir
             await processingMsg.edit({
                 content: `😢 ${member.user.username} has left the server...`,
                 embeds: [leaveEmbed],
@@ -49,7 +47,6 @@ module.exports = {
         } catch (error) {
             console.error('❌ Error sending leave message:', error);
             
-            // Fallback ke simple message jika error
             const channelId = '985908885938376744';
             const channel = member.guild.channels.cache.get(channelId);
             if (channel) {
@@ -84,7 +81,6 @@ async function createAnimatedLeaveBanner(member) {
             encoder.setDelay(150);
             encoder.setQuality(5);
 
-            // Load avatar
             let avatarImage;
             try {
                 const avatarUrl = member.user.displayAvatarURL({ 
@@ -101,31 +97,25 @@ async function createAnimatedLeaveBanner(member) {
             }
 
             try {
-                // Gunakan frame pertama saja untuk performance
                 console.log('🔄 Loading background frame...');
                 const backgroundImage = await loadImage(bannerPath);
                 console.log('✅ Background frame loaded');
 
-                // Hanya 8 frame untuk performance
                 const totalFrames = 8;
                 console.log(`🔄 Creating ${totalFrames} frames...`);
 
                 for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                     ctx.clearRect(0, 0, width, height);
 
-                    // Draw background
                     ctx.drawImage(backgroundImage, 0, 0, width, height);
 
-                    // Overlay untuk goodbye
                     const overlayAlpha = 0.5 + Math.sin(frameIndex * 0.5) * 0.1;
                     ctx.fillStyle = `rgba(0, 0, 0, ${overlayAlpha})`;
                     ctx.fillRect(0, 0, width, height);
 
-                    // Avatar dengan efek goodbye
                     if (avatarImage) {
                         ctx.save();
                         
-                        // Border dengan efek fade
                         const borderAlpha = 0.6 + Math.sin(frameIndex * 0.7) * 0.2;
                         ctx.strokeStyle = `rgba(255, 255, 255, ${borderAlpha})`;
                         ctx.lineWidth = 3;
@@ -133,7 +123,6 @@ async function createAnimatedLeaveBanner(member) {
                         ctx.arc(150, 150, 58, 0, Math.PI * 2);
                         ctx.stroke();
 
-                        // Draw avatar dengan sedikit transparency
                         ctx.globalAlpha = 0.8;
                         ctx.beginPath();
                         ctx.arc(150, 150, 56, 0, Math.PI * 2);
@@ -144,7 +133,6 @@ async function createAnimatedLeaveBanner(member) {
                         ctx.globalAlpha = 1.0;
                     }
 
-                    // Text goodbye
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 32px Arial';
                     ctx.textAlign = 'center';
@@ -201,7 +189,6 @@ async function createSimpleBanner(member, type) {
     const canvas = createCanvas(600, 200);
     const ctx = canvas.getContext('2d');
 
-    // Background sederhana
     const gradient = ctx.createLinearGradient(0, 0, 600, 200);
     if (type === 'leave') {
         gradient.addColorStop(0, '#667eea');
@@ -213,7 +200,6 @@ async function createSimpleBanner(member, type) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 600, 200);
 
-    // Load avatar kecil
     try {
         const avatarUrl = member.user.displayAvatarURL({ 
             extension: 'jpg', 
@@ -222,7 +208,6 @@ async function createSimpleBanner(member, type) {
         });
         const avatar = await loadImage(avatarUrl);
         
-        // Draw avatar circle
         ctx.save();
         ctx.beginPath();
         ctx.arc(80, 100, 30, 0, Math.PI * 2);
@@ -231,7 +216,6 @@ async function createSimpleBanner(member, type) {
         ctx.drawImage(avatar, 50, 70, 60, 60);
         ctx.restore();
 
-        // Avatar border
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -241,7 +225,6 @@ async function createSimpleBanner(member, type) {
         console.log('❌ Error loading avatar for simple banner:', error.message);
     }
 
-    // Text sederhana
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';
