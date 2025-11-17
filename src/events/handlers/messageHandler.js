@@ -44,7 +44,7 @@ function loadConfig() {
     return config;
   } catch (error) {
     console.error('Error loading config:', error);
-    return { afk: { prefix: '!' } };
+    return { settings: { prefix: '!' } };
   }
 }
 
@@ -54,7 +54,7 @@ module.exports = {
     if (message.author.bot) return;
 
     const config = loadConfig();
-    const afkConfig = config.afk || {};
+    const afkConfig = config.settings || {};
     const prefix = afkConfig.prefix || '!';
 
     const afkData = isAFK(message.author.id);
