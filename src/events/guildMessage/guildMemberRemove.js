@@ -17,7 +17,7 @@ module.exports = {
                 return;
             }
 
-            const bannerPath = path.join(__dirname, '../../img/banner_discord.gif');
+            const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
             const leaveBanner = await createLeaveBanner(member, bannerPath);
 
             const leaveEmbed = new EmbedBuilder()
@@ -67,7 +67,7 @@ async function createLeaveBanner(member, bannerPath) {
             ctx.clip();
 
             try {
-                const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128 }));
+                const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128, dynamic: true }));
                 ctx.drawImage(avatar, 90, 90, 120, 120);
             } catch (error) {
                 console.log('Error loading avatar:', error);
