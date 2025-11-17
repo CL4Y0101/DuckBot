@@ -129,7 +129,7 @@ async function createAnimatedWelcomeBanner(member) {
                     ctx.textAlign = 'center';
                     
                     const bounceOffset = Math.sin(frameIndex * 0.8) * 3;
-                    ctx.fillText('🎉 WELCOME 🎉', 550, 100 + bounceOffset);
+                    ctx.fillText('WELCOME', 550, 100 + bounceOffset);
 
                     ctx.font = 'bold 24px Arial';
                     const username = member.user.username.length > 12 
