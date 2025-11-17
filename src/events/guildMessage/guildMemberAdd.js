@@ -2,7 +2,6 @@ const { Events, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const { createCanvas, loadImage, registerFont } = require('canvas');
 const fs = require('fs');
 const path = require('path');
-const GIFEncoder = require('gifencoder');
 
 try {
     registerFont(path.join(__dirname, '../src/fonts/arial.ttf'), { family: 'Arial' });
