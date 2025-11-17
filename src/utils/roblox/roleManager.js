@@ -9,7 +9,6 @@ if (!verificationService || typeof verificationService.verifyUser !== 'function'
     process.exit(1);
 }
 
-// Function to get role IDs from guild config
 function getRoleIds(guildId) {
     try {
         if (!fs.existsSync(guildDatabasePath)) {

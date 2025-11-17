@@ -74,7 +74,6 @@ async function localGitPull() {
     if (remoteShow !== localContent) {
       fs.writeFileSync(databasePath, remoteShow, 'utf8');
       console.log(`✅ Pulled username.json from origin/${backupBranch} and updated local copy.`);
-      // update hash to avoid immediate re-push
       lastHash = getFileHash(databasePath);
     }
   } catch (error) {
@@ -100,7 +99,6 @@ async function apiBackup() {
     const fileContent = fs.readFileSync(databasePath, 'utf8');
     let fileSha;
 
-    // ensure branch exists; if not, try to create it from main
     try {
       await octokit.git.getRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `heads/${branch}` });
     } catch (err) {
@@ -109,7 +107,6 @@ async function apiBackup() {
         await octokit.git.createRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `refs/heads/${branch}`, sha: mainRef.object.sha });
         console.log(`ℹ️ Created branch ${branch} from main`);
       } catch (e) {
-        // ignore - proceed to create/update file which may also work
       }
     }
 
@@ -167,7 +164,6 @@ async function restoreDatabase() {
   if (isGitRepo) {
     await localGitPull();
   } else {
-    // API restore
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) return;
     try {
@@ -187,12 +183,10 @@ async function restoreDatabase() {
   }
 }
 
-// Non-blocking restore attempt on module load
 (async () => {
   try {
     await restoreDatabase();
   } catch (e) {
-    // ignore
   }
 })();
 
