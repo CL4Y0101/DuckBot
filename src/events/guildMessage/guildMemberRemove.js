@@ -1,5 +1,6 @@
 const { Events, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const { createCanvas, loadImage } = require('canvas');
+const GIFEncoder = require('gifencoder');
 const fs = require('fs');
 const path = require('path');
 
@@ -17,8 +18,7 @@ module.exports = {
                 return;
             }
 
-            const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
-            const leaveBanner = await createLeaveBanner(member, bannerPath);
+            const leaveBanner = await createAnimatedLeaveBanner(member);
 
             const leaveEmbed = new EmbedBuilder()
                 .setColor('#FF0000')
@@ -29,7 +29,7 @@ module.exports = {
                     { name: '👥 Members Left', value: `#${member.guild.memberCount}`, inline: true },
                     { name: '📝 Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true }
                 )
-                .setImage('attachment://banner_discord.gif')
+                .setImage('attachment://leave_banner.gif')
                 .setThumbnail(member.user.displayAvatarURL({ format: 'png', size: 128 }))
                 .setTimestamp();
 
@@ -45,118 +45,126 @@ module.exports = {
     },
 };
 
-async function createLeaveBanner(member, bannerPath) {
+async function createAnimatedLeaveBanner(member) {
     return new Promise(async (resolve, reject) => {
         try {
+            const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
+            
             if (!fs.existsSync(bannerPath)) {
-                console.log('Banner GIF not found, creating static banner');
-                const staticBanner = await createStaticLeaveBanner(member);
-                return resolve(staticBanner);
+                console.log('Background GIF not found, using animated gradient');
+                const fallbackBanner = await createFallbackAnimatedBanner(member, 'goodbye');
+                return resolve(fallbackBanner);
             }
 
-            const baseBanner = await loadImage(bannerPath);
-            const canvas = createCanvas(baseBanner.width, baseBanner.height);
+            const width = 800;
+            const height = 300;
+            
+            const encoder = new GIFEncoder(width, height);
+            const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
 
-            ctx.drawImage(baseBanner, 0, 0);
+            encoder.start();
+            encoder.setRepeat(0);
+            encoder.setDelay(120);
+            encoder.setQuality(10);
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(150, 150, 60, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.clip();
-
+            let baseBackground;
             try {
-                const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128, dynamic: true }));
-                ctx.drawImage(avatar, 90, 90, 120, 120);
+                baseBackground = await loadImage(bannerPath);
+            } catch (error) {
+                console.log('Error loading background GIF:', error);
+                const fallbackBanner = await createFallbackAnimatedBanner(member, 'goodbye');
+                return resolve(fallbackBanner);
+            }
+
+            let avatarImage;
+            try {
+                const avatarUrl = member.user.displayAvatarURL({ 
+                    extension: 'png', 
+                    size: 256,
+                    forceStatic: true 
+                });
+                avatarImage = await loadImage(avatarUrl);
             } catch (error) {
                 console.log('Error loading avatar:', error);
+                avatarImage = null;
             }
-            ctx.restore();
 
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(150, 150, 62, 0, Math.PI * 2);
-            ctx.stroke();
+            for (let frame = 0; frame < 10; frame++) {
+                ctx.clearRect(0, 0, width, height);
 
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 36px Arial';
-            ctx.fillText('GOODBYE', 280, 120);
+                ctx.drawImage(baseBackground, 0, 0, width, height);
 
-            ctx.font = 'bold 28px Arial';
-            ctx.fillText(member.user.username, 280, 160);
+                const overlayAlpha = 0.5 + Math.sin(frame * 0.5) * 0.2;
+                ctx.fillStyle = `rgba(0, 0, 0, ${overlayAlpha})`;
+                ctx.fillRect(0, 0, width, height);
 
-            ctx.font = '24px Arial';
-            ctx.fillText(`from ${member.guild.name}`, 280, 200);
+                if (avatarImage) {
+                    ctx.save();
+                    
+                    const borderAlpha = 0.7 + Math.sin(frame * 0.7) * 0.3;
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${borderAlpha})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(150, 150, 62, 0, Math.PI * 2);
+                    ctx.stroke();
 
-            ctx.font = '20px Arial';
-            ctx.fillText(`Members Left: ${member.guild.memberCount}`, 280, 240);
+                    ctx.globalAlpha = 0.8 + Math.sin(frame * 0.5) * 0.2;
+                    ctx.beginPath();
+                    ctx.arc(150, 150, 60, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(avatarImage, 90, 90, 120, 120);
+                    ctx.restore();
+                    ctx.globalAlpha = 1.0;
+                }
 
-            const buffer = canvas.toBuffer('image/gif');
-            const attachment = new AttachmentBuilder(buffer, { name: 'banner_discord.gif' });
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 38px Arial';
+                ctx.textAlign = 'center';
+                
+                const shakeOffset = Math.sin(frame * 3) * 4;
+                ctx.fillText('😢 GOODBYE 😢', 550 + shakeOffset, 100);
+
+                ctx.font = 'bold 30px Arial';
+                const username = member.user.username.length > 15 
+                    ? member.user.username.substring(0, 15) + '...' 
+                    : member.user.username;
+                ctx.fillText(username, 550, 150);
+
+                ctx.font = '26px Arial';
+                const serverName = member.guild.name.length > 20
+                    ? member.guild.name.substring(0, 20) + '...'
+                    : member.guild.name;
+                ctx.fillText(`from ${serverName}`, 550, 190);
+
+                ctx.font = 'bold 22px Arial';
+                ctx.fillText(`Members Left: ${member.guild.memberCount}`, 550, 230);
+
+                if (frame % 4 === 0) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    for (let i = 0; i < 2; i++) {
+                        const x = 650 + i * 40;
+                        const y = 60 + Math.sin(frame * 0.5 + i) * 10;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                encoder.addFrame(ctx);
+            }
+
+            encoder.finish();
+            const gifBuffer = encoder.out.getData();
+            const attachment = new AttachmentBuilder(gifBuffer, { name: 'leave_banner.gif' });
+
             resolve(attachment);
 
         } catch (error) {
-            console.error('Error creating leave banner:', error);
+            console.error('Error creating animated leave banner:', error);
             const staticBanner = await createStaticLeaveBanner(member);
             resolve(staticBanner);
         }
     });
-}
-
-async function createStaticLeaveBanner(member) {
-    const canvas = createCanvas(800, 300);
-    const ctx = canvas.getContext('2d');
-
-    const gradient = ctx.createLinearGradient(0, 0, 800, 300);
-    gradient.addColorStop(0, '#ff6b6b');
-    gradient.addColorStop(1, '#ee5a24');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 800, 300);
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    for (let i = 0; i < 800; i += 20) {
-        for (let j = 0; j < 300; j += 20) {
-            ctx.fillRect(i, j, 2, 2);
-        }
-    }
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(150, 150, 60, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-
-    try {
-        const avatar = await loadImage(member.user.displayAvatarURL({ format: 'png', size: 128 }));
-        ctx.drawImage(avatar, 90, 90, 120, 120);
-    } catch (error) {
-        console.log('Error loading avatar:', error);
-    }
-    ctx.restore();
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(150, 150, 62, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('GOODBYE', 280, 120);
-
-    ctx.font = 'bold 28px Arial';
-    ctx.fillText(member.user.username, 280, 160);
-
-    ctx.font = '24px Arial';
-    ctx.fillText(`from ${member.guild.name}`, 280, 200);
-
-    ctx.font = '20px Arial';
-    ctx.fillText(`Members Left: ${member.guild.memberCount}`, 280, 240);
-
-    const buffer = canvas.toBuffer('image/png');
-    const attachment = new AttachmentBuilder(buffer, { name: 'leave.png' });
-
-    return attachment;
 }
