@@ -3,6 +3,8 @@
     "@octokit/rest": "^22.0.1",
     "axios": "^1.13.2",
     "discord": "^0.8.2",
+    "canvas": "^2.11.2",
+    "gifencoder": "^2.0.1",
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3"
   }
