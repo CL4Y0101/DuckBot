@@ -17,7 +17,7 @@
     "path": "^0.12.7"
   },
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   },
   "keywords": [
     "discord",
