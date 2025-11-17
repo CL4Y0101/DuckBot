@@ -1,6 +1,7 @@
 const { Events, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const { createCanvas, loadImage, registerFont } = require('canvas');
 const GIFEncoder = require('gifencoder');
+const gifFrames = require('gif-frames');
 const fs = require('fs');
 const path = require('path');
 
@@ -68,15 +69,6 @@ async function createAnimatedWelcomeBanner(member) {
             encoder.setDelay(100);
             encoder.setQuality(10);
 
-            let baseBackground;
-            try {
-                baseBackground = await loadImage(bannerPath);
-            } catch (error) {
-                console.log('Error loading background GIF:', error);
-                const fallbackBanner = await createFallbackAnimatedBanner(member, 'welcome');
-                return resolve(fallbackBanner);
-            }
-
             let avatarImage;
             try {
                 const avatarUrl = member.user.displayAvatarURL({ 
@@ -90,86 +82,98 @@ async function createAnimatedWelcomeBanner(member) {
                 avatarImage = null;
             }
 
-            for (let frame = 0; frame < 12; frame++) {
-                ctx.clearRect(0, 0, width, height);
+            try {
+                const frameData = await gifFrames({
+                    url: bannerPath,
+                    frames: 'all',
+                    outputType: 'png'
+                });
 
-                ctx.drawImage(baseBackground, 0, 0, width, height);
+                console.log(`Loaded ${frameData.length} frames from background GIF`);
 
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.fillRect(0, 0, width, height);
-
-                if (avatarImage) {
-                    ctx.save();
+                for (let frameIndex = 0; frameIndex < Math.min(frameData.length, 15); frameIndex++) {
+                    const frame = frameData[frameIndex];
+                    const frameImage = await loadImage(frame.getImage());
                     
-                    const borderSize = 4 + Math.sin(frame * 0.8) * 2;
-                    ctx.strokeStyle = `hsl(${(frame * 30) % 360}, 100%, 65%)`;
-                    ctx.lineWidth = borderSize;
-                    ctx.beginPath();
-                    ctx.arc(150, 150, 62, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.drawImage(frameImage, 0, 0, width, height);
 
-                    ctx.beginPath();
-                    ctx.arc(150, 150, 60, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-                    
-                    ctx.drawImage(avatarImage, 90, 90, 120, 120);
-                    ctx.restore();
-                } else {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.fillRect(0, 0, width, height);
+
+                    if (avatarImage) {
+                        ctx.save();
+                        
+                        const borderHue = (frameIndex * 25) % 360;
+                        ctx.strokeStyle = `hsl(${borderHue}, 100%, 65%)`;
+                        ctx.lineWidth = 5;
+                        ctx.beginPath();
+                        ctx.arc(150, 150, 62, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(150, 150, 60, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.clip();
+                        
+                        ctx.drawImage(avatarImage, 90, 90, 120, 120);
+                        ctx.restore();
+                    }
+
                     ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(150, 150, 60, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.font = 'bold 40px Arial';
+                    ctx.textAlign = 'center';
+                    
+                    const bounceOffset = Math.sin(frameIndex * 0.5) * 5;
+                    ctx.fillText('🎉 WELCOME 🎉', 550, 100 + bounceOffset);
+
+                    ctx.font = 'bold 32px Arial';
+                    const username = member.user.username.length > 15 
+                        ? member.user.username.substring(0, 15) + '...' 
+                        : member.user.username;
+                    
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillText(username, 550, 150);
+                    ctx.shadowBlur = 0;
+
+                    ctx.font = '28px Arial';
+                    const serverName = member.guild.name.length > 20
+                        ? member.guild.name.substring(0, 20) + '...'
+                        : member.guild.name;
+                    ctx.fillText(`to ${serverName}`, 550, 190);
+
+                    ctx.font = 'bold 24px Arial';
+                    const scale = 1 + Math.sin(frameIndex * 0.3) * 0.05;
+                    ctx.save();
+                    ctx.translate(550, 230);
+                    ctx.scale(scale, scale);
+                    ctx.fillText(`Member #${member.guild.memberCount}`, 0, 0);
+                    ctx.restore();
+
+                    ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + Math.sin(frameIndex * 0.8) * 0.3})`;
+                    for (let i = 0; i < 5; i++) {
+                        const x = 500 + Math.cos(frameIndex * 0.5 + i) * 30;
+                        const y = 250 + Math.sin(frameIndex * 0.5 + i) * 15;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    encoder.addFrame(ctx);
                 }
 
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 40px Arial';
-                ctx.textAlign = 'center';
-                
-                const bounceOffset = Math.sin(frame * 0.7) * 8;
-                ctx.fillText('🎉 WELCOME 🎉', 550, 100 + bounceOffset);
+                encoder.finish();
+                const gifBuffer = encoder.out.getData();
+                const attachment = new AttachmentBuilder(gifBuffer, { name: 'welcome_banner.gif' });
 
-                ctx.font = 'bold 32px Arial';
-                const username = member.user.username.length > 15 
-                    ? member.user.username.substring(0, 15) + '...' 
-                    : member.user.username;
-                
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.7)';
-                ctx.shadowBlur = 10;
-                ctx.fillText(username, 550, 150);
-                ctx.shadowBlur = 0;
+                resolve(attachment);
 
-                ctx.font = '28px Arial';
-                const serverName = member.guild.name.length > 20
-                    ? member.guild.name.substring(0, 20) + '...'
-                    : member.guild.name;
-                ctx.fillText(`to ${serverName}`, 550, 190);
-
-                ctx.font = 'bold 24px Arial';
-                const scale = 1 + Math.sin(frame * 0.5) * 0.1;
-                ctx.save();
-                ctx.translate(550, 230);
-                ctx.scale(scale, scale);
-                ctx.fillText(`Member #${member.guild.memberCount}`, 0, 0);
-                ctx.restore();
-
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + Math.sin(frame * 0.5) * 0.2})`;
-                for (let i = 0; i < 3; i++) {
-                    const x = 500 + Math.cos(frame * 0.3 + i) * 20;
-                    const y = 250 + Math.sin(frame * 0.3 + i) * 10;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                encoder.addFrame(ctx);
+            } catch (error) {
+                console.log('Error processing GIF frames, using single frame:', error);
+                const fallbackBanner = await createSingleFrameBanner(member, 'welcome');
+                resolve(fallbackBanner);
             }
-
-            encoder.finish();
-            const gifBuffer = encoder.out.getData();
-            const attachment = new AttachmentBuilder(gifBuffer, { name: 'welcome_banner.gif' });
-
-            resolve(attachment);
 
         } catch (error) {
             console.error('Error creating animated welcome banner:', error);
@@ -177,6 +181,117 @@ async function createAnimatedWelcomeBanner(member) {
             resolve(staticBanner);
         }
     });
+}
+
+async function createSingleFrameBanner(member, type) {
+    const width = 800;
+    const height = 300;
+    
+    const encoder = new GIFEncoder(width, height);
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    encoder.start();
+    encoder.setRepeat(0);
+    encoder.setDelay(100);
+    encoder.setQuality(10);
+
+    const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
+    let backgroundImage;
+    try {
+        backgroundImage = await loadImage(bannerPath);
+    } catch (error) {
+        console.log('Error loading background:', error);
+        backgroundImage = null;
+    }
+
+    let avatarImage;
+    try {
+        const avatarUrl = member.user.displayAvatarURL({ 
+            extension: 'png', 
+            size: 256,
+            forceStatic: true 
+        });
+        avatarImage = await loadImage(avatarUrl);
+    } catch (error) {
+        console.log('Error loading avatar:', error);
+        avatarImage = null;
+    }
+
+    for (let frame = 0; frame < 10; frame++) {
+        ctx.clearRect(0, 0, width, height);
+
+        if (backgroundImage) {
+            ctx.drawImage(backgroundImage, 0, 0, width, height);
+        } else {
+            const hue = (frame * 18) % 360;
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, `hsl(${hue}, 80%, 60%)`);
+            gradient.addColorStop(1, `hsl(${(hue + 120) % 360}, 80%, 60%)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, width, height);
+
+        if (avatarImage) {
+            ctx.save();
+            
+            const borderSize = 4 + Math.sin(frame * 0.8) * 2;
+            ctx.strokeStyle = `hsl(${(frame * 36) % 360}, 100%, 65%)`;
+            ctx.lineWidth = borderSize;
+            ctx.beginPath();
+            ctx.arc(150, 150, 62, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(150, 150, 60, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(avatarImage, 90, 90, 120, 120);
+            ctx.restore();
+        }
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        
+        const title = type === 'welcome' ? '🎉 WELCOME 🎉' : '😢 GOODBYE 😢';
+        const bounceOffset = Math.sin(frame * 0.7) * 8;
+        ctx.fillText(title, 550, 100 + bounceOffset);
+
+        ctx.font = 'bold 28px Arial';
+        const username = member.user.username.length > 15 
+            ? member.user.username.substring(0, 15) + '...' 
+            : member.user.username;
+        ctx.fillText(username, 550, 150);
+
+        ctx.font = '24px Arial';
+        const serverText = type === 'welcome' ? `to ${member.guild.name}` : `from ${member.guild.name}`;
+        const serverName = member.guild.name.length > 20
+            ? member.guild.name.substring(0, 20) + '...'
+            : member.guild.name;
+        ctx.fillText(serverText, 550, 190);
+
+        ctx.font = '20px Arial';
+        const memberText = type === 'welcome' 
+            ? `Member #${member.guild.memberCount}` 
+            : `Members Left: ${member.guild.memberCount}`;
+        
+        const scale = 1 + Math.sin(frame * 0.5) * 0.1;
+        ctx.save();
+        ctx.translate(550, 230);
+        ctx.scale(scale, scale);
+        ctx.fillText(memberText, 0, 0);
+        ctx.restore();
+
+        encoder.addFrame(ctx);
+    }
+
+    encoder.finish();
+    const gifBuffer = encoder.out.getData();
+    return new AttachmentBuilder(gifBuffer, { name: `${type}_banner.gif` });
 }
 
 async function createFallbackAnimatedBanner(member, type) {
