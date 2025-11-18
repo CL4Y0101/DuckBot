@@ -133,12 +133,41 @@ async function apiBackup() {
 }
 
 /**
+ * Remove duplicates based on userid, keeping the last occurrence
+ */
+function removeDuplicates(data) {
+  return Array.from(
+    data.reduce((map, item) => {
+      map.set(item.userid, item);
+      return map;
+    }, new Map()).values()
+  );
+}
+
+/**
  * Fungsi utama backup database
  */
 async function backupDatabase() {
 
   if (!fs.existsSync(databasePath)) {
     return;
+  }
+
+  let data = [];
+  try {
+    const fileContent = fs.readFileSync(databasePath, 'utf8');
+    if (fileContent.trim()) {
+      data = JSON.parse(fileContent);
+    }
+  } catch (error) {
+    console.error('Error reading username.json for deduplication:', error);
+    return;
+  }
+
+  const uniqueData = removeDuplicates(data);
+  if (uniqueData.length !== data.length) {
+    fs.writeFileSync(databasePath, JSON.stringify(uniqueData, null, 2));
+    console.log(`✅ Removed ${data.length - uniqueData.length} duplicate entries from username.json`);
   }
 
   const newHash = getFileHash(databasePath);
