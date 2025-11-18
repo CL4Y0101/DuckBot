@@ -202,7 +202,7 @@ module.exports = {
 
         if (interaction.customId === 'reverify_button') {
             const modal = new ModalBuilder()
-                .setCustomId('verify_modal')
+                .setCustomId('reverify_modal')
                 .setTitle('Reverify Your Username');
 
             const robloxInput = new TextInputBuilder()
