@@ -73,18 +73,20 @@ function isAFK(userId) {
   return afkUsers.find(user => user.userId === userId);
 }
 
-function setAFK(userId, reason) {
+function setAFK(userId, reason, originalNickname = null) {
   const afkUsers = loadAFK();
   const existingIndex = afkUsers.findIndex(user => user.userId === userId);
 
   if (existingIndex !== -1) {
     afkUsers[existingIndex].reason = reason;
     afkUsers[existingIndex].timestamp = Date.now();
+    if (originalNickname) afkUsers[existingIndex].originalNickname = originalNickname;
   } else {
     afkUsers.push({
       userId: userId,
       reason: reason,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      originalNickname: originalNickname
     });
   }
 
@@ -103,17 +105,20 @@ async function removeAFKByAdmin(userId, adminId, interaction) {
     throw new Error('You do not have permission to remove AFK status from others.');
   }
 
-  removeAFK(userId);
-
-  try {
-    const member = interaction.guild.members.cache.get(userId);
-    if (member && member.displayName.startsWith('[AFK] ')) {
-      const originalName = member.displayName.slice(6);
-      await member.setNickname(originalName);
+  const afkUsers = loadAFK();
+  const afkData = afkUsers.find(user => user.userId === userId);
+  if (afkData && afkData.originalNickname) {
+    try {
+      const targetMember = interaction.guild.members.cache.get(userId);
+      if (targetMember) {
+        await targetMember.setNickname(afkData.originalNickname);
+      }
+    } catch (error) {
+      console.error('Error restoring nickname:', error);
     }
-  } catch (error) {
-    console.error('Error removing AFK nickname:', error);
   }
+
+  removeAFK(userId);
 
   return true;
 }
@@ -149,7 +154,7 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const config = loadConfig();
+    const config = getConfig();
     const afkConfig = config.afk || {};
 
     if (afkConfig.commandChannelOnly && afkConfig.commandChannels) {
@@ -173,14 +178,13 @@ module.exports = {
         return;
       }
 
-      setAFK(interaction.user.id, reason);
-
+      let originalNickname = null;
       let nicknameChanged = false;
       try {
         const member = interaction.guild.members.cache.get(interaction.user.id);
         if (member) {
-          const originalName = member.displayName;
-          const afkName = `[AFK] ${originalName}`;
+          originalNickname = member.displayName;
+          const afkName = `[AFK] ${originalNickname}`;
           await member.setNickname(afkName);
           nicknameChanged = true;
         }
@@ -189,6 +193,8 @@ module.exports = {
         if (error.code === 50013) {
         }
       }
+
+      setAFK(interaction.user.id, reason, originalNickname);
 
       const response = nicknameChanged
         ? `✅ You are now AFK: ${reason}`

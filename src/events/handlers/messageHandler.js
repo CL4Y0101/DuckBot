@@ -53,9 +53,10 @@ module.exports = {
   async execute(message, client) {
     if (message.author.bot) return;
 
-    const config = loadConfig();
-    const afkConfig = config.settings || {};
-    const prefix = afkConfig.prefix || '!';
+    const config = getConfig();
+    const settings = config.settings || {};
+    const afkConfig = config.afk || {};
+    const prefix = settings.prefix || '!';
 
     const afkData = isAFK(message.author.id);
     if (afkData && afkConfig.removeAFKOnMessage !== false) {
@@ -63,22 +64,30 @@ module.exports = {
         const member = message.guild?.members.cache.get(message.author.id);
         if (member && afkConfig.exemptRoles.some(roleId => member.roles.cache.has(roleId))) {
         } else {
-          removeAFK(message.author.id);
+        removeAFK(message.author.id);
 
-          if (afkConfig.enableNicknameChange !== false) {
-            try {
-              const member = message.guild.members.cache.get(message.author.id);
-              if (member && member.displayName.startsWith(afkConfig.nicknamePrefix || '[AFK] ')) {
+        if (afkConfig.enableNicknameChange !== false) {
+          try {
+            const member = message.guild.members.cache.get(message.author.id);
+            if (member && member.displayName.startsWith(afkConfig.nicknamePrefix || '[AFK] ')) {
+              const afkUsers = loadAFK();
+              const afkData = afkUsers.find(user => user.userId === message.author.id);
+              if (afkData && afkData.originalNickname) {
+                await member.setNickname(afkData.originalNickname);
+              } else {
                 const originalName = member.displayName.slice((afkConfig.nicknamePrefix || '[AFK] ').length);
                 await member.setNickname(originalName);
               }
-            } catch (error) {
-              console.error('Error removing AFK nickname:', error);
             }
+          } catch (error) {
+            console.error('Error removing AFK nickname:', error);
           }
+        }
 
-          const welcomeMessage = afkConfig.welcomeBackMessage || '✅ Welcome back! Your AFK status has been removed.';
-          await message.reply(welcomeMessage);
+        const welcomeMessage = (afkConfig.welcomeBackMessage || '👋 **Welcome back, {user}!**\n-# You were AFK for: <t:{time}:R>')
+          .replace('{user}', message.author.username)
+          .replace('{time}', Math.floor(afkData.timestamp / 1000));
+        await message.reply(welcomeMessage);
           return;
         }
       } else {
@@ -96,7 +105,9 @@ module.exports = {
           }
         }
 
-        const welcomeMessage = afkConfig.welcomeBackMessage || '✅ Welcome back! Your AFK status has been removed.';
+        const welcomeMessage = (afkConfig.welcomeBackMessage || '👋 **Welcome back, {user}!**\n-# You were AFK for: <t:{time}:R>')
+          .replace('{user}', message.author.username)
+          .replace('{time}', Math.floor(afkData.timestamp / 1000));
         await message.reply(welcomeMessage);
         return;
       }
@@ -110,11 +121,10 @@ module.exports = {
           if (afkData) {
             const timestamp = afkData.timestamp;
             const timeFormat = afkConfig.timeFormat === 'absolute' ? 'f' : 'R';
-            const mentionMessage = (afkConfig.mentionAFKMessage || '@{username} is AFK: {reason}\n<t:{timestamp}:R>')
-              .replace('{username}', user.username)
+            const mentionMessage = (afkConfig.mentionAFKMessage || '😴 **{user}** is currently AFK.\n-# Reason: {reason}\n-# AFK since: <t:{time}:R>')
+              .replace('{user}', user.username)
               .replace('{reason}', afkData.reason)
-              .replace('{timestamp}', Math.floor(timestamp / 1000))
-              .replace(':R', `:${timeFormat}>`);
+              .replace('{time}', Math.floor(timestamp / 1000));
 
             await message.reply(mentionMessage);
 

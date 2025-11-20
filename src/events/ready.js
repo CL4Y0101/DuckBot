@@ -78,9 +78,7 @@ module.exports = {
           `${memberCount} members`,
           `${robloxUsers} Roblox users`,
           `${verifiedUsers} verified users`,
-          `Duck 🦆`,
-          `/verify to join!`,
-          `v${process.env.npm_package_version || '1.0.0'}`
+          `Duck 🦆`
         ];
 
         const statuses = ['online', 'idle', 'dnd'];

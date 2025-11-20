@@ -6,8 +6,9 @@ const util = require('util');
 const crypto = require('crypto');
 
 const execPromise = util.promisify(exec);
-const databasePath = path.join(__dirname, '../../database/username.json');
-let lastHash = '';
+const databaseDir = path.join(__dirname, '../../database');
+const databaseFiles = ['afk.json', 'guild.json', 'invites.json', 'sessions.json', 'username.json'];
+let lastHashes = {};
 const backupBranch = process.env.GITHUB_BACKUP_BRANCH || 'database';
 
 /**
@@ -50,9 +51,14 @@ async function localGitCommit() {
 
     await executeCommand('git fetch origin');
     await executeCommand(`git checkout -B ${backupBranch}`);
-    await executeCommand('git add src/database/username.json');
+    for (const file of databaseFiles) {
+      const filePath = path.join(databaseDir, file);
+      if (fs.existsSync(filePath)) {
+        await executeCommand(`git add src/database/${file}`);
+      }
+    }
     await executeCommand(
-      'git commit -m "Auto-backup: update username.json" || echo "⚠️ No changes to commit"'
+      'git commit -m "Auto-backup: update database files" || echo "⚠️ No changes to commit"'
     );
 
     const pushResult = await executeCommand(`git push origin ${backupBranch} --set-upstream`);
@@ -68,13 +74,16 @@ async function localGitCommit() {
 async function localGitPull() {
   try {
     await executeCommand('git fetch origin');
-    const remoteShow = await executeCommand(`git show origin/${backupBranch}:src/database/username.json`);
-    if (remoteShow === null) return;
-    const localContent = fs.existsSync(databasePath) ? fs.readFileSync(databasePath, 'utf8') : '';
-    if (remoteShow !== localContent) {
-      fs.writeFileSync(databasePath, remoteShow, 'utf8');
-      console.log(`✅ Pulled username.json from origin/${backupBranch} and updated local copy.`);
-      lastHash = getFileHash(databasePath);
+    for (const file of databaseFiles) {
+      const filePath = path.join(databaseDir, file);
+      const remoteShow = await executeCommand(`git show origin/${backupBranch}:src/database/${file}`);
+      if (remoteShow === null) continue;
+      const localContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+      if (remoteShow !== localContent) {
+        fs.writeFileSync(filePath, remoteShow, 'utf8');
+        console.log(`✅ Pulled ${file} from origin/${backupBranch} and updated local copy.`);
+        lastHashes[file] = getFileHash(filePath);
+      }
     }
   } catch (error) {
     console.error('⚠️ localGitPull failed:', error.message);
@@ -96,36 +105,41 @@ async function apiBackup() {
     const { Octokit } = await import('@octokit/rest');
     const octokit = new Octokit({ auth: githubToken });
     const branch = backupBranch;
-    const fileContent = fs.readFileSync(databasePath, 'utf8');
-    let fileSha;
 
-    try {
-      await octokit.git.getRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `heads/${branch}` });
-    } catch (err) {
+    for (const file of databaseFiles) {
+      const filePath = path.join(databaseDir, file);
+      if (!fs.existsSync(filePath)) continue;
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      let fileSha;
+
       try {
-        const { data: mainRef } = await octokit.git.getRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: 'heads/main' });
-        await octokit.git.createRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `refs/heads/${branch}`, sha: mainRef.object.sha });
-        console.log(`ℹ️ Created branch ${branch} from main`);
-      } catch (e) {
+        await octokit.git.getRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `heads/${branch}` });
+      } catch (err) {
+        try {
+          const { data: mainRef } = await octokit.git.getRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: 'heads/main' });
+          await octokit.git.createRef({ owner: 'CL4Y0101', repo: 'DuckBot', ref: `refs/heads/${branch}`, sha: mainRef.object.sha });
+          console.log(`ℹ️ Created branch ${branch} from main`);
+        } catch (e) {
+        }
       }
-    }
 
-    try {
-      const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: 'src/database/username.json', ref: branch });
-      fileSha = fileData.sha;
-    } catch {
-      fileSha = undefined;
-    }
+      try {
+        const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: `src/database/${file}`, ref: branch });
+        fileSha = fileData.sha;
+      } catch {
+        fileSha = undefined;
+      }
 
-    await octokit.repos.createOrUpdateFileContents({
-      owner: 'CL4Y0101',
-      repo: 'DuckBot',
-      path: 'src/database/username.json',
-      message: 'Auto-backup: Update username.json',
-      content: Buffer.from(fileContent).toString('base64'),
-      sha: fileSha,
-      branch,
-    });
+      await octokit.repos.createOrUpdateFileContents({
+        owner: 'CL4Y0101',
+        repo: 'DuckBot',
+        path: `src/database/${file}`,
+        message: `Auto-backup: Update ${file}`,
+        content: Buffer.from(fileContent).toString('base64'),
+        sha: fileSha,
+        branch,
+      });
+    }
 
   } catch (error) {
     console.error('❌ Error during GitHub API backup:', error.message);
@@ -148,33 +162,39 @@ function removeDuplicates(data) {
  * Fungsi utama backup database
  */
 async function backupDatabase() {
+  let hasChanges = false;
 
-  if (!fs.existsSync(databasePath)) {
-    return;
-  }
+  for (const file of databaseFiles) {
+    const filePath = path.join(databaseDir, file);
+    if (!fs.existsSync(filePath)) continue;
 
-  let data = [];
-  try {
-    const fileContent = fs.readFileSync(databasePath, 'utf8');
-    if (fileContent.trim()) {
-      data = JSON.parse(fileContent);
+    if (file === 'username.json') {
+      let data = [];
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        if (fileContent.trim()) {
+          data = JSON.parse(fileContent);
+        }
+      } catch (error) {
+        console.error(`Error reading ${file} for deduplication:`, error);
+        continue;
+      }
+
+      const uniqueData = removeDuplicates(data);
+      if (uniqueData.length !== data.length) {
+        fs.writeFileSync(filePath, JSON.stringify(uniqueData, null, 2));
+        console.log(`✅ Removed ${data.length - uniqueData.length} duplicate entries from ${file}`);
+      }
     }
-  } catch (error) {
-    console.error('Error reading username.json for deduplication:', error);
-    return;
+
+    const newHash = getFileHash(filePath);
+    if (newHash !== lastHashes[file]) {
+      lastHashes[file] = newHash;
+      hasChanges = true;
+    }
   }
 
-  const uniqueData = removeDuplicates(data);
-  if (uniqueData.length !== data.length) {
-    fs.writeFileSync(databasePath, JSON.stringify(uniqueData, null, 2));
-    console.log(`✅ Removed ${data.length - uniqueData.length} duplicate entries from username.json`);
-  }
-
-  const newHash = getFileHash(databasePath);
-  if (newHash === lastHash) {
-    return;
-  }
-  lastHash = newHash;
+  if (!hasChanges) return;
 
   const isGitRepo = fs.existsSync(path.join(process.cwd(), '.git'));
 
@@ -198,13 +218,16 @@ async function restoreDatabase() {
     try {
       const { Octokit } = await import('@octokit/rest');
       const octokit = new Octokit({ auth: githubToken });
-      const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: 'src/database/username.json', ref: backupBranch });
-      const remoteContent = Buffer.from(fileData.content, fileData.encoding).toString('utf8');
-      const localContent = fs.existsSync(databasePath) ? fs.readFileSync(databasePath, 'utf8') : '';
-      if (remoteContent !== localContent) {
-        fs.writeFileSync(databasePath, remoteContent, 'utf8');
-        console.log(`✅ Restored username.json from ${backupBranch} via API`);
-        lastHash = getFileHash(databasePath);
+      for (const file of databaseFiles) {
+        const filePath = path.join(databaseDir, file);
+        const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: `src/database/${file}`, ref: backupBranch });
+        const remoteContent = Buffer.from(fileData.content, fileData.encoding).toString('utf8');
+        const localContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+        if (remoteContent !== localContent) {
+          fs.writeFileSync(filePath, remoteContent, 'utf8');
+          console.log(`✅ Restored ${file} from ${backupBranch} via API`);
+          lastHashes[file] = getFileHash(filePath);
+        }
       }
     } catch (error) {
       console.error('⚠️ api restore failed:', error.message);
