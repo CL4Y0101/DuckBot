@@ -236,6 +236,13 @@ async function restoreDatabase() {
   }
 }
 
+/**
+ * Check and pull remote changes (alias for restoreDatabase)
+ */
+async function checkAndPullRemoteChanges() {
+  await restoreDatabase();
+}
+
 (async () => {
   try {
     await restoreDatabase();
