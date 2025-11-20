@@ -9,6 +9,7 @@ const execPromise = util.promisify(exec);
 const databaseDir = path.join(__dirname, '../../database');
 const databaseFiles = ['afk.json', 'guild.json', 'invites.json', 'sessions.json', 'username.json'];
 let lastHashes = {};
+let lastCommitSHA = null;
 const backupBranch = process.env.GITHUB_BACKUP_BRANCH || 'database';
 
 /**
@@ -242,4 +243,4 @@ async function restoreDatabase() {
   }
 })();
 
-module.exports = { backupDatabase, restoreDatabase };
+module.exports = { backupDatabase, restoreDatabase, checkAndPullRemoteChanges };

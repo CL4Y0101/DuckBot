@@ -3,7 +3,7 @@ const { getCommandFiles } = require('../utils/commandLoader');
 const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
 const verificationService = require('../utils/roblox/verifyUser');
 const { startScheduler } = require('../utils/roblox/scheduler');
-const { backupDatabase } = require('../utils/github/backup');
+const { backupDatabase, checkAndPullRemoteChanges } = require('../utils/github/backup');
 const inviteTracker = require('../utils/inviteTracker');
 const fs = require('fs');
 const path = require('path');
@@ -158,6 +158,14 @@ module.exports = {
       } catch (error) {
         console.error('❌ Scheduled backup failed:', error.message);
       }
-    }, 30 * 60 * 1000);
+    }, 5 * 60 * 1000); // 5 minutes
+
+    setInterval(async () => {
+      try {
+        await checkAndPullRemoteChanges();
+      } catch (error) {
+        console.error('❌ Scheduled pull failed:', error.message);
+      }
+    }, 30 * 1000); // 30 seconds
   }
 };
