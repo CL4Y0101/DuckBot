@@ -101,8 +101,6 @@ module.exports = {
         });
       }
 
-
-
       if (existingUser && interaction.customId === 'reverify_modal') {
         existingUser.roblox_username = roblox;
         existingUser.verified = false;

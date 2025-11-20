@@ -3,6 +3,7 @@ const { createCanvas, loadImage } = require('canvas');
 const GIFEncoder = require('gifencoder');
 const fs = require('fs');
 const path = require('path');
+const inviteTracker = require('../utils/inviteTracker');
 
 module.exports = {
     name: Events.GuildMemberRemove,

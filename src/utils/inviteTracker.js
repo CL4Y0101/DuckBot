@@ -187,8 +187,21 @@ class InviteTracker {
 
             const inviter = inviterId ? await client.users.fetch(inviterId).catch(() => null) : null;
 
+            let accurateTotalInvites = 0;
+            let discordTotalInvites = 0;
+
+            try {
+                const currentInvites = await member.guild.invites.fetch();
+                for (const [code, inv] of currentInvites) {
+                    if (String(inv.inviter?.id) === String(inviterId)) {
+                        discordTotalInvites += inv.uses;
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Could not fetch current Discord invites for verification');
+            }
+
             let computedTotalInvites = 0;
-            let computedSuccessfulInvites = 0;
             const guildCache = this.inviteCache.get(member.guild.id);
             if (guildCache && guildCache.invites) {
                 for (const [code, inv] of guildCache.invites) {
@@ -205,8 +218,13 @@ class InviteTracker {
 
             const userStats = this.inviteCache.get(member.guild.id)?.users?.get(inviterId);
 
+            const displayTotalInvites = discordTotalInvites > 0 ? discordTotalInvites : computedTotalInvites;
+
+            const isAccurate = discordTotalInvites > 0 ? (computedTotalInvites === discordTotalInvites) : true;
+            const verificationStatus = discordTotalInvites > 0 ? (isAccurate ? '✅ Verified' : '⚠️ May be inaccurate') : '🔄 Tracking';
+
             const embed = {
-                color: 0x00ff00,
+                color: isAccurate ? 0x00ff00 : 0xffa500,
                 title: '📨 Invite Used',
                 fields: [
                     {
@@ -226,7 +244,12 @@ class InviteTracker {
                     },
                     {
                         name: '📊 Total Invites',
-                        value: `${computedTotalInvites}`,
+                        value: `${displayTotalInvites}`,
+                        inline: true
+                    },
+                    {
+                        name: '🔍 Verification',
+                        value: verificationStatus,
                         inline: true
                     },
                     {
@@ -235,7 +258,10 @@ class InviteTracker {
                         inline: true
                     }
                 ],
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: discordTotalInvites > 0 ? `Discord: ${discordTotalInvites} | Tracked: ${computedTotalInvites}` : 'Invite tracking active'
+                }
             };
 
             await channel.send({ embeds: [embed] });
@@ -263,6 +289,63 @@ class InviteTracker {
             successfulInvites: 0,
             codes: []
         };
+    }
+
+    async trackMemberLeave(client, member) {
+        try {
+            const guildId = member.guild.id;
+
+            const guildConfig = this.getGuildConfig(guildId);
+            if (!guildConfig?.tracking?.enabled) {
+                return;
+            }
+
+            const currentInvites = await member.guild.invites.fetch();
+            const data = this.loadInviteData();
+            const guildData = data[guildId];
+
+            if (!guildData) return;
+
+            let invitesChanged = false;
+
+            for (const [code, storedInvite] of Object.entries(guildData.invites)) {
+                const currentInvite = currentInvites.get(code);
+                if (currentInvite) {
+                    const storedUses = Number(storedInvite.uses) || 0;
+                    const currentUses = Number(currentInvite.uses) || 0;
+
+                    if (currentUses < storedUses) {
+                        const inviterId = storedInvite.inviter;
+                        if (inviterId && guildData.users[inviterId]) {
+                            if (guildData.users[inviterId].successfulInvites > 0) {
+                                guildData.users[inviterId].successfulInvites -= 1;
+                                invitesChanged = true;
+                                console.log(`📉 Decremented invite count for ${inviterId} due to member leave: ${member.user.username} (invite: ${code})`);
+                            }
+                        }
+
+                        guildData.invites[code].uses = currentUses;
+                    }
+                }
+            }
+
+            if (invitesChanged) {
+                this.saveInviteData(data);
+
+                // Update cache
+                const userStats = this.inviteCache.get(guildId)?.users;
+                if (userStats) {
+                    for (const [userId, userData] of userStats) {
+                        if (guildData.users[userId]) {
+                            userData.successfulInvites = guildData.users[userId].successfulInvites;
+                        }
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Error tracking member leave:', error);
+        }
     }
 
     getGuildInvites(guildId) {
