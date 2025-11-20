@@ -3,7 +3,7 @@ const { createCanvas, loadImage } = require('canvas');
 const GIFEncoder = require('gifencoder');
 const fs = require('fs');
 const path = require('path');
-const inviteTracker = require('../utils/inviteTracker');
+const inviteTracker = require('../../utils/inviteTracker');
 
 module.exports = {
     name: Events.GuildMemberRemove,
@@ -39,6 +39,12 @@ module.exports = {
                 embeds: [leaveEmbed],
                 files: [leaveBanner]
             });
+
+            try {
+                await inviteTracker.trackMemberLeave(client, member);
+            } catch (err) {
+                console.error('❌ Error while running inviteTracker.trackMemberLeave:', err);
+            }
 
         } catch (error) {
             console.error('❌ Error sending leave message:', error);
