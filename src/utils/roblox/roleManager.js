@@ -67,7 +67,7 @@ const loggedRegistered = new Set();
 const loggedVerified = new Set();
 const loggedNoVerified = new Set();
 
-async function assignVerifiedRole(client, userid, guildId = null) {
+async function assignVerifiedRole(client, userid, guildId = null, options = {}) {
     try {
         if (!client || !client.isReady()) {
             return false;
@@ -90,9 +90,9 @@ async function assignVerifiedRole(client, userid, guildId = null) {
         }
 
         await member.roles.add(VERIFIED_ROLE_ID).catch(err => {
-            console.error(`⚠️ Failed to add role to ${member.user.username}:`, err.message);
+            if (!options.silent) console.error(`⚠️ Failed to add role to ${member.user.username}:`, err.message);
         });
-        console.log(`✅ Assigned verified role to ${member.user.username}`);
+        if (!options.silent) console.log(`✅ Assigned verified role to ${member.user.username}`);
         return true;
     } catch (e) {
         console.error(`❌ Error assigning verified role: ${e.message}`);
@@ -100,7 +100,7 @@ async function assignVerifiedRole(client, userid, guildId = null) {
     }
 }
 
-async function assignRegisteredRole(client, userid, guildId = null) {
+async function assignRegisteredRole(client, userid, guildId = null, options = {}) {
     try {
         const guild = client.guilds.cache.get(guildId || process.env.GUILD_ID);
         if (!guild) return console.log('❌ Guild not found'), false;
@@ -119,7 +119,7 @@ async function assignRegisteredRole(client, userid, guildId = null) {
         }
 
         await member.roles.add(UNVERIFIED_ROLE_ID);
-        console.log(`✅ Assigned registered role to ${member.user.username}`);
+        if (!options.silent) console.log(`✅ Assigned registered role to ${member.user.username}`);
         return true;
     } catch (e) {
         // console.error(`❌ Error assigning registered role: ${e.message}`);
@@ -127,7 +127,7 @@ async function assignRegisteredRole(client, userid, guildId = null) {
     }
 }
 
-async function removeVerifiedRole(client, userid, guildId = null) {
+async function removeVerifiedRole(client, userid, guildId = null, options = {}) {
     try {
         if (!client || !client.isReady()) {
             return false;
@@ -144,16 +144,16 @@ async function removeVerifiedRole(client, userid, guildId = null) {
 
         if (!member.roles.cache.has(VERIFIED_ROLE_ID)) {
             if (!loggedNoVerified.has(member.user.username)) {
-                console.log(`ℹ️ ${member.user.username} has no verified role`);
+                if (!options.silent) console.log(`ℹ️ ${member.user.username} has no verified role`);
                 loggedNoVerified.add(member.user.username);
             }
             return true;
         }
 
         await member.roles.remove(VERIFIED_ROLE_ID).catch(err => {
-            console.error(`⚠️ Failed to remove role from ${member.user.username}:`, err.message);
+            if (!options.silent) console.error(`⚠️ Failed to remove role from ${member.user.username}:`, err.message);
         });
-        console.log(`❌ Removed verified role from ${member.user.username}`);
+        if (!options.silent) console.log(`❌ Removed verified role from ${member.user.username}`);
         return true;
     } catch (e) {
         console.error(`❌ Error removing verified role: ${e.message}`);
@@ -246,13 +246,13 @@ async function updateRoles(client) {
                         logsToShow.verified.push(user.userid);
                         console.log(`✅ ${user.username} verified with nickname: ${user.roblox_nickname || 'N/A'} (guild: ${guild.id || 'default'})`);
                     }
-                    await assignVerifiedRole(client, user.userid);
+                    await assignVerifiedRole(client, user.userid, null, { silent: true });
                 } else {
                     if (!logState.notVerified.includes(user.userid) && logsToShow.notVerified.length < 5) {
                         logsToShow.notVerified.push(user.userid);
                         console.log(`❌ ${user.username} not verified (nickname: ${user.roblox_nickname || 'N/A'}) (guild: ${guild.id || 'default'})`);
                     }
-                    await removeVerifiedRole(client, user.userid);
+                    await removeVerifiedRole(client, user.userid, null, { silent: true });
                 }
                 
                 updatedCount++;
