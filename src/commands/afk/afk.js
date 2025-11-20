@@ -1,53 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { getConfig } = require('../../utils/config');
 
 const afkPath = path.join(__dirname, '../../database/afk.json');
-
-function loadConfig() {
-  try {
-    const configPath = path.join(__dirname, '../../../config.yml');
-    const fileContents = fs.readFileSync(configPath, 'utf8');
-    const lines = fileContents.split('\n');
-    const config = {};
-    let currentSection = null;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('#') || trimmed === '') continue;
-
-      if (trimmed.endsWith(':')) {
-        currentSection = trimmed.slice(0, -1);
-        config[currentSection] = {};
-      } else if (currentSection && trimmed.includes(':')) {
-        const [key, ...valueParts] = trimmed.split(':');
-        let value = valueParts.join(':').trim();
-
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        }
-
-        if (value.startsWith('[') && value.endsWith(']')) {
-          try {
-            value = JSON.parse(value);
-          } catch {
-            value = [];
-          }
-        }
-        else if (value === 'true') value = true;
-        else if (value === 'false') value = false;
-        else if (!isNaN(value)) value = Number(value);
-
-        config[currentSection][key.trim()] = value;
-      }
-    }
-
-    return config;
-  } catch (error) {
-    console.error('Error loading config:', error);
-    return { afk: { prefix: '!' } };
-  }
-}
 
 function loadAFK() {
   try {
