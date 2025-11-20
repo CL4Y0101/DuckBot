@@ -154,7 +154,7 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const config = getConfig();
+    const config = loadConfig();
     const afkConfig = config.afk || {};
 
     if (afkConfig.commandChannelOnly && afkConfig.commandChannels) {
