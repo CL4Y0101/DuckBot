@@ -18,7 +18,7 @@ function getCommandFiles(dir) {
 
 function loadCommands(client, commandsPath) {
   const commandFiles = getCommandFiles(commandsPath);
-  console.log('Loading commands from:', commandFiles);
+  // console.log('Loading commands from:', commandFiles);
   for (const file of commandFiles) {
     try {
       const command = require(path.resolve(file));

@@ -3,10 +3,35 @@ const path = require('path');
 const verificationService = require('./verifyUser');
 const databasePath = path.join(__dirname, '../../database/username.json');
 const guildDatabasePath = path.join(__dirname, '../../database/guild.json');
+const logStateFile = path.join(__dirname, '../../database/roleUpdateLogState.json');
 
 if (!verificationService || typeof verificationService.verifyUser !== 'function') {
     console.error('❌ Critical Error: verificationService tidak ter-load dengan benar');
     process.exit(1);
+}
+
+function getLogState() {
+    try {
+        if (fs.existsSync(logStateFile)) {
+            return JSON.parse(fs.readFileSync(logStateFile, 'utf8'));
+        }
+    } catch (error) {
+        console.error('⚠️ Error reading log state file:', error.message);
+    }
+    return {
+        notInGuild: [],
+        verified: [],
+        notVerified: [],
+        timeout: []
+    };
+}
+
+function saveLogState(state) {
+    try {
+        fs.writeFileSync(logStateFile, JSON.stringify(state, null, 2));
+    } catch (error) {
+        console.error('⚠️ Error saving log state file:', error.message);
+    }
 }
 
 function getRoleIds(guildId) {
@@ -168,7 +193,13 @@ async function updateRoles(client) {
             userid: String(user.userid)
         }));
 
-        
+        const logState = getLogState();
+        const logsToShow = {
+            notInGuild: [],
+            verified: [],
+            notVerified: []
+        };
+
         for (let i = 0; i < normalizedUsers.length; i++) {
             const user = normalizedUsers[i];
             
@@ -192,13 +223,15 @@ async function updateRoles(client) {
                 try {
                     member = await Promise.race([memberFetchPromise, timeoutPromise]);
                 } catch (timeoutError) {
-                    console.warn(`⚠️ Timeout fetching member ${user.userid} (${user.username})`);
                     errorCount++;
                     continue;
                 }
 
                 if (!member) {
-                    console.log(`ℹ️ Member ${user.userid} (${user.username}) not in guild`);
+                    if (!logState.notInGuild.includes(user.userid) && logsToShow.notInGuild.length < 5) {
+                        logsToShow.notInGuild.push(user.userid);
+                        console.log(`ℹ️ Member ${user.userid} (${user.username}) not in guild`);
+                    }
                     continue;
                 }
 
@@ -209,8 +242,16 @@ async function updateRoles(client) {
                 const isVerified = await verificationService.verifyUser(user.userid, guild.id);
                 
                 if (isVerified) {
+                    if (!logState.verified.includes(user.userid) && logsToShow.verified.length < 5) {
+                        logsToShow.verified.push(user.userid);
+                        console.log(`✅ ${user.username} verified with nickname: ${user.roblox_nickname || 'N/A'} (guild: ${guild.id || 'default'})`);
+                    }
                     await assignVerifiedRole(client, user.userid);
                 } else {
+                    if (!logState.notVerified.includes(user.userid) && logsToShow.notVerified.length < 5) {
+                        logsToShow.notVerified.push(user.userid);
+                        console.log(`❌ ${user.username} not verified (nickname: ${user.roblox_nickname || 'N/A'}) (guild: ${guild.id || 'default'})`);
+                    }
                     await removeVerifiedRole(client, user.userid);
                 }
                 
@@ -222,6 +263,11 @@ async function updateRoles(client) {
             }
         }
 
+        logState.notInGuild = [...new Set([...logState.notInGuild, ...logsToShow.notInGuild])];
+        logState.verified = [...new Set([...logState.verified, ...logsToShow.verified])];
+        logState.notVerified = [...new Set([...logState.notVerified, ...logsToShow.notVerified])];
+        saveLogState(logState);
+
         console.log(`✅ Role update completed: ${updatedCount} users processed, ${errorCount} errors`);
 
     } catch (error) {
@@ -229,3 +275,4 @@ async function updateRoles(client) {
     }
 }
 module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles };
+
