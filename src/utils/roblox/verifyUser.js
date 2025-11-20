@@ -188,8 +188,8 @@ class VerificationService {
         }
 
         const regexPattern = pattern
-            .replace(/\*/g, '.*') // Wildcard support
-            .replace(/\?/g, '.'); // Single char wildcard
+            .replace(/\*/g, '.*')
+            .replace(/\?/g, '.');
             
         try {
             const regex = new RegExp(`^${regexPattern}$`, 'i');

@@ -195,27 +195,27 @@ class InviteTracker {
                 description: `Member joined but the invite source could not be determined.`,
                 fields: [
                     {
-                        name: '👤 Member',
+                        name: '\`👤\` Member',
                         value: `<@${member.id}> (${member.user.username})`,
                         inline: true
                     },
                     {
-                        name: '🆔 User ID',
+                        name: '\`🆔\` User ID',
                         value: `${member.id}`,
                         inline: true
                     },
                     {
-                        name: '📋 Possible Reasons',
+                        name: '\`📋\` Possible Reasons',
                         value: 'Member joined via server discovery, invite expired, or invite was deleted before tracking.',
                         inline: false
                     },
                     {
-                        name: '👥 Guild Member #',
+                        name: '\`👥\` Guild Member #',
                         value: `${member.guild.memberCount}`,
                         inline: true
                     },
                     {
-                        name: '📅 Account Created',
+                        name: '\`📅\` Account Created',
                         value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`,
                         inline: true
                     }
@@ -242,7 +242,6 @@ class InviteTracker {
 
             const inviter = inviterId ? await client.users.fetch(inviterId).catch(() => null) : null;
 
-            let accurateTotalInvites = 0;
             let discordTotalInvites = 0;
 
             try {
@@ -283,32 +282,32 @@ class InviteTracker {
                 title: '📨 Invite Used',
                 fields: [
                     {
-                        name: '👤 New Member',
+                        name: '\`👤\` New Member',
                         value: `<@${member.id}> (${member.user.username})`,
                         inline: true
                     },
                     {
-                        name: '🎯 Inviter',
+                        name: '\`🎯\` Inviter',
                         value: inviter ? `<@${inviter.id}> (${inviter.username})` : 'Unknown',
                         inline: true
                     },
                     {
-                        name: '🔗 Invite Code',
+                        name: '\`🔗\` Invite Code',
                         value: `\`${invite.code}\``,
                         inline: true
                     },
                     {
-                        name: '📊 Total Invites',
+                        name: '\`📊\` Total Invites',
                         value: `${displayTotalInvites}`,
                         inline: true
                     },
                     {
-                        name: '🔍 Verification',
+                        name: '\`🔍\` Verification',
                         value: verificationStatus,
                         inline: true
                     },
                     {
-                        name: '👥 Guild Member #',
+                        name: '\`👥\` Guild Member #',
                         value: `${member.guild.memberCount}`,
                         inline: true
                     }
