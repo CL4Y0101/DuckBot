@@ -8,6 +8,7 @@ class InviteTracker {
     constructor() {
         this.inviteCache = new Map();
         this.userInvites = new Map();
+        this.memberInviteMap = new Map();
     }
 
     loadInviteData() {
@@ -167,11 +168,65 @@ class InviteTracker {
                 await this.logInviteUsage(client, member, usedInvite, inviterId, guildConfig.tracking.channel);
 
             } else {
-                console.log(`ℹ️ Could not determine invite used by ${member.user.username}`);
+                await this.logUnknownInvite(client, member, guildConfig.tracking.channel);
             }
 
         } catch (error) {
             console.error('❌ Error tracking member join:', error);
+        }
+    }
+
+    async logUnknownInvite(client, member, logChannelId) {
+        try {
+            if (!logChannelId) {
+                console.log(`ℹ️ Could not determine invite used by ${member.user.username} (${member.id}). Possible reasons: member joined via server discovery, invite expired, or invite was deleted before tracking.`);
+                return;
+            }
+
+            const channel = client.channels.cache.get(logChannelId);
+            if (!channel) {
+                console.log(`❌ Log channel ${logChannelId} not found`);
+                return;
+            }
+
+            const embed = {
+                color: 0xFFA500,
+                title: '❓ Unknown Invite Source',
+                description: `Member joined but the invite source could not be determined.`,
+                fields: [
+                    {
+                        name: '👤 Member',
+                        value: `<@${member.id}> (${member.user.username})`,
+                        inline: true
+                    },
+                    {
+                        name: '🆔 User ID',
+                        value: `${member.id}`,
+                        inline: true
+                    },
+                    {
+                        name: '📋 Possible Reasons',
+                        value: 'Member joined via server discovery, invite expired, or invite was deleted before tracking.',
+                        inline: false
+                    },
+                    {
+                        name: '👥 Guild Member #',
+                        value: `${member.guild.memberCount}`,
+                        inline: true
+                    },
+                    {
+                        name: '📅 Account Created',
+                        value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`,
+                        inline: true
+                    }
+                ],
+                timestamp: new Date().toISOString()
+            };
+
+            await channel.send({ embeds: [embed] });
+
+        } catch (error) {
+            console.error('❌ Error logging unknown invite:', error);
         }
     }
 
@@ -332,7 +387,6 @@ class InviteTracker {
             if (invitesChanged) {
                 this.saveInviteData(data);
 
-                // Update cache
                 const userStats = this.inviteCache.get(guildId)?.users;
                 if (userStats) {
                     for (const [userId, userData] of userStats) {
