@@ -9,25 +9,55 @@ class InviteTracker {
         this.inviteCache = new Map();
         this.userInvites = new Map();
         this.memberInviteMap = new Map();
+        this.refreshIntervals = new Map();
+        this.defaultRefreshMs = 5 * 60 * 1000; // 5 minutes
     }
 
     loadInviteData() {
         try {
             if (!fs.existsSync(invitesPath)) {
-                this.saveInviteData();
-                return;
+                fs.writeFileSync(invitesPath, JSON.stringify({}, null, 2));
+                return {};
             }
-            const data = JSON.parse(fs.readFileSync(invitesPath, 'utf8'));
-            return data;
+            const raw = fs.readFileSync(invitesPath, 'utf8').trim();
+            if (!raw) return {};
+            const rawData = JSON.parse(raw);
+
+            for (const guildId in rawData) {
+                if (rawData[guildId].users) {
+                    for (const userId in rawData[guildId].users) {
+                        const user = rawData[guildId].users[userId];
+                        if (user.uniqueInvitedMembersArray) {
+                            user.uniqueInvitedMembers = new Set(user.uniqueInvitedMembersArray);
+                            delete user.uniqueInvitedMembersArray;
+                        } else {
+                            user.uniqueInvitedMembers = new Set();
+                        }
+                    }
+                }
+            }
+            return rawData || {};
         } catch (error) {
             console.error('❌ Error loading invite data:', error);
-            return { "985901035593801749": { invites: {}, users: {} } };
+            return {};
         }
     }
 
     saveInviteData(data = null) {
         try {
             const saveData = data || this.getCurrentData();
+
+            for (const guildId in saveData) {
+                if (saveData[guildId].users) {
+                    for (const userId in saveData[guildId].users) {
+                        const user = saveData[guildId].users[userId];
+                        if (user.uniqueInvitedMembers && user.uniqueInvitedMembers instanceof Set) {
+                            user.uniqueInvitedMembersArray = Array.from(user.uniqueInvitedMembers);
+                            delete user.uniqueInvitedMembers;
+                        }
+                    }
+                }
+            }
             fs.writeFileSync(invitesPath, JSON.stringify(saveData, null, 2));
         } catch (error) {
             console.error('❌ Error saving invite data:', error);
@@ -37,9 +67,25 @@ class InviteTracker {
     getCurrentData() {
         const data = {};
         for (const [guildId, guildData] of this.inviteCache) {
+            let usersObj = {};
+            if (guildData.users instanceof Map) {
+                for (const [userId, userData] of guildData.users) {
+                    usersObj[userId] = {
+                        totalInvites: userData.totalInvites || 0,
+                        successfulInvites: userData.successfulInvites || 0,
+                        codes: userData.codes || [],
+                        uniqueInvitedMembersArray: userData.uniqueInvitedMembers ? Array.from(userData.uniqueInvitedMembers) : []
+                    };
+                }
+            } else {
+                usersObj = guildData.users || {};
+            }
+
+            const invitesObj = guildData.invites instanceof Map ? Object.fromEntries(guildData.invites) : (guildData.invites || {});
             data[guildId] = {
-                invites: Object.fromEntries(guildData.invites),
-                users: Object.fromEntries(guildData.users)
+                invites: invitesObj,
+                users: usersObj,
+                lastUpdated: guildData.lastUpdated || new Date().toISOString()
             };
         }
         return data;
@@ -58,51 +104,84 @@ class InviteTracker {
                 data[guildId] = { invites: {}, users: {} };
             }
 
-            const invites = await guild.invites.fetch();
-            const inviteMap = new Map();
-            const userMap = new Map();
+            const guildConfig = this.getGuildConfig(guildId);
 
-            invites.forEach(invite => {
-                inviteMap.set(invite.code, {
-                    code: invite.code,
-                    inviter: invite.inviter?.id || 'unknown',
-                    uses: invite.uses,
-                    maxUses: invite.maxUses,
-                    createdAt: invite.createdAt?.toISOString(),
-                    expiresAt: invite.expiresAt?.toISOString()
+            let invites;
+            let inviteMap = new Map();
+            let userMap = new Map();
+
+            try {
+                invites = await guild.invites.fetch();
+                invites.forEach(invite => {
+                    inviteMap.set(invite.code, {
+                        code: invite.code,
+                        inviter: invite.inviter?.id || 'unknown',
+                        uses: invite.uses,
+                        maxUses: invite.maxUses,
+                        createdAt: invite.createdAt?.toISOString(),
+                        expiresAt: invite.expiresAt?.toISOString()
+                    });
+
+                    const inviterId = invite.inviter?.id;
+                    if (inviterId) {
+                        if (!userMap.has(inviterId)) {
+                            userMap.set(inviterId, {
+                                totalInvites: 0,
+                                successfulInvites: 0,
+                                codes: []
+                            });
+                        }
+                        const userData = userMap.get(inviterId);
+                        userData.totalInvites += invite.uses;
+                        userData.successfulInvites += invite.uses;
+                        userData.codes.push(invite.code);
+                    }
                 });
 
-                const inviterId = invite.inviter?.id;
-                if (inviterId) {
-                    if (!userMap.has(inviterId)) {
-                        userMap.set(inviterId, {
-                            totalInvites: 0,
-                            successfulInvites: 0,
-                            codes: []
-                        });
-                    }
-                    const userData = userMap.get(inviterId);
-                    userData.totalInvites += invite.uses;
-                    userData.successfulInvites += invite.uses;
-                    userData.codes.push(invite.code);
+                this.inviteCache.set(guildId, {
+                    invites: inviteMap,
+                    users: userMap,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                data[guildId].invites = Object.fromEntries(inviteMap);
+                data[guildId].users = Object.fromEntries(userMap);
+                this.saveInviteData(data);
+
+                console.log(`✅ Invite tracking initialized for guild ${guildId} with ${invites.size} invites`);
+                if (guildConfig?.tracking?.autoRefresh !== false) {
+                    this.startAutoRefresh(client, guildId);
                 }
-            });
+            } catch (err) {
+                console.warn(`⚠️ Could not fetch invites from Discord for guild ${guildId}, falling back to disk data.`);
+                // populate from disk if available
+                const diskInvites = data[guildId]?.invites || {};
+                const diskUsers = data[guildId]?.users || {};
 
-            this.inviteCache.set(guildId, {
-                invites: inviteMap,
-                users: userMap
-            });
+                for (const [code, inv] of Object.entries(diskInvites)) {
+                    inviteMap.set(code, inv);
+                }
+                for (const [uid, udata] of Object.entries(diskUsers)) {
+                    userMap.set(uid, udata);
+                }
 
-            data[guildId].invites = Object.fromEntries(inviteMap);
-            data[guildId].users = Object.fromEntries(userMap);
-            this.saveInviteData(data);
+                this.inviteCache.set(guildId, {
+                    invites: inviteMap,
+                    users: userMap,
+                    lastUpdated: new Date().toISOString()
+                });
 
-            console.log(`✅ Invite tracking initialized for guild ${guildId} with ${invites.size} invites`);
+                console.log(`ℹ️ Invite tracking initialized for guild ${guildId} from disk: ${inviteMap.size} invites`);
+                if (guildConfig?.tracking?.autoRefresh !== false) {
+                    this.startAutoRefresh(client, guildId);
+                }
+            }
 
         } catch (error) {
             console.error('❌ Error initializing invite tracking:', error);
         }
     }
+
 
     async trackMemberJoin(client, member) {
         try {
@@ -150,7 +229,8 @@ class InviteTracker {
                         userStats.set(inviterId, {
                             totalInvites: 0,
                             successfulInvites: 0,
-                            codes: []
+                            codes: [],
+                            uniqueInvitedMembers: new Set()
                         });
                     }
                     const userData = userStats.get(inviterId);
@@ -158,11 +238,25 @@ class InviteTracker {
                     if (!userData.codes.includes(usedInvite.code)) {
                         userData.codes.push(usedInvite.code);
                     }
+                    // Add member.id to unique invited members
+                    userData.uniqueInvitedMembers.add(member.id);
                 }
 
                 const data = this.loadInviteData();
                 data[guildId].invites[usedInvite.code] = inviteData;
-                data[guildId].users = Object.fromEntries(userStats);
+
+                // Convert Set to array for saving
+                const saveUserStats = {};
+                for (const [userId, userData] of userStats.entries()) {
+                    saveUserStats[userId] = {
+                        totalInvites: userData.totalInvites,
+                        successfulInvites: userData.successfulInvites,
+                        codes: userData.codes,
+                        uniqueInvitedMembersArray: Array.from(userData.uniqueInvitedMembers || [])
+                    };
+                }
+                data[guildId].users = saveUserStats;
+
                 this.saveInviteData(data);
 
                 await this.logInviteUsage(client, member, usedInvite, inviterId, guildConfig.tracking.channel);
@@ -230,6 +324,7 @@ class InviteTracker {
         }
     }
 
+
     async logInviteUsage(client, member, invite, inviterId, logChannelId) {
         try {
             if (!logChannelId) return;
@@ -255,26 +350,13 @@ class InviteTracker {
                 console.log('⚠️ Could not fetch current Discord invites for verification');
             }
 
-            let computedTotalInvites = 0;
-            const guildCache = this.inviteCache.get(member.guild.id);
-            if (guildCache && guildCache.invites) {
-                for (const [code, inv] of guildCache.invites) {
-                    try {
-                        const invObj = inv || {};
-                        const invUses = Number(invObj.uses) || 0;
-                        if (String(invObj.inviter) === String(inviterId)) {
-                            computedTotalInvites += invUses;
-                        }
-                    } catch (e) {
-                    }
-                }
-            }
-
             const userStats = this.inviteCache.get(member.guild.id)?.users?.get(inviterId);
 
-            const displayTotalInvites = discordTotalInvites > 0 ? discordTotalInvites : computedTotalInvites;
+            const uniqueInviteCount = userStats && userStats.uniqueInvitedMembers ? userStats.uniqueInvitedMembers.size : 0;
 
-            const isAccurate = discordTotalInvites > 0 ? (computedTotalInvites === discordTotalInvites) : true;
+            const displayTotalInvites = discordTotalInvites > 0 ? discordTotalInvites : uniqueInviteCount;
+
+            const isAccurate = discordTotalInvites > 0 ? (uniqueInviteCount === discordTotalInvites) : true;
             const verificationStatus = discordTotalInvites > 0 ? (isAccurate ? '✅ Verified' : '⚠️ May be inaccurate') : '🔄 Tracking';
 
             const embed = {
@@ -314,7 +396,7 @@ class InviteTracker {
                 ],
                 timestamp: new Date().toISOString(),
                 footer: {
-                    text: discordTotalInvites > 0 ? `Discord: ${discordTotalInvites} | Tracked: ${computedTotalInvites}` : 'Invite tracking active'
+                    text: discordTotalInvites > 0 ? `Discord: ${discordTotalInvites} | Tracked: ${uniqueInviteCount}` : 'Invite tracking active'
                 }
             };
 
@@ -398,6 +480,87 @@ class InviteTracker {
 
         } catch (error) {
             console.error('❌ Error tracking member leave:', error);
+        }
+    }
+
+    async refreshGuildInvites(client, guildId) {
+        try {
+            const guild = client.guilds.cache.get(guildId);
+            if (!guild) return;
+
+            const invites = await guild.invites.fetch();
+            const inviteMap = new Map();
+            const userMap = new Map();
+
+            invites.forEach(invite => {
+                inviteMap.set(invite.code, {
+                    code: invite.code,
+                    inviter: invite.inviter?.id || 'unknown',
+                    uses: invite.uses,
+                    maxUses: invite.maxUses,
+                    createdAt: invite.createdAt?.toISOString(),
+                    expiresAt: invite.expiresAt?.toISOString()
+                });
+
+                const inviterId = invite.inviter?.id;
+                if (inviterId) {
+                    if (!userMap.has(inviterId)) {
+                        userMap.set(inviterId, {
+                            totalInvites: 0,
+                            successfulInvites: 0,
+                            codes: []
+                        });
+                    }
+                    const userData = userMap.get(inviterId);
+                    userData.totalInvites += invite.uses;
+                    userData.successfulInvites += invite.uses;
+                    userData.codes.push(invite.code);
+                }
+            });
+
+            this.inviteCache.set(guildId, {
+                invites: inviteMap,
+                users: userMap,
+                lastUpdated: new Date().toISOString()
+            });
+
+            const data = this.loadInviteData();
+            data[guildId] = data[guildId] || { invites: {}, users: {} };
+            data[guildId].invites = Object.fromEntries(inviteMap);
+            data[guildId].users = Object.fromEntries(userMap);
+            data[guildId].lastUpdated = new Date().toISOString();
+            this.saveInviteData(data);
+
+            console.log(`🔄 Refreshed invites for guild ${guildId} (${inviteMap.size} invites)`);
+        } catch (error) {
+            console.warn(`⚠️ Timeout or error refreshing invites for guild ${guildId}:`, error);
+        }
+    }
+
+    startAutoRefresh(client, guildId, intervalMs = null) {
+        try {
+            const ms = intervalMs || this.defaultRefreshMs;
+            if (this.refreshIntervals.has(guildId)) return;
+            const id = setInterval(() => {
+                this.refreshGuildInvites(client, guildId).catch(err => console.error('❌ Error in auto-refresh:', err));
+            }, ms);
+            this.refreshIntervals.set(guildId, id);
+            console.log(`⏱️ Started invite auto-refresh for guild ${guildId} every ${ms}ms`);
+        } catch (error) {
+            console.error('❌ Error starting auto-refresh:', error);
+        }
+    }
+
+    stopAutoRefresh(guildId) {
+        try {
+            const id = this.refreshIntervals.get(guildId);
+            if (id) {
+                clearInterval(id);
+                this.refreshIntervals.delete(guildId);
+                console.log(`⏹️ Stopped invite auto-refresh for guild ${guildId}`);
+            }
+        } catch (error) {
+            console.error('❌ Error stopping auto-refresh:', error);
         }
     }
 
