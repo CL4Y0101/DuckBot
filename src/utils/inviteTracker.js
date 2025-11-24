@@ -154,7 +154,6 @@ class InviteTracker {
                 }
             } catch (err) {
                 console.warn(`⚠️ Could not fetch invites from Discord for guild ${guildId}, falling back to disk data.`);
-                // populate from disk if available
                 const diskInvites = data[guildId]?.invites || {};
                 const diskUsers = data[guildId]?.users || {};
 
@@ -238,14 +237,12 @@ class InviteTracker {
                     if (!userData.codes.includes(usedInvite.code)) {
                         userData.codes.push(usedInvite.code);
                     }
-                    // Add member.id to unique invited members
                     userData.uniqueInvitedMembers.add(member.id);
                 }
 
                 const data = this.loadInviteData();
                 data[guildId].invites[usedInvite.code] = inviteData;
 
-                // Convert Set to array for saving
                 const saveUserStats = {};
                 for (const [userId, userData] of userStats.entries()) {
                     saveUserStats[userId] = {
@@ -410,8 +407,24 @@ class InviteTracker {
     getGuildConfig(guildId) {
         try {
             if (!fs.existsSync(guildConfigPath)) return null;
-            const data = JSON.parse(fs.readFileSync(guildConfigPath, 'utf8'));
-            return data.find(guild => guild[guildId])?.[guildId];
+            const raw = fs.readFileSync(guildConfigPath, 'utf8');
+            const data = JSON.parse(raw);
+            if (Array.isArray(data)) {
+                const found = data.find(g => g && typeof g === 'object' && g[guildId]);
+                return found ? found[guildId] : null;
+            }
+            if (data && typeof data === 'object') {
+                if (data[guildId]) return data[guildId];
+                for (const key of Object.keys(data)) {
+                    const val = data[key];
+                    if (Array.isArray(val)) {
+                        const found = val.find(g => g && typeof g === 'object' && g[guildId]);
+                        if (found) return found[guildId];
+                    }
+                }
+                return null;
+            }
+            return null;
         } catch (error) {
             console.error('❌ Error loading guild config:', error);
             return null;
