@@ -134,6 +134,51 @@ module.exports = {
       console.log('✅ Backup system initialized');
 
       console.log('📨 Initializing invite tracking...');
+      try {
+        const guildConfigPath = path.join(__dirname, '..', 'database', 'guild.json');
+        if (fs.existsSync(guildConfigPath)) {
+          const raw = fs.readFileSync(guildConfigPath, 'utf8');
+          const parsed = JSON.parse(raw);
+          const entries = [];
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+              if (item && typeof item === 'object') {
+                for (const key of Object.keys(item)) entries.push({ guildId: key, config: item[key] });
+              }
+            }
+          } else if (parsed && typeof parsed === 'object') {
+            for (const key of Object.keys(parsed)) {
+              const val = parsed[key];
+              if (val && typeof val === 'object' && val.tracking !== undefined) {
+                entries.push({ guildId: key, config: val });
+              } else if (Array.isArray(val)) {
+                for (const item of val) if (item && item[key]) entries.push({ guildId: key, config: item[key] });
+              }
+            }
+          }
+
+          for (const e of entries) {
+            try {
+              const cfg = e.config || {};
+              if (cfg.tracking && cfg.tracking.enabled) {
+                const ch = cfg.tracking.channel || process.env.INVITE_TRACKER_CHANNEL;
+                if (!ch) {
+                  console.warn(`⚠️ Invite tracking enabled for guild ${e.guildId} but no tracking.channel configured and no INVITE_TRACKER_CHANNEL env var set.`);
+                } else {
+                  const chObj = client.channels.cache.get(ch);
+                  if (!chObj) {
+                    console.warn(`⚠️ Tracking channel ${ch} for guild ${e.guildId} not found in cache. Ensure the channel ID is correct and the bot has access.`);
+                  }
+                }
+              }
+            } catch (err) {
+            }
+          }
+        }
+      } catch (err) {
+        console.error('❌ Error validating guild tracking config:', err);
+      }
+
       await inviteTracker.initializeGuild(client, process.env.GUILD_ID);
       console.log('✅ Invite tracking initialized');
 

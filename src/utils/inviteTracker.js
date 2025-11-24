@@ -269,6 +269,7 @@ class InviteTracker {
 
     async logUnknownInvite(client, member, logChannelId) {
         try {
+            logChannelId = logChannelId || process.env.INVITE_TRACKER_CHANNEL;
             if (!logChannelId) {
                 console.log(`ℹ️ Could not determine invite used by ${member.user.username} (${member.id}). Possible reasons: member joined via server discovery, invite expired, or invite was deleted before tracking.`);
                 return;
@@ -324,6 +325,8 @@ class InviteTracker {
 
     async logInviteUsage(client, member, invite, inviterId, logChannelId) {
         try {
+            // allow fallback to global env var
+            logChannelId = logChannelId || process.env.INVITE_TRACKER_CHANNEL;
             if (!logChannelId) return;
 
             const channel = client.channels.cache.get(logChannelId);
@@ -488,6 +491,30 @@ class InviteTracker {
                             userData.successfulInvites = guildData.users[userId].successfulInvites;
                         }
                     }
+                }
+                // send a brief embed to the tracking channel if configured
+                try {
+                    const guildConfig = this.getGuildConfig(guildId) || {};
+                    const channelId = guildConfig.tracking?.channel || process.env.INVITE_TRACKER_CHANNEL;
+                    if (channelId) {
+                        const channel = client.channels.cache.get(channelId);
+                        if (channel) {
+                            const embed = {
+                                color: 0xffa500,
+                                title: '📉 Invite Update - Member Left',
+                                description: `${member.user.tag} left the server. Invite counts were updated.`,
+                                fields: [
+                                    { name: '`👤` Member', value: `<@${member.id}>`, inline: true },
+                                    { name: '`🆔` User ID', value: `${member.id}`, inline: true },
+                                    { name: '`📋` Reason', value: 'Invite count decremented based on current invites', inline: false }
+                                ],
+                                timestamp: new Date().toISOString()
+                            };
+                            await channel.send({ embeds: [embed] });
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ Error sending invite-decrement embed:', err);
                 }
             }
 
