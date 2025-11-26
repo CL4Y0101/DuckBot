@@ -42,8 +42,35 @@ function getRoleIds(guildId) {
                 registered: '996367985759486042'
             };
         }
-        const guildData = JSON.parse(fs.readFileSync(guildDatabasePath, 'utf8'));
-        const guildConfig = guildData[guildId];
+        const raw = fs.readFileSync(guildDatabasePath, 'utf8');
+        const guildData = raw.trim() ? JSON.parse(raw) : {};
+
+        let guildConfig = null;
+        if (Array.isArray(guildData)) {
+            for (const item of guildData) {
+                if (item && typeof item === 'object' && item[guildId]) {
+                    guildConfig = item[guildId];
+                    break;
+                }
+            }
+        } else if (guildData && typeof guildData === 'object') {
+            guildConfig = guildData[guildId] || null;
+            if (!guildConfig) {
+                for (const key of Object.keys(guildData)) {
+                    const val = guildData[key];
+                    if (Array.isArray(val)) {
+                        for (const item of val) {
+                            if (item && typeof item === 'object' && item[guildId]) {
+                                guildConfig = item[guildId];
+                                break;
+                            }
+                        }
+                        if (guildConfig) break;
+                    }
+                }
+            }
+        }
+
         if (guildConfig && guildConfig.Roles) {
             return {
                 verified: guildConfig.Roles.verified || '1405032359589449800',
@@ -171,6 +198,9 @@ async function updateRoles(client) {
             return;
         }
 
+        const roleIdsGlobal = getRoleIds(guild.id);
+        console.log(`🔎 Role IDs for guild ${guild.id}: verified=${roleIdsGlobal.verified}, registered=${roleIdsGlobal.registered}`);
+
         const fs = require('fs');
         
         if (!fs.existsSync(databasePath)) {
@@ -246,12 +276,14 @@ async function updateRoles(client) {
                         logsToShow.verified.push(user.userid);
                         console.log(`✅ ${user.username} verified with nickname: ${user.roblox_nickname || 'N/A'} (guild: ${guild.id || 'default'})`);
                     }
+                    console.log(`➡️ Assigning verified role (${roleIdsGlobal.verified}) to user ${user.userid}`);
                     await assignVerifiedRole(client, user.userid, null, { silent: true });
                 } else {
                     if (!logState.notVerified.includes(user.userid) && logsToShow.notVerified.length < 5) {
                         logsToShow.notVerified.push(user.userid);
                         console.log(`❌ ${user.username} not verified (nickname: ${user.roblox_nickname || 'N/A'}) (guild: ${guild.id || 'default'})`);
                     }
+                    console.log(`⬅️ Removing verified role (${roleIdsGlobal.verified}) from user ${user.userid}`);
                     await removeVerifiedRole(client, user.userid, null, { silent: true });
                 }
                 
