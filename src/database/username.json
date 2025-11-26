@@ -394,10 +394,10 @@
   {
     "userid": "1401884652268027924",
     "username": "naa.0418_07980",
-    "roblox_username": "ily_01111",
-    "roblox_uid": "7278836335",
-    "roblox_nickname": "naclairoDV",
-    "verified": true
+    "roblox_username": "naclairoDV",
+    "roblox_uid": "",
+    "roblox_nickname": "",
+    "verified": false
   },
   {
     "userid": "1190179979850436619",
@@ -422,13 +422,5 @@
     "roblox_uid": "5666274674",
     "roblox_nickname": "Seii",
     "verified": false
-  },
-  {
-    "userid": "955425481749065778",
-    "username": "dyinglullaby.",
-    "roblox_username": "Kaerthaav",
-    "roblox_uid": "7347472217",
-    "roblox_nickname": "DVetryn",
-    "verified": true
   }
 ]
