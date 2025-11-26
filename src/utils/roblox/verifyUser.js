@@ -26,11 +26,15 @@ class VerificationService {
                 return false;
             }
 
-            if (user.verified) return true;
-
             await this.updateUserProfile(user);
 
-            if (!user.roblox_nickname) return false;
+            if (!user.roblox_nickname) {
+                if (user.verified) {
+                    user.verified = false;
+                    this.saveDatabase(data);
+                }
+                return false;
+            }
 
             const isVerified = this.checkVerification(user.roblox_nickname, guildid);
             
