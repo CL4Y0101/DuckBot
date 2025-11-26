@@ -3,7 +3,7 @@ const { getCommandFiles } = require('../utils/commandLoader');
 const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
 const verificationService = require('../utils/roblox/verifyUser');
 const { startScheduler } = require('../utils/roblox/scheduler');
-const { backupDatabase, checkAndPullRemoteChanges } = require('../utils/github/backup');
+  const { triggerImmediateBackup, checkAndPullRemoteChanges, startBackupWatcher } = require('../utils/github/backup');
 const inviteTracker = require('../utils/inviteTracker');
 const fs = require('fs');
 const path = require('path');
@@ -188,17 +188,24 @@ module.exports = {
   },
 
   async initializeBackupSystem() {
-    try {
-      await backupDatabase();
-      console.log('✅ Initial backup completed');
-    } catch (error) {
-      console.error('❌ Initial backup failed:', error.message);
-    }
+      try {
+        await triggerImmediateBackup();
+        console.log('✅ Initial backup completed');
+      } catch (error) {
+        console.error('❌ Initial backup failed:', error.message);
+      }
+
+      // Start immediate backup watcher so any change in src/database triggers a push
+      try {
+        startBackupWatcher();
+      } catch (err) {
+        console.error('❌ Failed to start backup watcher:', err.message);
+      }
 
     setInterval(async () => {
       try {
         console.log('💾 Running scheduled backup...');
-        await backupDatabase();
+        await triggerImmediateBackup();
         console.log('✅ Scheduled backup completed');
       } catch (error) {
         console.error('❌ Scheduled backup failed:', error.message);
@@ -211,6 +218,6 @@ module.exports = {
       } catch (error) {
         console.error('❌ Scheduled pull failed:', error.message);
       }
-    }, 30 * 1000); // 30 seconds
+    }, 5 * 60 * 1000); // 5 minutes
   }
 };

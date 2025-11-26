@@ -28,8 +28,17 @@ class VerificationService {
 
             await this.updateUserProfile(user);
 
+            // Debug: log previous vs fetched nickname/verified
+            try {
+                const prevEntry = data.find(u => String(u.userid) === normalizedUserid) || {};
+                const prevNick = prevEntry.roblox_nickname || '<none>';
+                const prevVerified = !!prevEntry.verified;
+                console.log(`🔍 verifyUser start: userid=${normalizedUserid} prevNick=${prevNick} prevVerified=${prevVerified}`);
+            } catch (e) {}
+
             if (!user.roblox_nickname) {
                 if (user.verified) {
+                    console.log(`ℹ️ Clearing verified flag for ${normalizedUserid} because display name not available`);
                     user.verified = false;
                     this.saveDatabase(data);
                 }
@@ -39,6 +48,7 @@ class VerificationService {
             const isVerified = this.checkVerification(user.roblox_nickname, guildid);
             
             if (user.verified !== isVerified) {
+                console.log(`🔁 verifyUser: userid=${normalizedUserid} nick=${user.roblox_nickname} isVerified=${isVerified} (was ${user.verified})`);
                 user.verified = isVerified;
                 this.saveDatabase(data);
             }
@@ -269,7 +279,17 @@ class VerificationService {
 
     saveDatabase(data) {
         try {
-            fs.writeFileSync(databasePath, JSON.stringify(data, null, 2));
+            const deduped = Array.from(
+                data.reduce((map, item) => {
+                    map.set(String(item.userid), item);
+                    return map;
+                }, new Map()).values()
+            );
+            fs.writeFileSync(databasePath, JSON.stringify(deduped, null, 2));
+            try {
+                const stat = fs.statSync(databasePath);
+                console.log(`💾 Saved database (${deduped.length} entries) at ${databasePath} mtime=${new Date(stat.mtimeMs).toISOString()}`);
+            } catch {}
         } catch (error) {
             console.error('❌ Error saving database:', error);
         }

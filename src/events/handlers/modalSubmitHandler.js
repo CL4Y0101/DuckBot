@@ -166,7 +166,8 @@ module.exports = {
               fs.writeFileSync(databasePath, JSON.stringify(updatedData, null, 2));
               console.log(`Updated Roblox UID for ${roblox}: ${robloxUid}`);
 
-              backupDatabase().catch(err => console.error('Auto-backup failed:', err));
+              const { triggerImmediateBackup } = require('../../utils/github/backup');
+              triggerImmediateBackup().catch(err => console.error('Auto-backup failed:', err));
             }
           } else {
             console.log(`❌ Could not find Roblox UID for username: ${roblox}`);

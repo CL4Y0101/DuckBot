@@ -11,6 +11,9 @@ const databaseFiles = ['afk.json', 'guild.json', 'invites.json', 'sessions.json'
 let lastHashes = {};
 let lastCommitSHA = null;
 const backupBranch = process.env.GITHUB_BACKUP_BRANCH || 'database';
+let backupWatcher = null;
+let _debounceTimer = null;
+let _lastBackupTime = 0;
 
 /**
  * Jalankan command shell
@@ -160,49 +163,67 @@ function removeDuplicates(data) {
 }
 
 /**
- * Fungsi utama backup database
+ * Trigger an immediate backup (no dedup/hash checks) — used by watcher and manual calls.
  */
-async function backupDatabase() {
-  let hasChanges = false;
-
-  for (const file of databaseFiles) {
-    const filePath = path.join(databaseDir, file);
-    if (!fs.existsSync(filePath)) continue;
-
-    if (file === 'username.json') {
-      let data = [];
-      try {
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        if (fileContent.trim()) {
-          data = JSON.parse(fileContent);
-        }
-      } catch (error) {
-        console.error(`Error reading ${file} for deduplication:`, error);
-        continue;
-      }
-
-      const uniqueData = removeDuplicates(data);
-      if (uniqueData.length !== data.length) {
-        fs.writeFileSync(filePath, JSON.stringify(uniqueData, null, 2));
-        console.log(`✅ Removed ${data.length - uniqueData.length} duplicate entries from ${file}`);
-      }
+async function triggerImmediateBackup() {
+  try {
+    const isGitRepo = fs.existsSync(path.join(process.cwd(), '.git'));
+    if (isGitRepo) {
+      await localGitCommit();
+    } else {
+      await apiBackup();
     }
-
-    const newHash = getFileHash(filePath);
-    if (newHash !== lastHashes[file]) {
-      lastHashes[file] = newHash;
-      hasChanges = true;
-    }
+  } catch (error) {
+    console.error('❌ triggerImmediateBackup failed:', error.message);
   }
+}
 
-  if (!hasChanges) return;
+/**
+ * Start watching the database directory for changes and trigger immediate backups (debounced).
+ */
+function startBackupWatcher() {
+  try {
+    if (backupWatcher) return;
+    if (!fs.existsSync(databaseDir)) return;
 
-  const isGitRepo = fs.existsSync(path.join(process.cwd(), '.git'));
+    backupWatcher = fs.watch(databaseDir, (eventType, filename) => {
+      try {
+        if (!filename) return;
+        if (!databaseFiles.includes(filename)) return;
 
-  if (isGitRepo) {
-    await localGitCommit();
-  } else {
-    await apiBackup();
+        // small debounce to batch rapid file updates
+        if (_debounceTimer) clearTimeout(_debounceTimer);
+        _debounceTimer = setTimeout(async () => {
+              const now = Date.now();
+              // avoid running backup if we just ran one a moment ago
+              if (now - _lastBackupTime < 1000) return;
+              await triggerImmediateBackup();
+              _lastBackupTime = Date.now();
+            }, 1500);
+      } catch (err) {
+        console.error('❌ Error in backup watcher handler:', err.message);
+      }
+    });
+
+    console.log(`👀 Started watching ${databaseDir} for immediate backups`);
+  } catch (error) {
+    console.error('❌ Failed to start backup watcher:', error.message);
+  }
+}
+
+function stopBackupWatcher() {
+  try {
+    if (_debounceTimer) {
+      clearTimeout(_debounceTimer);
+      _debounceTimer = null;
+    }
+    if (backupWatcher) {
+      backupWatcher.close();
+      backupWatcher = null;
+      console.log('⏹️ Stopped backup watcher');
+    }
+  } catch (error) {
+    console.error('❌ Failed to stop backup watcher:', error.message);
   }
 }
 
@@ -225,6 +246,17 @@ async function restoreDatabase() {
         const remoteContent = Buffer.from(fileData.content, fileData.encoding).toString('utf8');
         const localContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
         if (remoteContent !== localContent) {
+          // Do not blindly overwrite if local was modified very recently (protect recent runtime updates)
+          const localStat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+          const localMtime = localStat ? localStat.mtimeMs : 0;
+          const now = Date.now();
+          const GRACE_MS = 2 * 60 * 1000; // 2 minutes grace period
+
+          if (localMtime && (now - localMtime) < GRACE_MS) {
+            console.warn(`⚠️ Skipping restore of ${file} because local file was modified recently (${Math.round((now - localMtime)/1000)}s ago)`);
+            continue;
+          }
+
           fs.writeFileSync(filePath, remoteContent, 'utf8');
           console.log(`✅ Restored ${file} from ${backupBranch} via API`);
           lastHashes[file] = getFileHash(filePath);
@@ -250,4 +282,4 @@ async function checkAndPullRemoteChanges() {
   }
 })();
 
-module.exports = { backupDatabase, restoreDatabase, checkAndPullRemoteChanges };
+module.exports = { triggerImmediateBackup, restoreDatabase, checkAndPullRemoteChanges, startBackupWatcher, stopBackupWatcher };
