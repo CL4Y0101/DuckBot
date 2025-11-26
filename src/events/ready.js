@@ -195,7 +195,6 @@ module.exports = {
         console.error('❌ Initial backup failed:', error.message);
       }
 
-      // Start immediate backup watcher so any change in src/database triggers a push
       try {
         startBackupWatcher();
       } catch (err) {

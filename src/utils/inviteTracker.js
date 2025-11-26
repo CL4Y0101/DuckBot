@@ -325,7 +325,6 @@ class InviteTracker {
 
     async logInviteUsage(client, member, invite, inviterId, logChannelId) {
         try {
-            // allow fallback to global env var
             logChannelId = logChannelId || process.env.INVITE_TRACKER_CHANNEL;
             if (!logChannelId) return;
 
@@ -492,7 +491,6 @@ class InviteTracker {
                         }
                     }
                 }
-                // send a brief embed to the tracking channel if configured
                 try {
                     const guildConfig = this.getGuildConfig(guildId) || {};
                     const channelId = guildConfig.tracking?.channel || process.env.INVITE_TRACKER_CHANNEL;

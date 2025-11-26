@@ -28,7 +28,6 @@ class VerificationService {
 
             await this.updateUserProfile(user);
 
-            // Debug: log previous vs fetched nickname/verified
             try {
                 const prevEntry = data.find(u => String(u.userid) === normalizedUserid) || {};
                 const prevNick = prevEntry.roblox_nickname || '<none>';
