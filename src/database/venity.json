@@ -13,5 +13,20 @@
     },
     "verified": false,
     "updatedAt": "2025-11-27T08:24:36.495Z"
+  },
+  {
+    "userid": "1001085268046118942",
+    "username": "lexoadiz",
+    "playerName": "AwoawaCraft",
+    "playerId": 334006,
+    "xuid": "2535470103246260",
+    "guild": {
+      "id": 124,
+      "name": "BEBEKFASTMODE",
+      "tag": "BBKFM",
+      "role": "officer"
+    },
+    "verified": true,
+    "updatedAt": "2025-11-27T08:25:19.779Z"
   }
 ]
