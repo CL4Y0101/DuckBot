@@ -12,6 +12,89 @@ let client = null;
 let intervalId = null;
 let isRunning = false;
 
+const venityDbPath = path.join(__dirname, '../../database/venity.json');
+
+async function runVenityCheck(discordClient) {
+    if (!discordClient || !discordClient.isReady()) return;
+
+    try {
+        if (!fs.existsSync(venityDbPath)) return;
+        const raw = fs.readFileSync(venityDbPath, 'utf8');
+        if (!raw || !raw.trim()) return;
+        let data = JSON.parse(raw);
+        if (!Array.isArray(data)) return;
+
+        const api = new MinecraftAPI();
+        let changed = false;
+
+        for (const entry of data) {
+            try {
+                if (!entry || !entry.userid) continue;
+                // only check entries that were previously verified
+                if (!entry.verified) continue;
+
+                const playerId = entry.playerId || null;
+                let profile = null;
+                if (playerId) {
+                    profile = await api.getProfileByUUID(String(playerId));
+                } else if (entry.playerName) {
+                    // fallback: search guilds for playerName
+                    const allGuilds = await api.getAllBebekGuilds();
+                    for (const g of allGuilds || []) {
+                        if (!g || !Array.isArray(g.members)) continue;
+                        const m = g.members.find(mem => mem.playerName && String(mem.playerName).toLowerCase() === String(entry.playerName).toLowerCase());
+                        if (m) {
+                            profile = await api.getProfileByUUID(String(m.playerId));
+                            break;
+                        }
+                    }
+                }
+
+                // decide membership: if profile exists and has guild info, consider still in guild
+                const stillInGuild = !!(profile && profile.guild && profile.guild.id);
+
+                if (!stillInGuild) {
+                    // mark unverified and remove role(s)
+                    entry.verified = false;
+                    changed = true;
+
+                    try {
+                        // remove Venity-specific role and verified role
+                        const guild = discordClient.guilds.cache.get(process.env.GUILD_ID);
+                        if (guild) {
+                            const roles = getRoleIds(guild.id);
+                            const venityRoleId = roles.venityRole;
+                            const member = await guild.members.fetch(entry.userid).catch(() => null);
+                            if (member) {
+                                if (venityRoleId && member.roles.cache.has(venityRoleId)) {
+                                    await member.roles.remove(venityRoleId).catch(err => console.error('Failed to remove venity role:', err));
+                                }
+                                // also remove general verified role via roleManager
+                                await removeVerifiedRole(discordClient, entry.userid, null, { silent: true });
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error removing roles for Venity user:', err);
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking Venity entry:', err);
+            }
+        }
+
+        if (changed) {
+            try {
+                fs.writeFileSync(venityDbPath, JSON.stringify(data, null, 2));
+            } catch (e) {
+                console.error('Failed to write venity.json after venity check:', e);
+            }
+            try { await triggerImmediateBackup(); } catch (e) { console.error('triggerImmediateBackup failed after venity changes:', e); }
+        }
+    } catch (error) {
+        console.error('runVenityCheck error:', error);
+    }
+}
+
 function startScheduler(discordClient) {
     if (isRunning) {
         console.log('⚠️ Scheduler is already running');

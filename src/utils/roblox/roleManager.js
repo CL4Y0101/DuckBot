@@ -309,5 +309,5 @@ async function updateRoles(client) {
         console.error('❌ Error in role update process:', error);
     }
 }
-module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles };
+module.exports = { assignVerifiedRole, assignRegisteredRole, removeVerifiedRole, updateRoles, getRoleIds };
 
