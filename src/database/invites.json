@@ -151,14 +151,6 @@
         "createdAt": "2025-11-23T06:33:47.285Z",
         "expiresAt": "2025-11-30T06:33:47.000Z"
       },
-      "vVRtJ7nC": {
-        "code": "vVRtJ7nC",
-        "inviter": "unknown",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-11-26T11:38:53.965Z",
-        "expiresAt": "2025-11-27T11:38:53.000Z"
-      },
       "xskxqTQVvc": {
         "code": "xskxqTQVvc",
         "inviter": "862263528492105748",
@@ -280,6 +272,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-27T11:37:06.984Z"
+    "lastUpdated": "2025-11-27T11:42:07.092Z"
   }
 }
