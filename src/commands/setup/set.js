@@ -42,7 +42,7 @@ module.exports = {
     const channel = interaction.options.getChannel('channel');
     const type = interaction.options.getString('type') || 'roblox';
 
-    const attachment = new AttachmentBuilder('src/img/profile.png', {
+    const attachment = new AttachmentBuilder('src/assets/img/profile.png', {
       name: 'profile.png'
     });
 
@@ -58,7 +58,6 @@ module.exports = {
           `• The bot will search across the known Venity guilds for your membership and link your account.\n` +
           `• If found, the bot will fetch your Venity profile and store your **xuid** for future verification checks.`
         )
-        .setImage('attachment://profile.png')
         .setColor('#4CAF50');
 
       button = new ButtonBuilder()
