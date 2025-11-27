@@ -1,5 +1,9 @@
 const verificationService = require('./verifyUser');
-const { updateRoles } = require('./roleManager');
+const { updateRoles, removeVerifiedRole, getRoleIds } = require('./roleManager');
+const MinecraftAPI = require('../minecraft/minecraftAPI');
+const fs = require('fs');
+const path = require('path');
+const { triggerImmediateBackup } = require('../github/backup');
 
 const CHECK_INTERVAL = 5 * 60 * 1000;
 const INITIAL_DELAY = 30 * 1000;
@@ -57,6 +61,13 @@ async function runVerificationCheck() {
                 await updateRoles(client);
             } else {
                 console.warn('⚠️ Discord client disconnected during verification, skipping role update');
+            }
+
+            // also run Venity (Minecraft) membership checks and remove roles if left guild
+            try {
+                await runVenityCheck(client);
+            } catch (e) {
+                console.error('⚠️ Error during Venity check:', e.message || e);
             }
         })();
 

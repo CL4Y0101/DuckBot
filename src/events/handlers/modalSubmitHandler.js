@@ -13,7 +13,8 @@ const {
   triggerImmediateBackup
 } = require('../../utils/github/backup');
 const {
-  assignRegisteredRole
+  assignRegisteredRole,
+  assignVerifiedRole
 } = require('../../utils/roblox/roleManager');
 
 module.exports = {
@@ -241,21 +242,57 @@ module.exports = {
               entry.playerId = playerId;
               // fetch profile to get xuid
               const profile = await api.getProfileByUUID(String(playerId));
-              if (profile && profile.xuid) {
-                entry.xuid = profile.xuid;
+              if (profile) {
+                if (profile.xuid) entry.xuid = profile.xuid;
                 entry.guild = {
                   id: found.guild.id,
                   name: found.guild.name,
                   tag: found.guild.tag,
                   role: found.member.role
                 };
-                entry.verified = true;
-                entry.updatedAt = new Date().toISOString();
-                console.log(`Venity: Found ${playerName} in guild ${found.guild.name} (playerId=${playerId}, xuid=${entry.xuid})`);
+
+                // verify by matching discordId
+                const profileDiscord = profile.discordId || profile.discordID || profile.discord || null;
+                if (profileDiscord && String(profileDiscord) === String(userId)) {
+                  entry.verified = true;
+                  entry.updatedAt = new Date().toISOString();
+                  console.log(`Venity: Verified ${playerName} (playerId=${playerId}, xuid=${entry.xuid}) matching discordId=${profileDiscord}`);
+
+                  // assign roles: use existing verified assigner and also add Venity-specific role
+                  try {
+                    await assignVerifiedRole(client, userId);
+                  } catch (err) {
+                    console.error('Failed to assign verified role via roleManager:', err);
+                  }
+                  try {
+                    const guildObj = client.guilds.cache.get(process.env.GUILD_ID);
+                    if (guildObj) {
+                      const roleIds = require('../../utils/roblox/roleManager').getRoleIds(guildObj.id);
+                      const VENITY_ROLE_ID = roleIds.venityRole;
+                      const member = await guildObj.members.fetch(userId).catch(() => null);
+                      if (member && VENITY_ROLE_ID && !member.roles.cache.has(VENITY_ROLE_ID)) {
+                        await member.roles.add(VENITY_ROLE_ID).catch(err => console.error('Failed to add Venity role:', err));
+                      }
+                    }
+                  } catch (err) {
+                    console.error('Error assigning Venity-specific role:', err);
+                  }
+
+                  // follow up to user
+                  try {
+                    await interaction.followUp({ content: `✅ Venity verification berhasil — role telah diberikan.`, ephemeral: true });
+                  } catch (e) { /* ignore followUp errors */ }
+                } else {
+                  entry.verified = false;
+                  console.log(`Venity: Found ${playerName} (playerId=${playerId}) but discordId did not match (${profileDiscord})`);
+                  try {
+                    await interaction.followUp({ content: '⚠️ Account Venity tidak terhubung dengan Discord Anda. Silakan verifikasi akun Anda di server Discord Venity (link di server) lalu coba verifikasi ulang di sini.', ephemeral: true });
+                  } catch (e) { /* ignore */ }
+                }
               } else {
-                // no xuid but playerId exists
+                // profile fetch failed entirely
                 entry.verified = false;
-                console.log(`Venity: Found ${playerName} (playerId=${playerId}) but failed to fetch profile/xuid`);
+                console.log(`Venity: Found ${playerName} (playerId=${playerId}) but failed to fetch profile`);
               }
             } else {
               entry.verified = false;

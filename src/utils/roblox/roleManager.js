@@ -74,12 +74,15 @@ function getRoleIds(guildId) {
         if (guildConfig && guildConfig.Roles) {
             return {
                 verified: guildConfig.Roles.verified || '1405032359589449800',
-                registered: guildConfig.Roles.registered || '996367985759486042'
+                // support both 'registered' and older 'unverified' naming
+                registered: guildConfig.Roles.registered || guildConfig.Roles.unverified || '996367985759486042',
+                venityRole: guildConfig.Roles.venityRole || '996406094618443807'
             };
         }
         return {
             verified: '1405032359589449800',
-            registered: '996367985759486042'
+            registered: '996367985759486042',
+            venityRole: '996406094618443807'
         };
     } catch (error) {
         console.error('❌ Error loading guild config:', error);
