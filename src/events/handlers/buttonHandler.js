@@ -200,6 +200,73 @@ module.exports = {
             }
         }
 
+                if (interaction.customId === 'venity_verify_button') {
+                    const userId = interaction.user.id;
+
+                    const venityDbPath = path.join(__dirname, '../../database/venity.json');
+                    let data = [];
+                    if (fs.existsSync(venityDbPath)) {
+                        const fileContent = fs.readFileSync(venityDbPath, 'utf8');
+                        if (fileContent.trim()) data = JSON.parse(fileContent);
+                    }
+
+                    const existing = data.find(u => u.userid === userId);
+                    if (existing) {
+                        const embed = new EmbedBuilder()
+                            .setTitle('`🔍` Your Venity Verification Status')
+                            .setColor(existing.xuid ? '#00ff00' : '#ff6b6b')
+                            .setDescription(
+                                `- **Discord Username:** \`${interaction.user.username}\`\n` +
+                                `- **Minecraft Player:** \`${existing.playerName || 'Not set'}\`\n` +
+                                `- **Venity PlayerId:** \`${existing.playerId || 'N/A'}\`\n` +
+                                `- **xuid:** \`${existing.xuid || 'N/A'}\``
+                            );
+
+                        const button = new ButtonBuilder()
+                            .setCustomId('venity_reverify_button')
+                            .setLabel('Reverify your Minecraft name')
+                            .setStyle(ButtonStyle.Secondary);
+
+                        const row = new ActionRowBuilder().addComponents(button);
+
+                        await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+                    } else {
+                        const modal = new ModalBuilder()
+                            .setCustomId('venity_modal')
+                            .setTitle('Venity Verification');
+
+                        const nameInput = new TextInputBuilder()
+                            .setCustomId('venity_playername')
+                            .setLabel('Masukkan Minecraft username kamu:')
+                            .setStyle(TextInputStyle.Short)
+                            .setPlaceholder('contoh: BenBenKUN24')
+                            .setRequired(true);
+
+                        const row = new ActionRowBuilder().addComponents(nameInput);
+                        modal.addComponents(row);
+
+                        await interaction.showModal(modal);
+                    }
+                }
+
+                if (interaction.customId === 'venity_reverify_button') {
+                    const modal = new ModalBuilder()
+                        .setCustomId('venity_modal')
+                        .setTitle('Venity Reverify');
+
+                    const nameInput = new TextInputBuilder()
+                        .setCustomId('venity_playername')
+                        .setLabel('Masukkan Minecraft username kamu:')
+                        .setStyle(TextInputStyle.Short)
+                        .setPlaceholder('contoh: BenBenKUN24')
+                        .setRequired(true);
+
+                    const row = new ActionRowBuilder().addComponents(nameInput);
+                    modal.addComponents(row);
+
+                    await interaction.showModal(modal);
+                }
+
         if (interaction.customId === 'reverify_button') {
             const modal = new ModalBuilder()
                 .setCustomId('reverify_modal')

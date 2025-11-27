@@ -8,8 +8,9 @@ const {
 const fs = require('fs');
 const path = require('path');
 const robloxAPI = require('../../utils/roblox/robloxAPI');
+const MinecraftAPI = require('../../utils/minecraft/minecraftAPI');
 const {
-  backupDatabase
+  triggerImmediateBackup
 } = require('../../utils/github/backup');
 const {
   assignRegisteredRole
@@ -181,6 +182,103 @@ module.exports = {
         content: `✅ Username **${roblox}** berhasil disimpan!`,
         ephemeral: true
       });
+    }
+
+    // Venity / Minecraft verification modal
+    if (interaction.customId === 'venity_modal') {
+      try {
+        const playerName = interaction.fields.getTextInputValue('venity_playername');
+        const dbPath = path.join(__dirname, '../../database/venity.json');
+        let data = [];
+        try {
+          if (fs.existsSync(dbPath)) {
+            const raw = fs.readFileSync(dbPath, 'utf8');
+            if (raw.trim()) data = JSON.parse(raw);
+          }
+        } catch (e) {
+          console.error('Failed to read venity.json:', e);
+          data = [];
+        }
+
+        const userId = interaction.user.id;
+        let entry = data.find(e => e.userid === userId);
+        if (!entry) {
+          entry = {
+            userid: userId,
+            username: interaction.user.username,
+            playerName: '',
+            playerId: null,
+            xuid: null,
+            guild: null,
+            verified: false,
+            updatedAt: new Date().toISOString()
+          };
+          data.push(entry);
+        }
+
+        entry.playerName = playerName;
+        entry.updatedAt = new Date().toISOString();
+
+        // Async lookup: search bebek guilds for the playerName
+        setImmediate(async () => {
+          try {
+            const api = new MinecraftAPI();
+            const allGuilds = await api.getAllBebekGuilds();
+            let found = null;
+            if (Array.isArray(allGuilds)) {
+              for (const g of allGuilds) {
+                if (!g || !Array.isArray(g.members)) continue;
+                const m = g.members.find(mem => mem.playerName && mem.playerName.toLowerCase() === playerName.toLowerCase());
+                if (m) {
+                  found = { guild: g, member: m };
+                  break;
+                }
+              }
+            }
+
+            if (found) {
+              const playerId = found.member.playerId;
+              entry.playerId = playerId;
+              // fetch profile to get xuid
+              const profile = await api.getProfileByUUID(String(playerId));
+              if (profile && profile.xuid) {
+                entry.xuid = profile.xuid;
+                entry.guild = {
+                  id: found.guild.id,
+                  name: found.guild.name,
+                  tag: found.guild.tag,
+                  role: found.member.role
+                };
+                entry.verified = true;
+                entry.updatedAt = new Date().toISOString();
+                console.log(`Venity: Found ${playerName} in guild ${found.guild.name} (playerId=${playerId}, xuid=${entry.xuid})`);
+              } else {
+                // no xuid but playerId exists
+                entry.verified = false;
+                console.log(`Venity: Found ${playerName} (playerId=${playerId}) but failed to fetch profile/xuid`);
+              }
+            } else {
+              entry.verified = false;
+              console.log(`Venity: Player ${playerName} not found in known bebek guilds`);
+            }
+
+            try {
+              fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+            } catch (e) {
+              console.error('Failed to write venity.json:', e);
+            }
+
+            try { await triggerImmediateBackup(); } catch (e) { console.error('triggerImmediateBackup failed:', e); }
+          } catch (err) {
+            console.error('Error during Venity lookup:', err);
+          }
+        });
+
+        await interaction.reply({ content: `✅ Minecraft name **${playerName}** disimpan. Sedang mencari keanggotaan guild...`, ephemeral: true });
+      } catch (err) {
+        console.error('Error handling venity_modal submit:', err);
+        try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses verifikasi Venity.', ephemeral: true }); } catch (e) { console.error('Failed to send reply:', e); }
+      }
     }
   },
 };
