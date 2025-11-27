@@ -4,7 +4,8 @@ class MinecraftAPI {
   constructor() {
     this.venityGuildName = 'https://api.venitymc.com/v2/guild/search/{query}';
     this.venityGuildInformation = 'https://api.venitymc.com/v2/guild/info/{guildId}';
-    this.venityProfile = 'https://api.venitymc.com/v2/profile/{uuid}';
+    // Venity exposes player info at /v2/player/info/{id} (contains xuid)
+    this.venityProfile = 'https://api.venitymc.com/v2/player/info/{id}';
   }
 
   // Allowed bebek guild queries
@@ -87,20 +88,35 @@ class MinecraftAPI {
     }
   }
 
-  async getProfileByUUID(uuid) {
+  /**
+   * Fetch player info by numeric player id. Returns the player info object (contains xuid).
+   * Accepts either numeric id or xuid string; will try the /player/info endpoint first.
+   */
+  async getProfileByUUID(idOrUuid) {
     try {
-      const response = await axios.get(this.venityProfile.replace('{uuid}', uuid), {
+      // try player/info by numeric id first
+      const response = await axios.get(this.venityProfile.replace('{id}', idOrUuid), {
         headers: {
           'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
         },
         timeout: 15000
       });
-      return response.data;
+      if (response && response.data) return response.data;
+    } catch (error) {
+      // fallback: some endpoints use /v2/profile/{uuid}
+      try {
+        const alt = 'https://api.venitymc.com/v2/profile/{uuid}';
+        const resp2 = await axios.get(alt.replace('{uuid}', idOrUuid), {
+          headers: { 'User-Agent': 'DuckCommunityBot/1.0 (Node.js)' },
+          timeout: 15000
+        });
+        if (resp2 && resp2.data) return resp2.data;
+      } catch (err2) {
+        console.error(`❌ Error fetching profile for ${idOrUuid}: ${error.message} / ${err2.message}`);
+        return null;
+      }
     }
-    catch (error) {
-      console.error(`❌ Error fetching profile by UUID: ${error.message}`);
-      return null;
-    }
+    return null;
   }
 }
 module.exports = MinecraftAPI;
