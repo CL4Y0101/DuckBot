@@ -1,20 +1,16 @@
 [
-  {
-    "985901035593801749": {
-      "Roles": {
-        "verified": "482127058034491402",
-        "unverified": "985901036063486514"
-      },
-      "DV": true,
-      "dv": true,
-      "tracking": {
-        "enabled": true,
-        "channel": "1012734651489595476"
-      },
-      "Verification": {
-        "roblox": "1423651345327456316",
-        "minecraft": "1423651345327456316"
-      }
+    {
+        "985901035593801749": {
+            "Roles": {
+                "verified": "482127058034491402",
+                "unverified": "985901036063486514"
+            },
+            "DV": true,
+            "dv": true,
+            "tracking": {
+                "enabled": true,
+                "channel": "1012734651489595476"
+            }
+        }
     }
-  }
 ]
