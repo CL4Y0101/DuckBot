@@ -125,8 +125,7 @@
       },
       "dmvvpGwn": {
         "code": "dmvvpGwn",
-        "inviter": "unknown",
-        "uses": 0,
+        "uses": 1,
         "maxUses": 0,
         "createdAt": "2025-11-27T13:14:51.141Z",
         "expiresAt": "2025-11-28T13:14:51.000Z"
@@ -181,14 +180,16 @@
         "successfulInvites": 0,
         "codes": [
           "23nn5ZkF"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "1032472108414017576": {
         "totalInvites": 2,
         "successfulInvites": 2,
         "codes": [
           "2HPpcApZ"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "1001085268046118942": {
         "totalInvites": 559,
@@ -199,35 +200,40 @@
           "RYnkGsKA",
           "XHmEY5uw",
           "m4eWgQR6m3"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "760117882239320115": {
         "totalInvites": 3,
         "successfulInvites": 3,
         "codes": [
           "BSV88Hne8h"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "1439491555273478195": {
         "totalInvites": 0,
         "successfulInvites": 0,
         "codes": [
           "CnURmDHV"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "976427868177432617": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "EWUHHW7rMn"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "773522972828499969": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "H54WTanF"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "302050872383242240": {
         "totalInvites": 37,
@@ -235,28 +241,32 @@
         "codes": [
           "PVgZS9p5Kw",
           "saGPjmf2zm"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "870621270981627904": {
         "totalInvites": 3,
         "successfulInvites": 3,
         "codes": [
           "R8aAn72Awp"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "1384603415916712092": {
         "totalInvites": 0,
         "successfulInvites": 0,
         "codes": [
           "RE858pKF"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "1439523336492286013": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "V8KveXcK"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "808418614109536277": {
         "totalInvites": 18,
@@ -264,35 +274,40 @@
         "codes": [
           "YQsQttAEYa",
           "uVMBFxg3Du"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "603204060136603648": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "bPYt2Tup"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "835323968474841180": {
         "totalInvites": 19,
         "successfulInvites": 19,
         "codes": [
           "kRayGPwaZ3"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "893907569335214090": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "uyKv4etd"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       },
       "862263528492105748": {
         "totalInvites": 1,
         "successfulInvites": 1,
         "codes": [
           "xskxqTQVvc"
-        ]
+        ],
+        "uniqueInvitedMembersArray": []
       }
     },
     "lastUpdated": "2025-11-28T11:40:47.070Z"
