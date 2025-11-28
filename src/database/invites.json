@@ -155,7 +155,7 @@
       "uVMBFxg3Du": {
         "code": "uVMBFxg3Du",
         "inviter": "808418614109536277",
-        "uses": 16,
+        "uses": 17,
         "maxUses": 0,
         "createdAt": "2025-09-28T05:30:24.558Z"
       },
@@ -259,8 +259,8 @@
         ]
       },
       "808418614109536277": {
-        "totalInvites": 18,
-        "successfulInvites": 18,
+        "totalInvites": 19,
+        "successfulInvites": 19,
         "codes": [
           "YQsQttAEYa",
           "uVMBFxg3Du"
@@ -295,6 +295,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-28T13:05:47.274Z"
+    "lastUpdated": "2025-11-28T13:10:47.257Z"
   }
 }
