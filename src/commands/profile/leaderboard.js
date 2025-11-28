@@ -96,7 +96,7 @@ function createLeaderboardEmbed(users, page, sort, totalPages, displayMode = 'ro
     if (currentUser && user.userid === currentUser.userid) {
       displayMedalLink = `<a:blue_arrow_right:1437420636153577493> ${medal} ${link} <a:blue_arrow_left:1437420744815542293>`;
     }
-    desc += `${displayMedalLink}\n-# <:blank:1437120167665729638>${formatAge(user.createdDate)}\n`;
+    desc += `${displayMedalLink}\n-# <:blank:1437120167665729638> ${formatAge(user.createdDate)}\n`;
   }
 
   if (lastUpdated) {
