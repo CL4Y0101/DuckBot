@@ -46,14 +46,6 @@
         "maxUses": 0,
         "createdAt": "2022-08-25T21:47:34.379Z"
       },
-      "H54WTanF": {
-        "code": "H54WTanF",
-        "inviter": "773522972828499969",
-        "uses": 1,
-        "maxUses": 0,
-        "createdAt": "2025-11-21T15:40:49.736Z",
-        "expiresAt": "2025-11-28T15:40:49.000Z"
-      },
       "PVgZS9p5Kw": {
         "code": "PVgZS9p5Kw",
         "inviter": "302050872383242240",
@@ -222,13 +214,6 @@
           "EWUHHW7rMn"
         ]
       },
-      "773522972828499969": {
-        "totalInvites": 1,
-        "successfulInvites": 1,
-        "codes": [
-          "H54WTanF"
-        ]
-      },
       "302050872383242240": {
         "totalInvites": 37,
         "successfulInvites": 37,
@@ -295,6 +280,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-28T15:40:47.695Z"
+    "lastUpdated": "2025-11-28T15:45:47.727Z"
   }
 }
