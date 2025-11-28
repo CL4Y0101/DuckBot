@@ -1,16 +1,1 @@
-{
-  "1443848651020701719": {
-    "key": "1443848651020701719",
-    "channelId": "1011201042597281812",
-    "messageId": "1443848651020701719",
-    "type": "leaderboard",
-    "meta": {
-      "originalUserId": "1032472108414017576",
-      "page": 1,
-      "totalPages": 6,
-      "sort": "old",
-      "displayMode": "roblox"
-    },
-    "expiresAt": 1764311046134
-  }
-}
+{}
