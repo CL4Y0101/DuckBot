@@ -31,6 +31,14 @@
         "maxUses": 0,
         "createdAt": "2025-10-17T20:46:20.675Z"
       },
+      "CnURmDHV": {
+        "code": "CnURmDHV",
+        "inviter": "1439491555273478195",
+        "uses": 0,
+        "maxUses": 0,
+        "createdAt": "2025-11-28T06:32:25.721Z",
+        "expiresAt": "2025-12-05T06:32:25.000Z"
+      },
       "EWUHHW7rMn": {
         "code": "EWUHHW7rMn",
         "inviter": "976427868177432617",
@@ -200,6 +208,13 @@
           "BSV88Hne8h"
         ]
       },
+      "1439491555273478195": {
+        "totalInvites": 0,
+        "successfulInvites": 0,
+        "codes": [
+          "CnURmDHV"
+        ]
+      },
       "976427868177432617": {
         "totalInvites": 1,
         "successfulInvites": 1,
@@ -280,6 +295,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-28T06:32:09.249Z"
+    "lastUpdated": "2025-11-28T06:37:09.253Z"
   }
 }
