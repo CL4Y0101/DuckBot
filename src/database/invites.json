@@ -9,14 +9,6 @@
         "createdAt": "2025-11-24T12:56:30.352Z",
         "expiresAt": "2025-12-01T12:56:30.000Z"
       },
-      "2HPpcApZ": {
-        "code": "2HPpcApZ",
-        "inviter": "1032472108414017576",
-        "uses": 2,
-        "maxUses": 0,
-        "createdAt": "2025-11-21T14:44:15.407Z",
-        "expiresAt": "2025-11-28T14:44:15.000Z"
-      },
       "3EA2wEzM": {
         "code": "3EA2wEzM",
         "inviter": "1406172832718782474",
@@ -191,13 +183,6 @@
           "23nn5ZkF"
         ]
       },
-      "1032472108414017576": {
-        "totalInvites": 2,
-        "successfulInvites": 2,
-        "codes": [
-          "2HPpcApZ"
-        ]
-      },
       "1406172832718782474": {
         "totalInvites": 0,
         "successfulInvites": 0,
@@ -310,6 +295,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-28T14:40:47.448Z"
+    "lastUpdated": "2025-11-28T14:45:47.687Z"
   }
 }
