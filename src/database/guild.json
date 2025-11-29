@@ -21,6 +21,10 @@
                         "ownerId": "userId",
                         "channelId": "channelId",
                         "channelName": "default username discord",
+                        "slowmode": 0,
+                        "bitrate": 64000,
+                        "userlimit": 0,
+                        "region": "auto",
                         "isActive": false
                     }
                 ]
