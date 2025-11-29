@@ -288,8 +288,8 @@ class VoiceButtonBannerGenerator {
 
     // 🖼️ Generate compact version untuk embed kecil
     async generateCompactBanner() {
-        const width = 240;
-        const height = 120;
+        const width = 480;
+        const height = 80;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
@@ -311,9 +311,9 @@ class VoiceButtonBannerGenerator {
 
         // Draw compact buttons
         const startY = 60;
-        const buttonWidth = 180;
-        const buttonHeight = 50;
-        const buttonSpacing = 15;
+        const buttonWidth = 80;
+        const buttonHeight = 20;
+        const buttonSpacing = 5;
 
         compactRows.forEach((row, rowIndex) => {
             const totalButtons = row.length;
