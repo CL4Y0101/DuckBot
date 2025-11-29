@@ -18,8 +18,8 @@
                 "channel": "1411332799969103914",
                 "ownerToChannel": [
                     {
-                        "ownerId": "userId",
-                        "channelId": "channelId",
+                        "ownerId": null,
+                        "channelId": null,
                         "channelName": "default username discord",
                         "slowmode": 0,
                         "bitrate": 64000,

@@ -83,6 +83,7 @@ module.exports = {
 
       const tryDeleteChannel = async (channel) => {
         if (!channel || channel.type !== ChannelType.GuildVoice) return;
+        if (channel.id === lobbyId) return;
         const members = channel.members;
         if (members && members.size === 0) {
           const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
@@ -121,7 +122,8 @@ module.exports = {
 
                 const remIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
                 if (remIdx !== -1) {
-                  ownerToChannelArr.splice(remIdx, 1);
+                  ownerToChannelArr[remIdx].channelId = null;
+                  ownerToChannelArr[remIdx].isActive = false;
                   if (voiceContainer && voiceContainer.parsed) {
                     voiceContainer.entry.ownerToChannel = ownerToChannelArr;
                     saveGuildRaw(voiceContainer.parsed);
@@ -239,7 +241,8 @@ module.exports = {
 
                 const remIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
                 if (remIdx !== -1) {
-                  ownerToChannelArr.splice(remIdx, 1);
+                  ownerToChannelArr[remIdx].channelId = null;
+                  ownerToChannelArr[remIdx].isActive = false;
                   if (voiceContainer && voiceContainer.parsed) {
                     voiceContainer.entry.ownerToChannel = ownerToChannelArr;
                     saveGuildRaw(voiceContainer.parsed);
