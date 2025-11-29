@@ -14,6 +14,18 @@ class VoiceButtonBannerGenerator {
             'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#9B59B6' },
             'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#E67E22' }
         };
+        // map template keys to asset filenames (relative to src/assets/img)
+        this.iconFiles = {
+            'voice_btn_transfer': 'transfer.png',
+            'voice_btn_info': 'info.png',
+            'voice_btn_claim': 'claim.png',
+            'voice_btn_kick': 'kick.png',
+            'voice_btn_region': 'region.png',
+            'voice_btn_rename': 'name.png',
+            'voice_btn_limit': 'limit.png',
+            'voice_btn_bitrate': 'bitrate.png'
+        };
+        this.imageCache = {};
     }
 
     // 🖼️ Generate compact version untuk embed kecil
@@ -23,9 +35,7 @@ class VoiceButtonBannerGenerator {
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
-        // Background (very dark)
-        ctx.fillStyle = '#0f1012';
-        ctx.fillRect(0, 0, width, height);
+        // Transparent background (do not fill)
 
         // Rows definition (match publisher layout: 5 buttons top, 5 bottom with disables)
         const rows = [
@@ -40,6 +50,22 @@ class VoiceButtonBannerGenerator {
         const buttonSpacing = 14;
         const borderRadius = 22;
 
+        // Preload icons for all buttons used in these rows
+        const allIds = new Set(rows.flat());
+        await Promise.all(Array.from(allIds).map(async id => {
+            if (this.imageCache[id]) return;
+            const filename = this.iconFiles[id];
+            if (!filename) return;
+            const p = path.join(__dirname, '..', '..', 'assets', 'img', filename);
+            try {
+                if (fs.existsSync(p)) {
+                    this.imageCache[id] = await loadImage(p);
+                }
+            } catch (e) {
+                // ignore load errors
+            }
+        }));
+
         rows.forEach((row, rowIndex) => {
             const totalButtons = row.length;
             const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
@@ -48,24 +74,14 @@ class VoiceButtonBannerGenerator {
 
             row.forEach(buttonId => {
                 const template = this.buttonTemplates[buttonId];
-                // draw pill background
-                // outer shadow
-                ctx.save();
-                ctx.shadowColor = 'rgba(0,0,0,0.7)';
-                ctx.shadowBlur = 8;
-                ctx.shadowOffsetY = 3;
-                ctx.fillStyle = '#16171a';
+                // draw pill outline only (transparent background)
+                ctx.lineWidth = 1.2;
+                ctx.strokeStyle = 'rgba(255,255,255,0.04)';
                 this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
-                ctx.fill();
-                ctx.restore();
-
-                // inner slight highlight strip on top
-                ctx.fillStyle = 'rgba(255,255,255,0.02)';
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, Math.floor(buttonHeight/2), borderRadius);
-                ctx.fill();
+                ctx.stroke();
 
                 if (template) {
-                    // left colored circle
+                    // left colored circle (filled)
                     const circleX = currentX + 18;
                     const circleY = currentY + (buttonHeight / 2);
                     const circleR = 14;
@@ -74,14 +90,22 @@ class VoiceButtonBannerGenerator {
                     ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // emoji/icon inside circle
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Arial"';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(template.emoji, circleX, circleY - 1);
+                    // draw image icon if available, otherwise emoji fallback
+                    const img = this.imageCache[buttonId];
+                    if (img) {
+                        const imgSize = Math.round(circleR * 1.6);
+                        const ix = circleX - (imgSize / 2);
+                        const iy = circleY - (imgSize / 2) - 1;
+                        try { ctx.drawImage(img, ix, iy, imgSize, imgSize); } catch (e) { /* ignore */ }
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Arial"';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(template.emoji, circleX, circleY - 1);
+                    }
 
-                    // label (uppercase look)
+                    // label text
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '700 12px Arial';
                     ctx.textAlign = 'left';
@@ -89,12 +113,12 @@ class VoiceButtonBannerGenerator {
                     const textX = circleX + circleR + 10;
                     ctx.fillText((template.label || '').toUpperCase(), textX, circleY + 1);
                 } else {
-                    // disabled placeholder (dash)
+                    // disabled placeholder (dash) centered
                     ctx.fillStyle = '#9aa0a6';
                     ctx.font = '700 18px Arial';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('-', currentX + (buttonWidth/2), currentY + (buttonHeight/2));
+                    ctx.fillText('-', currentX + (buttonWidth / 2), currentY + (buttonHeight / 2));
                 }
 
                 currentX += buttonWidth + buttonSpacing;
