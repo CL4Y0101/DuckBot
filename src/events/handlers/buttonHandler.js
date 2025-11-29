@@ -414,6 +414,67 @@ module.exports = {
                 switch (interaction.customId) {
                     case 'voice_btn_bitrate': {
                         if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modalB = new ModalBuilder().setCustomId('voice_modal_bitrate').setTitle('Set Bitrate');
+                        const inputB = new TextInputBuilder().setCustomId('bitrate_input').setLabel('Bitrate (8000 - 128000)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 64000').setRequired(true);
+                        modalB.addComponents(new ActionRowBuilder().addComponents(inputB));
+                        await interaction.showModal(modalB);
+                        break;
+                    }
+                    case 'voice_btn_limit': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modalL = new ModalBuilder().setCustomId('voice_modal_limit').setTitle('Set User Limit');
+                        const inputL = new TextInputBuilder().setCustomId('limit_input').setLabel('User limit (0 = unlimited, max 99)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 10').setRequired(true);
+                        modalL.addComponents(new ActionRowBuilder().addComponents(inputL));
+                        await interaction.showModal(modalL);
+                        break;
+                    }
+                    case 'voice_btn_rename': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modalR = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
+                        const inputR = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. luhnox's Hangout").setRequired(true);
+                        modalR.addComponents(new ActionRowBuilder().addComponents(inputR));
+                        await interaction.showModal(modalR);
+                        break;
+                    }
+                    case 'voice_btn_region': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const options = [
+                            { label: 'Automatic', value: 'auto' },
+                            { label: 'Brazil', value: 'brazil' },
+                            { label: 'Hong Kong', value: 'hongkong' },
+                            { label: 'India', value: 'india' },
+                            { label: 'Japan', value: 'japan' },
+                            { label: 'Rotterdam', value: 'rotterdam' },
+                            { label: 'Singapore', value: 'singapore' },
+                            { label: 'South Africa', value: 'southafrica' },
+                            { label: 'Sydney', value: 'sydney' },
+                            { label: 'US Central', value: 'us_central' },
+                            { label: 'US East', value: 'us_east' },
+                            { label: 'US South', value: 'us_south' },
+                            { label: 'US West', value: 'us_west' }
+                        ];
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_region').setPlaceholder('Pilih region').addOptions(options.map(o => ({ label: o.label, value: o.value })));
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Pilih region untuk channel Anda:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_kick': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
+                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel.', ephemeral: true });
+                        const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Pilih user untuk dikick').setMinValues(1).setMaxValues(1).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Pilih user untuk kick dari voice:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_claim': {
+                        if (!voiceChannel) return await notInVoiceReply();
 
                         if (!mapping) {
                             return await interaction.reply({ content: '❌ Channel ini bukan dibuat atau dikelola oleh bot, sehingga tidak dapat diklaim.', ephemeral: true });
@@ -456,66 +517,6 @@ module.exports = {
 
                         mapping.ownerId = member.id;
                         mapping.isActive = true;
-                        if (parsed) saveGuildRaw(parsed);
-                        await interaction.reply({ content: '✅ Anda sekarang owner dari channel ini.', ephemeral: true });
-                        break;
-                        if (!voiceChannel) return await notInVoiceReply();
-                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
-                        const modal = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
-                        const input = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. luhnox's Hangout").setRequired(true);
-                        modal.addComponents(new ActionRowBuilder().addComponents(input));
-                        await interaction.showModal(modal);
-                        break;
-                    }
-                    case 'voice_btn_region': {
-                        if (!voiceChannel) return await notInVoiceReply();
-                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
-                        const options = [
-                            { label: 'Automatic', value: 'auto' },
-                            { label: 'Brazil', value: 'brazil' },
-                            { label: 'Hong Kong', value: 'hongkong' },
-                            { label: 'India', value: 'india' },
-                            { label: 'Japan', value: 'japan' },
-                            { label: 'Rotterdam', value: 'rotterdam' },
-                            { label: 'Singapore', value: 'singapore' },
-                            { label: 'South Africa', value: 'southafrica' },
-                            { label: 'Sydney', value: 'sydney' },
-                            { label: 'US Central', value: 'us_central' },
-                            { label: 'US East', value: 'us_east' },
-                            { label: 'US South', value: 'us_south' },
-                            { label: 'US West', value: 'us_west' }
-                        ];
-                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_region').setPlaceholder('Pilih region').addOptions(options.map(o => ({ label: o.label, value: o.value })));
-                        const row = new ActionRowBuilder().addComponents(menu);
-                        await interaction.reply({ content: 'Pilih region untuk channel Anda:', components: [row], ephemeral: true });
-                        break;
-                    }
-                    case 'voice_btn_kick': {
-                        if (!voiceChannel) return await notInVoiceReply();
-                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
-                        const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
-                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel.', ephemeral: true });
-                        const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
-                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Pilih user untuk dikick').setMinValues(1).setMaxValues(1).addOptions(options);
-                        const row = new ActionRowBuilder().addComponents(menu);
-                        await interaction.reply({ content: 'Pilih user untuk kick dari voice:', components: [row], ephemeral: true });
-                        break;
-                    }
-                    case 'voice_btn_claim': {
-                        if (!voiceChannel) return await notInVoiceReply();
-                        if (mapping && mapping.ownerId && mapping.ownerId === member.id) return await interaction.reply({ content: 'Anda sudah menjadi owner.', ephemeral: true });
-                        let currentOwnerPresent = false;
-                        if (mapping && mapping.ownerId) {
-                            currentOwnerPresent = voiceChannel.members.has(mapping.ownerId);
-                        }
-                        if (mapping && mapping.ownerId && currentOwnerPresent) return await interaction.reply({ content: 'Owner masih berada di channel, claim tidak diperbolehkan.', ephemeral: true });
-                        if (!mapping) {
-                            mapping = { ownerId: member.id, channelId: voiceChannel.id, channelName: voiceChannel.name, slowmode: 0, bitrate: voiceChannel.bitrate || 64000, userlimit: voiceChannel.userLimit || 0, region: 'auto', isActive: true };
-                            voiceCfg.ownerToChannel.push(mapping);
-                        } else {
-                            mapping.ownerId = member.id;
-                            mapping.isActive = true;
-                        }
                         if (parsed) saveGuildRaw(parsed);
                         await interaction.reply({ content: '✅ Anda sekarang owner dari channel ini.', ephemeral: true });
                         break;
