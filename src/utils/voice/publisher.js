@@ -34,13 +34,12 @@ async function publishVoiceSetupEmbeds(client) {
                 let botMessage = null;
                 try {
                     const messages = await channelObj.messages.fetch({ limit: 50 });
-                    botMessage = messages.find(m => m.author && m.author.id === client.user.id && m.embeds && m.embeds.length > 0 && m.embeds[0].title && m.embeds[0].title.includes('Temporary Voice Setup'));
-                } catch (e) {
-                }
+                    botMessage = messages.find(m => m.author && m.author.id === client.user.id && m.embeds && m.embeds.length > 0 && m.embeds[0].title && (m.embeds[0].title.includes('Temporary Voice Setup') || m.embeds[0].title.includes('Voice Channel Configuration')));
+                } catch (e) { }
 
                 const embed = new EmbedBuilder()
-                    .setTitle('Temporary Voice Setup')
-                    .setDescription(`Gunakan perintah atau klik tombol (nanti) untuk menetapkan voice channel aktif sebagai lobby.\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
+                    .setTitle('Voice Channel Configuration')
+                    .setDescription(`This **Configuration** can be used to manage voice channels.\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
                     .setColor('#5865F2');
 
                 let attachment = null;
