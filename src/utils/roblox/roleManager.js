@@ -280,14 +280,24 @@ async function updateRoles(client) {
                         console.log(`✅ ${user.username} verified with nickname: ${user.roblox_nickname || 'N/A'} (guild: ${guild.id || 'default'})`);
                     }
                     console.log(`➡️ Assigning verified role (${roleIdsGlobal.verified}) to user ${user.userid}`);
-                    await assignVerifiedRole(client, user.userid, null, { silent: true });
+                    try {
+                        const ok = await assignVerifiedRole(client, user.userid, null, { silent: false });
+                        if (!ok) console.warn(`⚠️ assignVerifiedRole returned false for user ${user.userid}`);
+                    } catch (e) {
+                        console.error(`⚠️ Error calling assignVerifiedRole for ${user.userid}:`, e);
+                    }
                 } else {
                     if (!logState.notVerified.includes(user.userid) && logsToShow.notVerified.length < 5) {
                         logsToShow.notVerified.push(user.userid);
                         console.log(`❌ ${user.username} not verified (nickname: ${user.roblox_nickname || 'N/A'}) (guild: ${guild.id || 'default'})`);
                     }
                     console.log(`⬅️ Removing verified role (${roleIdsGlobal.verified}) from user ${user.userid}`);
-                    await removeVerifiedRole(client, user.userid, null, { silent: true });
+                    try {
+                        const ok = await removeVerifiedRole(client, user.userid, null, { silent: false });
+                        if (!ok) console.warn(`⚠️ removeVerifiedRole returned false for user ${user.userid}`);
+                    } catch (e) {
+                        console.error(`⚠️ Error calling removeVerifiedRole for ${user.userid}:`, e);
+                    }
                 }
                 
                 updatedCount++;

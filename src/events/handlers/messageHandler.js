@@ -53,7 +53,7 @@ module.exports = {
   async execute(message, client) {
     if (message.author.bot) return;
 
-    const config = getConfig();
+    const config = loadConfig();
     const settings = config.settings || {};
     const afkConfig = config.afk || {};
     const prefix = settings.prefix || '!';
