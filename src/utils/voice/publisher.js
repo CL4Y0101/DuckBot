@@ -46,7 +46,7 @@ async function publishVoiceSetupEmbeds(client) {
                 // Try generating a visual banner for the voice buttons. If generation fails (missing canvas, etc.), continue without image.
                 let attachment = null;
                 try {
-                    const buffer = await bannerGen.generateVoiceControlBanner();
+                    const buffer = await bannerGen.generateCompactBanner();
                     if (buffer) {
                         attachment = new AttachmentBuilder(buffer, { name: 'voice_buttons.png' });
                         embed.setImage('attachment://voice_buttons.png');
