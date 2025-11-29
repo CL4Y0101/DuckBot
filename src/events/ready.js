@@ -3,7 +3,7 @@ const { getCommandFiles } = require('../utils/commandLoader');
 const { updateRobloxUIDs } = require('../utils/roblox/updateRobloxUIDs');
 const verificationService = require('../utils/roblox/verifyUser');
 const { startScheduler } = require('../utils/roblox/scheduler');
-  const { triggerImmediateBackup, checkAndPullRemoteChanges, startBackupWatcher } = require('../utils/github/backup');
+const { triggerImmediateBackup, checkAndPullRemoteChanges, startBackupWatcher } = require('../utils/github/backup');
 const inviteTracker = require('../utils/inviteTracker');
 const fs = require('fs');
 const path = require('path');
@@ -109,6 +109,15 @@ module.exports = {
     try {
       console.log('🔄 Initializing services...');
       
+      // pull remote database first so services use the latest remote state
+      try {
+        console.log('🔽 Pulling remote database before initializing services...');
+        await checkAndPullRemoteChanges();
+        console.log('✅ Remote database pull completed');
+      } catch (err) {
+        console.error('❌ Initial pull of remote database failed:', err && err.message ? err.message : err);
+      }
+
       console.log('📊 Updating Roblox UIDs...');
       await updateRobloxUIDs();
       console.log('✅ Roblox UIDs updated');
