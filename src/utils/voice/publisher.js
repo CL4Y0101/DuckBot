@@ -50,10 +50,10 @@ async function publishVoiceSetupEmbeds(client) {
                 );
 
                 const row2 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setLabel('Kick').setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setLabel('Claim').setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setLabel('Kick').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setLabel('Claim').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setLabel('Info').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setLabel('Transfer').setStyle(ButtonStyle.Primary)
+                    new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setLabel('Transfer').setStyle(ButtonStyle.Secondary)
                 );
 
                 const components = [row1, row2];
