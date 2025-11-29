@@ -46,11 +46,11 @@ async function publishVoiceSetupEmbeds(client) {
                     new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setLabel('Bitrate').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setLabel('Limit').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setLabel('Rename').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setLabel('Region').setStyle(ButtonStyle.Secondary)
+                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setLabel('Region').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setLabel('Kick').setStyle(ButtonStyle.Secondary)
                 );
 
                 const row2 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setLabel('Kick').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setLabel('Claim').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setLabel('Info').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setLabel('Transfer').setStyle(ButtonStyle.Secondary)
