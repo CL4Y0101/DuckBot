@@ -84,14 +84,6 @@
         "maxUses": 0,
         "createdAt": "2022-08-24T15:14:52.873Z"
       },
-      "RE858pKF": {
-        "code": "RE858pKF",
-        "inviter": "1384603415916712092",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-11-22T09:47:10.200Z",
-        "expiresAt": "2025-11-29T09:47:10.000Z"
-      },
       "V8KveXcK": {
         "code": "V8KveXcK",
         "inviter": "1439523336492286013",
@@ -243,13 +235,6 @@
           "R8aAn72Awp"
         ]
       },
-      "1384603415916712092": {
-        "totalInvites": 0,
-        "successfulInvites": 0,
-        "codes": [
-          "RE858pKF"
-        ]
-      },
       "1439523336492286013": {
         "totalInvites": 1,
         "successfulInvites": 1,
@@ -301,6 +286,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-29T09:42:18.032Z"
+    "lastUpdated": "2025-11-29T09:47:18.024Z"
   }
 }
