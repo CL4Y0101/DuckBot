@@ -28,7 +28,7 @@
       "B2tzAwNF5k": {
         "code": "B2tzAwNF5k",
         "inviter": "1001085268046118942",
-        "uses": 557,
+        "uses": 558,
         "maxUses": 0,
         "createdAt": "2025-07-10T02:46:50.964Z"
       },
@@ -190,8 +190,8 @@
         ]
       },
       "1001085268046118942": {
-        "totalInvites": 564,
-        "successfulInvites": 564,
+        "totalInvites": 565,
+        "successfulInvites": 565,
         "codes": [
           "B2tzAwNF5k",
           "Qwcb7YzV",
@@ -286,6 +286,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-29T14:37:18.401Z"
+    "lastUpdated": "2025-11-29T14:42:18.451Z"
   }
 }
