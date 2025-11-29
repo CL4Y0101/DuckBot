@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const guildDbPath = path.join(__dirname, '../../database/guild.json');
+const creationCooldowns = new Map();
 
 function getGuildConfig(guildId) {
   try {
@@ -90,6 +91,7 @@ module.exports = {
         if (!members || members.size !== 0) return;
 
         const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
+        const ownerIdForCooldown = ownerIdx !== -1 ? ownerToChannelArr[ownerIdx].ownerId : null;
 
         if (ownerIdx !== -1) {
           ownerToChannelArr[ownerIdx].isActive = false;
@@ -121,8 +123,17 @@ module.exports = {
           try {
             if (latest) await latest.delete('Temporary voice channel empty - cleanup');
             else await channel.delete('Temporary voice channel empty - cleanup');
+
+            if (ownerIdForCooldown) {
+              const key = `${guild.id}:${ownerIdForCooldown}`;
+              creationCooldowns.set(key, Date.now() + 10000);
+            }
           } catch (e) {
             console.error('Failed to delete temp voice channel:', e);
+            if (ownerIdForCooldown) {
+              const key = `${guild.id}:${ownerIdForCooldown}`;
+              creationCooldowns.set(key, Date.now() + 10000);
+            }
           }
         } catch (e) {
           console.error('Error during immediate cleanup for temp voice channel:', e);
@@ -133,6 +144,17 @@ module.exports = {
         if (lobbyId && newState.channelId === lobbyId) {
           const member = newState.member;
           if (!member) return;
+
+          const cooldownKey = `${guild.id}:${member.id}`;
+          const expiresAt = creationCooldowns.get(cooldownKey);
+          if (expiresAt && Date.now() < expiresAt) {
+            const expirySec = Math.floor(expiresAt / 1000);
+            try {
+              await member.send(`Anda sedang dalam cooldown pembuatan channel. Silakan coba lagi <t:${expirySec}:R>`);
+            } catch (e) {
+            }
+            return;
+          }
 
           const existingEntry = ownerToChannelArr.find(o => o.ownerId === member.id && o.channelId);
           if (existingEntry) {
