@@ -128,13 +128,13 @@ module.exports = {
 
             if (ownerIdForCooldown) {
               const key = `${guild.id}:${ownerIdForCooldown}`;
-              creationCooldowns.set(key, Date.now() + 10000);
+              creationCooldowns.set(key, Date.now() + 30000);
             }
           } catch (e) {
             console.error('Failed to delete temp voice channel:', e);
             if (ownerIdForCooldown) {
               const key = `${guild.id}:${ownerIdForCooldown}`;
-              creationCooldowns.set(key, Date.now() + 10000);
+              creationCooldowns.set(key, Date.now() + 30000);
             }
           }
         } catch (e) {
