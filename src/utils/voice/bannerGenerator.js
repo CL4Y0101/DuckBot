@@ -6,97 +6,97 @@ class VoiceButtonBannerGenerator {
     constructor() {
         this.buttonTemplates = {
             // Row 1 - Top buttons (NAME, LIMIT, PRIVACY, WAITING ROOM, CHAT)
-            'voice_btn_rename': { 
-                emoji: '📝', 
-                label: 'NAME', 
+            'voice_btn_rename': {
+                emoji: '📝',
+                label: 'NAME',
                 color: '#5865F2',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_limit': { 
-                emoji: '👥', 
-                label: 'LIMIT', 
+            'voice_btn_limit': {
+                emoji: '👥',
+                label: 'LIMIT',
                 color: '#EB459E',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_privacy': { 
-                emoji: '🔒', 
-                label: 'PRIVACY', 
+            'voice_btn_privacy': {
+                emoji: '🔒',
+                label: 'PRIVACY',
                 color: '#57F287',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_waiting': { 
-                emoji: '⏳', 
-                label: 'WAITING R.', 
+            'voice_btn_waiting': {
+                emoji: '⏳',
+                label: 'WAITING R.',
                 color: '#FEE75C',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_chat': { 
-                emoji: '💬', 
-                label: 'CHAT', 
+            'voice_btn_chat': {
+                emoji: '💬',
+                label: 'CHAT',
                 color: '#9B59B6',
                 bgColor: '#1E1F29'
             },
 
             // Row 2 - Middle buttons (TRUST, UNTRUST, INVITE, KICK, REGION)
-            'voice_btn_trust': { 
-                emoji: '✅', 
-                label: 'TRUST', 
+            'voice_btn_trust': {
+                emoji: '✅',
+                label: 'TRUST',
                 color: '#57F287',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_untrust': { 
-                emoji: '❌', 
-                label: 'UNTRUST', 
+            'voice_btn_untrust': {
+                emoji: '❌',
+                label: 'UNTRUST',
                 color: '#ED4245',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_invite': { 
-                emoji: '📨', 
-                label: 'INVITE', 
+            'voice_btn_invite': {
+                emoji: '📨',
+                label: 'INVITE',
                 color: '#5865F2',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_kick': { 
-                emoji: '👢', 
-                label: 'KICK', 
+            'voice_btn_kick': {
+                emoji: '👢',
+                label: 'KICK',
                 color: '#ED4245',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_region': { 
-                emoji: '🌐', 
-                label: 'REGION', 
+            'voice_btn_region': {
+                emoji: '🌐',
+                label: 'REGION',
                 color: '#3498DB',
                 bgColor: '#1E1F29'
             },
 
             // Row 3 - Bottom buttons (BLOCK, UNBLOCK, CLAIM, TRANSFER, DELETE)
-            'voice_btn_block': { 
-                emoji: '🚫', 
-                label: 'BLOCK', 
+            'voice_btn_block': {
+                emoji: '🚫',
+                label: 'BLOCK',
                 color: '#ED4245',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_unblock': { 
-                emoji: '🔓', 
-                label: 'UNBLOCK', 
+            'voice_btn_unblock': {
+                emoji: '🔓',
+                label: 'UNBLOCK',
                 color: '#57F287',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_claim': { 
-                emoji: '👑', 
-                label: 'CLAIM', 
+            'voice_btn_claim': {
+                emoji: '👑',
+                label: 'CLAIM',
                 color: '#FEE75C',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_transfer': { 
-                emoji: '🔄', 
-                label: 'TRANSFER', 
+            'voice_btn_transfer': {
+                emoji: '🔄',
+                label: 'TRANSFER',
                 color: '#9B59B6',
                 bgColor: '#1E1F29'
             },
-            'voice_btn_delete': { 
-                emoji: '🗑️', 
-                label: 'DELETE', 
+            'voice_btn_delete': {
+                emoji: '🗑️',
+                label: 'DELETE',
                 color: '#E74C3C',
                 bgColor: '#1E1F29'
             }
@@ -140,7 +140,7 @@ class VoiceButtonBannerGenerator {
             [
                 'voice_btn_rename',
                 'voice_btn_limit',
-                'voice_btn_privacy', 
+                'voice_btn_privacy',
                 'voice_btn_waiting',
                 'voice_btn_chat'
             ],
@@ -155,7 +155,7 @@ class VoiceButtonBannerGenerator {
             // Row 3: BLOCK, UNBLOCK, CLAIM, TRANSFER, DELETE
             [
                 'voice_btn_block',
-                'voice_btn_unblock', 
+                'voice_btn_unblock',
                 'voice_btn_claim',
                 'voice_btn_transfer',
                 'voice_btn_delete'
@@ -203,11 +203,11 @@ class VoiceButtonBannerGenerator {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         ctx.shadowBlur = 10;
         ctx.shadowOffsetY = 4;
-        
+
         ctx.fillStyle = template.bgColor || '#1E1F29';
         this.drawRoundedRect(ctx, x, y, width, height, radius);
         ctx.fill();
-        
+
         ctx.restore();
 
         // Border glow effect
@@ -238,19 +238,19 @@ class VoiceButtonBannerGenerator {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = 'bold 14px "Arial"';
         ctx.textAlign = 'left';
-        
+
         const textX = iconX + iconSize + 10;
         const textY = iconY;
-        
+
         ctx.fillText(template.label, textX, textY);
 
         // Subtitle/description kecil
         ctx.fillStyle = '#B9BBBE';
         ctx.font = '10px "Arial"';
-        
+
         // Tambahkan deskripsi berdasarkan button type
         let description = '';
-        switch(template.label) {
+        switch (template.label) {
             case 'NAME': description = 'Change name'; break;
             case 'LIMIT': description = 'Set user limit'; break;
             case 'PRIVACY': description = 'Toggle privacy'; break;
@@ -267,7 +267,7 @@ class VoiceButtonBannerGenerator {
             case 'TRANSFER': description = 'Transfer owner'; break;
             case 'DELETE': description = 'Delete channel'; break;
         }
-        
+
         ctx.fillText(description, textX, textY + 15);
     }
 
@@ -297,20 +297,20 @@ class VoiceButtonBannerGenerator {
         ctx.fillStyle = '#0D0E12';
         ctx.fillRect(0, 0, width, height);
 
-        // Title
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 24px "Arial"';
-        ctx.textAlign = 'center';
-        ctx.fillText('VOICE CONTROL PANEL', width / 2, 25);
+        // // Title
+        // ctx.fillStyle = '#FFFFFF';
+        // ctx.font = 'bold 24px "Arial"';
+        // ctx.textAlign = 'center';
+        // ctx.fillText('VOICE CONTROL PANEL', width / 2, 25);
 
         // Define compact rows
         const compactRows = [
-            ['voice_btn_rename', 'voice_btn_limit', 'voice_btn_privacy', 'voice_btn_region'],
-            ['voice_btn_invite', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_transfer']
+            ['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick'],
+            ['voice_btn_invite', 'voice_btn_claim', 'voice_btn_transfer']
         ];
 
         // Draw compact buttons
-        const startY = 60;
+        const startY = 40;
         const buttonWidth = 80;
         const buttonHeight = 20;
         const buttonSpacing = 5;
