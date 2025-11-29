@@ -132,7 +132,7 @@
       "saGPjmf2zm": {
         "code": "saGPjmf2zm",
         "inviter": "302050872383242240",
-        "uses": 36,
+        "uses": 37,
         "maxUses": 0,
         "createdAt": "2022-10-20T06:57:16.184Z"
       },
@@ -221,8 +221,8 @@
         ]
       },
       "302050872383242240": {
-        "totalInvites": 38,
-        "successfulInvites": 38,
+        "totalInvites": 39,
+        "successfulInvites": 39,
         "codes": [
           "PVgZS9p5Kw",
           "saGPjmf2zm"
@@ -286,6 +286,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-29T10:32:18.111Z"
+    "lastUpdated": "2025-11-29T10:37:18.202Z"
   }
 }
