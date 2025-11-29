@@ -5,52 +5,175 @@ const path = require('path');
 class VoiceButtonBannerGenerator {
     constructor() {
         this.buttonTemplates = {
-            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#2C2F33' },
-            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#2C2F33' },
-            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#2C2F33' },
-            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#2C2F33' },
-            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#2C2F33' },
-            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#2C2F33' },
-            'voice_btn_info': { emoji: 'ℹ️', label: 'INFO', color: '#2C2F33' },
-            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#2C2F33' },
-            'voice_disable_left': { emoji: '⚫', label: '', color: '#2C2F33' },
-            'voice_disable_right': { emoji: '⚫', label: '', color: '#2C2F33' }
+            // Row 1 - Top buttons (NAME, LIMIT, PRIVACY, WAITING ROOM, CHAT)
+            'voice_btn_rename': { 
+                emoji: '📝', 
+                label: 'NAME', 
+                color: '#5865F2',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_limit': { 
+                emoji: '👥', 
+                label: 'LIMIT', 
+                color: '#EB459E',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_privacy': { 
+                emoji: '🔒', 
+                label: 'PRIVACY', 
+                color: '#57F287',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_waiting': { 
+                emoji: '⏳', 
+                label: 'WAITING R.', 
+                color: '#FEE75C',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_chat': { 
+                emoji: '💬', 
+                label: 'CHAT', 
+                color: '#9B59B6',
+                bgColor: '#1E1F29'
+            },
+
+            // Row 2 - Middle buttons (TRUST, UNTRUST, INVITE, KICK, REGION)
+            'voice_btn_trust': { 
+                emoji: '✅', 
+                label: 'TRUST', 
+                color: '#57F287',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_untrust': { 
+                emoji: '❌', 
+                label: 'UNTRUST', 
+                color: '#ED4245',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_invite': { 
+                emoji: '📨', 
+                label: 'INVITE', 
+                color: '#5865F2',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_kick': { 
+                emoji: '👢', 
+                label: 'KICK', 
+                color: '#ED4245',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_region': { 
+                emoji: '🌐', 
+                label: 'REGION', 
+                color: '#3498DB',
+                bgColor: '#1E1F29'
+            },
+
+            // Row 3 - Bottom buttons (BLOCK, UNBLOCK, CLAIM, TRANSFER, DELETE)
+            'voice_btn_block': { 
+                emoji: '🚫', 
+                label: 'BLOCK', 
+                color: '#ED4245',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_unblock': { 
+                emoji: '🔓', 
+                label: 'UNBLOCK', 
+                color: '#57F287',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_claim': { 
+                emoji: '👑', 
+                label: 'CLAIM', 
+                color: '#FEE75C',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_transfer': { 
+                emoji: '🔄', 
+                label: 'TRANSFER', 
+                color: '#9B59B6',
+                bgColor: '#1E1F29'
+            },
+            'voice_btn_delete': { 
+                emoji: '🗑️', 
+                label: 'DELETE', 
+                color: '#E74C3C',
+                bgColor: '#1E1F29'
+            }
         };
     }
 
-    // 🎨 Generate banner dengan button visuals
-    async generateButtonBanner(rows = []) {
-        const width = 960;
-        const height = 260;
+    // 🎨 Generate banner dengan design mirip gambar
+    async generateVoiceControlBanner() {
+        const width = 1000;
+        const height = 380;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
-        // Background
-        ctx.fillStyle = '#0b0c0e';
+        // Background gradient gelap
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#0D0E12');
+        gradient.addColorStop(0.5, '#13141A');
+        gradient.addColorStop(1, '#0D0E12');
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
 
-        // Title
+        // Header dengan garis dekoratif
+        ctx.fillStyle = '#5865F2';
+        ctx.fillRect(0, 0, width, 4);
+
+        // Title utama
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = '700 22px Arial';
+        ctx.font = 'bold 32px "Arial"';
         ctx.textAlign = 'center';
-        ctx.fillText('VOICE CHANNEL CONTROL', width / 2, 36);
+        ctx.textBaseline = 'top';
+        ctx.fillText('VOICE CHANNEL CONTROL PANEL', width / 2, 20);
 
         // Subtitle
-        ctx.fillStyle = '#BFC7D9';
-        ctx.font = '14px Arial';
-        ctx.fillText('Manage your temporary voice channel', width / 2, 60);
+        ctx.fillStyle = '#B9BBBE';
+        ctx.font = '16px "Arial"';
+        ctx.fillText('Manage your temporary voice channel with advanced controls', width / 2, 60);
 
-        // Draw buttons untuk setiap row (gaya pill gelap dengan icon bulat berwarna di kiri)
-        let currentY = 80;
+        // Define rows sesuai gambar
+        const rows = [
+            // Row 1: NAME, LIMIT, PRIVACY, WAITING R., CHAT
+            [
+                'voice_btn_rename',
+                'voice_btn_limit',
+                'voice_btn_privacy', 
+                'voice_btn_waiting',
+                'voice_btn_chat'
+            ],
+            // Row 2: TRUST, UNTRUST, INVITE, KICK, REGION
+            [
+                'voice_btn_trust',
+                'voice_btn_untrust',
+                'voice_btn_invite',
+                'voice_btn_kick',
+                'voice_btn_region'
+            ],
+            // Row 3: BLOCK, UNBLOCK, CLAIM, TRANSFER, DELETE
+            [
+                'voice_btn_block',
+                'voice_btn_unblock', 
+                'voice_btn_claim',
+                'voice_btn_transfer',
+                'voice_btn_delete'
+            ]
+        ];
+
+        // Draw buttons untuk setiap row
+        const startY = 100;
         const buttonWidth = 180;
-        const buttonHeight = 48;
-        const buttonSpacing = 18;
-        const borderRadius = 28;
+        const buttonHeight = 65;
+        const buttonSpacing = 15;
+        const borderRadius = 12;
 
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
             const totalButtons = row.length;
             const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
             let currentX = Math.round((width - totalWidth) / 2);
+            const currentY = startY + (rowIndex * (buttonHeight + 20));
 
             row.forEach(buttonId => {
                 const template = this.buttonTemplates[buttonId];
@@ -59,57 +182,93 @@ class VoiceButtonBannerGenerator {
                     return;
                 }
 
-                // Outer pill (dark)
-                ctx.save();
-                ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                ctx.shadowBlur = 8;
-                ctx.shadowOffsetY = 3;
-                ctx.fillStyle = '#0f1113';
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
-                ctx.fill();
-                ctx.restore();
-
-                // Small colored circle for icon at left
-                const circleRadius = 18;
-                const circleX = currentX + 20;
-                const circleY = currentY + (buttonHeight / 2);
-                ctx.beginPath();
-                ctx.fillStyle = template.color || '#5865F2';
-                ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Emoji / icon inside circle
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = '18px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(template.emoji, circleX, circleY);
-
-                // Label text (left aligned after icon)
-                const textX = circleX + circleRadius + 12;
-                const textY = currentY + (buttonHeight / 2) + 6; // vertical tweak
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = '700 14px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(template.label, textX, textY);
-
-                // subtle separator (very faint)
-                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-                ctx.lineWidth = 1;
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
-                ctx.stroke();
-
+                this.drawModernButton(ctx, currentX, currentY, buttonWidth, buttonHeight, template, borderRadius);
                 currentX += buttonWidth + buttonSpacing;
             });
-
-            currentY += buttonHeight + 18;
         });
 
-        // Footer thin line
-        ctx.fillStyle = 'rgba(255,255,255,0.03)';
-        ctx.fillRect(0, height - 6, width, 6);
+        // Footer dengan informasi
+        ctx.fillStyle = '#72767D';
+        ctx.font = '12px "Arial"';
+        ctx.textAlign = 'center';
+        ctx.fillText('• Use these controls to manage your temporary voice channel •', width / 2, height - 25);
 
         return canvas.toBuffer();
+    }
+
+    // 🎯 Draw modern button dengan design mirip gambar
+    drawModernButton(ctx, x, y, width, height, template, radius) {
+        // Button background dengan shadow
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillStyle = template.bgColor || '#1E1F29';
+        this.drawRoundedRect(ctx, x, y, width, height, radius);
+        ctx.fill();
+        
+        ctx.restore();
+
+        // Border glow effect
+        ctx.strokeStyle = template.color + '40';
+        ctx.lineWidth = 1;
+        this.drawRoundedRect(ctx, x, y, width, height, radius);
+        ctx.stroke();
+
+        // Icon circle dengan gradient
+        const iconSize = 28;
+        const iconX = x + 20;
+        const iconY = y + (height / 2) - 5;
+
+        // Circle background
+        ctx.fillStyle = template.color + '20';
+        ctx.beginPath();
+        ctx.arc(iconX, iconY, iconSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Icon/emoji
+        ctx.fillStyle = template.color;
+        ctx.font = `18px "Arial"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(template.emoji, iconX, iconY);
+
+        // Label text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 14px "Arial"';
+        ctx.textAlign = 'left';
+        
+        const textX = iconX + iconSize + 10;
+        const textY = iconY;
+        
+        ctx.fillText(template.label, textX, textY);
+
+        // Subtitle/description kecil
+        ctx.fillStyle = '#B9BBBE';
+        ctx.font = '10px "Arial"';
+        
+        // Tambahkan deskripsi berdasarkan button type
+        let description = '';
+        switch(template.label) {
+            case 'NAME': description = 'Change name'; break;
+            case 'LIMIT': description = 'Set user limit'; break;
+            case 'PRIVACY': description = 'Toggle privacy'; break;
+            case 'WAITING R.': description = 'Waiting room'; break;
+            case 'CHAT': description = 'Text channel'; break;
+            case 'TRUST': description = 'Add to trusted'; break;
+            case 'UNTRUST': description = 'Remove trust'; break;
+            case 'INVITE': description = 'Invite users'; break;
+            case 'KICK': description = 'Kick user'; break;
+            case 'REGION': description = 'Change region'; break;
+            case 'BLOCK': description = 'Block user'; break;
+            case 'UNBLOCK': description = 'Unblock user'; break;
+            case 'CLAIM': description = 'Claim ownership'; break;
+            case 'TRANSFER': description = 'Transfer owner'; break;
+            case 'DELETE': description = 'Delete channel'; break;
+        }
+        
+        ctx.fillText(description, textX, textY + 15);
     }
 
     // 🔧 Utility function untuk rounded rectangle
@@ -127,59 +286,84 @@ class VoiceButtonBannerGenerator {
         ctx.closePath();
     }
 
-    // 🖼️ Generate banner berdasarkan button configuration
-    async generateVoiceControlBanner() {
-        // Define button rows sesuai dengan setup Anda
-        const row1 = [
-            'voice_btn_bitrate',
-            'voice_btn_limit', 
-            'voice_btn_rename',
-            'voice_btn_region',
-            'voice_btn_kick'
-        ];
-
-        const row2 = [
-            'voice_disable_left',
-            'voice_btn_claim',
-            'voice_btn_info',
-            'voice_btn_transfer', 
-            'voice_disable_right'
-        ];
-
-        return await this.generateButtonBanner([row1, row2]);
-    }
-
-    // 🎯 Generate banner untuk specific voice channel info
-    async generateChannelInfoBanner(channelInfo) {
+    // 🖼️ Generate compact version untuk embed kecil
+    async generateCompactBanner() {
         const width = 800;
-        const height = 200;
+        const height = 280;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
         // Background
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, '#5865F2');
-        gradient.addColorStop(1, '#EB459E');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        // Overlay
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillStyle = '#0D0E12';
         ctx.fillRect(0, 0, width, height);
 
         // Title
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 32px Arial';
+        ctx.font = 'bold 24px "Arial"';
         ctx.textAlign = 'center';
-        ctx.fillText('VOICE CHANNEL INFO', width / 2, 50);
+        ctx.fillText('VOICE CONTROL PANEL', width / 2, 25);
 
-        // Channel info
-        ctx.font = '20px Arial';
-        ctx.fillText(`Channel: ${channelInfo.name || 'Unknown'}`, width / 2, 90);
-        ctx.fillText(`Bitrate: ${channelInfo.bitrate ? `${channelInfo.bitrate / 1000}kbps` : 'N/A'}`, width / 2, 120);
-        ctx.fillText(`Users: ${channelInfo.userCount || 0}/${channelInfo.userLimit || 'Unlimited'}`, width / 2, 150);
+        // Define compact rows
+        const compactRows = [
+            ['voice_btn_rename', 'voice_btn_limit', 'voice_btn_privacy', 'voice_btn_region'],
+            ['voice_btn_invite', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_transfer']
+        ];
+
+        // Draw compact buttons
+        const startY = 60;
+        const buttonWidth = 180;
+        const buttonHeight = 50;
+        const buttonSpacing = 15;
+
+        compactRows.forEach((row, rowIndex) => {
+            const totalButtons = row.length;
+            const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
+            let currentX = Math.round((width - totalWidth) / 2);
+            const currentY = startY + (rowIndex * (buttonHeight + 15));
+
+            row.forEach(buttonId => {
+                const template = this.buttonTemplates[buttonId];
+                if (!template) {
+                    currentX += buttonWidth + buttonSpacing;
+                    return;
+                }
+
+                this.drawCompactButton(ctx, currentX, currentY, buttonWidth, buttonHeight, template, 8);
+                currentX += buttonWidth + buttonSpacing;
+            });
+        });
 
         return canvas.toBuffer();
+    }
+
+    // 🎯 Draw compact button
+    drawCompactButton(ctx, x, y, width, height, template, radius) {
+        // Button background
+        ctx.fillStyle = template.bgColor || '#1E1F29';
+        this.drawRoundedRect(ctx, x, y, width, height, radius);
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = template.color + '40';
+        ctx.lineWidth = 1;
+        this.drawRoundedRect(ctx, x, y, width, height, radius);
+        ctx.stroke();
+
+        // Icon
+        const iconX = x + 15;
+        const iconY = y + (height / 2);
+
+        ctx.fillStyle = template.color;
+        ctx.font = `16px "Arial"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(template.emoji, iconX, iconY);
+
+        // Label
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 13px "Arial"';
+        ctx.textAlign = 'left';
+        ctx.fillText(template.label, iconX + 25, iconY);
     }
 }
 
