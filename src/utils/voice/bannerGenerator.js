@@ -32,10 +32,19 @@ class VoiceButtonBannerGenerator {
     async generateCompactBanner() {
         const width = 640;
         const height = 140;
-        const canvas = createCanvas(width, height);
-        const ctx = canvas.getContext('2d');
 
-        // Transparent background (do not fill)
+        // Attempt to register a bundled font for crisper text if available
+        try {
+            const fontPath = path.join(__dirname, '..', '..', 'assets', 'fonts', 'Inter-Bold.ttf');
+            if (fs.existsSync(fontPath)) registerFont(fontPath, { family: 'InterCustom' });
+        } catch (e) {
+            // ignore font registration errors
+        }
+
+        // Supersample: draw at higher resolution then downscale to reduce blur
+        const scale = 2; // 2x rendering for anti-aliased downscale
+        const canvasHi = createCanvas(width * scale, height * scale);
+        const ctx = canvasHi.getContext('2d');
 
         // Rows definition (match publisher layout: 5 buttons top, 5 bottom with disables)
         const rows = [
@@ -66,35 +75,42 @@ class VoiceButtonBannerGenerator {
             }
         }));
 
+        const sw = (val) => Math.round(val * scale);
+
+        // draw scaled elements onto hi-res canvas
         rows.forEach((row, rowIndex) => {
             const totalButtons = row.length;
             const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
             let currentX = Math.round((width - totalWidth) / 2);
-            const currentY = startY + (rowIndex * (buttonHeight + 12));
+            currentX = sw(currentX);
+            const currentY = sw(startY + (rowIndex * (buttonHeight + 12)));
 
             row.forEach(buttonId => {
                 const template = this.buttonTemplates[buttonId];
-                // draw pill filled with a very dark semi-opaque color (canvas remains transparent)
+
+                // draw pill filled with a very dark semi-opaque color
                 ctx.save();
                 ctx.fillStyle = 'rgba(22,23,26,0.95)';
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                this.drawRoundedRect(ctx, currentX, currentY, sw(buttonWidth), sw(buttonHeight), sw(borderRadius));
                 ctx.fill();
                 // subtle top highlight
                 ctx.fillStyle = 'rgba(255,255,255,0.02)';
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, Math.floor(buttonHeight / 2), borderRadius);
+                this.drawRoundedRect(ctx, currentX, currentY, sw(buttonWidth), Math.floor(sw(buttonHeight) / 2), sw(borderRadius));
                 ctx.fill();
                 // border
-                ctx.lineWidth = 1.2;
+                ctx.lineWidth = Math.max(1, 1.2 * scale);
                 ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                this.drawRoundedRect(ctx, currentX, currentY, sw(buttonWidth), sw(buttonHeight), sw(borderRadius));
                 ctx.stroke();
                 ctx.restore();
 
                 if (template) {
-                    const circleX = currentX + 8;
-                    const circleY = currentY + (buttonHeight / 2);
-                    const circleR = 14;
+                    // left colored circle (filled)
+                    const circleX = currentX + sw(12);
+                    const circleY = currentY + Math.round(sw(buttonHeight) / 2);
+                    const circleR = Math.round(sw(14));
                     ctx.beginPath();
+                    ctx.fillStyle = template.color || '#40444B';
                     ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
                     ctx.fill();
 
@@ -103,40 +119,50 @@ class VoiceButtonBannerGenerator {
                     if (img) {
                         const imgSize = Math.round(circleR * 1.8);
                         const ix = circleX - (imgSize / 2);
-                        const iy = circleY - (imgSize / 2) - 1;
+                        const iy = circleY - (imgSize / 2) - Math.round(scale * 1);
                         try { ctx.drawImage(img, ix, iy, imgSize, imgSize); } catch (e) { /* ignore */ }
                     } else {
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Arial"';
+                        ctx.font = `${Math.round(16 * scale)}px "Segoe UI Emoji", "Apple Color Emoji", "Arial"`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        ctx.fillText(template.emoji, circleX, circleY - 1);
+                        ctx.fillText(template.emoji, circleX, circleY - Math.round(scale * 1));
                     }
 
+                    // label text
                     ctx.fillStyle = '#FFFFFF';
-                    ctx.font = '700 12px Arial';
+                    const fontFamily = fs.existsSync(path.join(__dirname, '..', '..', 'assets', 'fonts', 'Inter-Bold.ttf')) ? 'InterCustom' : 'Arial';
+                    ctx.font = `${Math.round(700)} ${Math.round(12 * scale)}px ${fontFamily}`;
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    const textX = circleX + circleR + 8;
-                    ctx.fillText((template.label || '').toUpperCase(), textX, circleY + 1);
+                    const textX = circleX + circleR + Math.round(8 * scale);
+                    ctx.fillText((template.label || '').toUpperCase(), textX, circleY + Math.round(scale * 1));
                 } else {
+                    // disabled placeholder (dash) centered — draw filled pill slightly dimmer
                     ctx.save();
                     ctx.fillStyle = 'rgba(20,21,23,0.6)';
-                    this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                    this.drawRoundedRect(ctx, currentX, currentY, sw(buttonWidth), sw(buttonHeight), sw(borderRadius));
                     ctx.fill();
                     ctx.restore();
                     ctx.fillStyle = '#9aa0a6';
-                    ctx.font = '700 18px Arial';
+                    ctx.font = `${Math.round(700)} ${Math.round(18 * scale)}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('-', currentX + (buttonWidth / 2), currentY + (buttonHeight / 2));
+                    ctx.fillText('-', currentX + Math.round(sw(buttonWidth) / 2), currentY + Math.round(sw(buttonHeight) / 2));
                 }
 
-                currentX += buttonWidth + buttonSpacing;
+                currentX += sw(buttonWidth + buttonSpacing);
             });
         });
 
-        return canvas.toBuffer();
+        // Downscale to final size for crisper result
+        const outCanvas = createCanvas(width, height);
+        const outCtx = outCanvas.getContext('2d');
+        outCtx.imageSmoothingEnabled = true;
+        outCtx.imageSmoothingQuality = 'high';
+        outCtx.drawImage(canvasHi, 0, 0, width, height);
+
+        return outCanvas.toBuffer();
     }
 
     // 🎯 Draw clean button seperti gambar
@@ -250,11 +276,12 @@ class VoiceButtonBannerGenerator {
                 ctx.restore();
 
                 if (template) {
-                    // left circle
+                    // left circle  
                     const circleX = currentX + 36;
                     const circleY = currentY + (buttonHeight / 2);
                     const circleR = 42;
                     ctx.beginPath();
+                    ctx.fillStyle = template.color || '#40444B';
                     ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
                     ctx.fill();
 
