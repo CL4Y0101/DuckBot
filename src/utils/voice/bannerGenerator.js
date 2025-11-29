@@ -74,19 +74,27 @@ class VoiceButtonBannerGenerator {
 
             row.forEach(buttonId => {
                 const template = this.buttonTemplates[buttonId];
-                // draw pill outline only (transparent background)
+                // draw pill filled with a very dark semi-opaque color (canvas remains transparent)
+                ctx.save();
+                ctx.fillStyle = 'rgba(22,23,26,0.95)';
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                ctx.fill();
+                // subtle top highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, Math.floor(buttonHeight / 2), borderRadius);
+                ctx.fill();
+                // border
                 ctx.lineWidth = 1.2;
-                ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
                 this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
                 ctx.stroke();
+                ctx.restore();
 
                 if (template) {
-                    // left colored circle (filled)
                     const circleX = currentX + 8;
                     const circleY = currentY + (buttonHeight / 2);
                     const circleR = 14;
                     ctx.beginPath();
-                    ctx.fillStyle = template.color || '#5865F2';
                     ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
                     ctx.fill();
 
@@ -105,7 +113,6 @@ class VoiceButtonBannerGenerator {
                         ctx.fillText(template.emoji, circleX, circleY - 1);
                     }
 
-                    // label text
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '700 12px Arial';
                     ctx.textAlign = 'left';
@@ -113,7 +120,11 @@ class VoiceButtonBannerGenerator {
                     const textX = circleX + circleR + 8;
                     ctx.fillText((template.label || '').toUpperCase(), textX, circleY + 1);
                 } else {
-                    // disabled placeholder (dash) centered
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(20,21,23,0.6)';
+                    this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                    ctx.fill();
+                    ctx.restore();
                     ctx.fillStyle = '#9aa0a6';
                     ctx.font = '700 18px Arial';
                     ctx.textAlign = 'center';
@@ -145,7 +156,6 @@ class VoiceButtonBannerGenerator {
         const iconX = x + 12;
         const iconY = y + (height / 2);
 
-        ctx.fillStyle = template.color;
         ctx.font = `14px "Segoe UI Emoji", "Apple Color Emoji", "Arial"`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -175,9 +185,128 @@ class VoiceButtonBannerGenerator {
         ctx.quadraticCurveTo(x, y, x + r, y);
         ctx.closePath();
     }
+
+    // Generate a high resolution 1920x1080 banner (HD)
+    async generateHDBanner() {
+        const width = 1920;
+        const height = 1080;
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+
+        // Transparent background
+
+        // Rows definition - keep two rows centered
+        const rows = [
+            ['voice_btn_rename', 'voice_btn_limit', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_bitrate'],
+            ['voice_disable_left', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer', 'voice_disable_right']
+        ];
+
+        // Geometry scaled for HD
+        const startY = 160;
+        const buttonWidth = 320;
+        const buttonHeight = 160;
+        const buttonSpacing = 48;
+        const borderRadius = 40;
+
+        // Preload icons used
+        const allIds = new Set(rows.flat());
+        await Promise.all(Array.from(allIds).map(async id => {
+            if (this.imageCache[id]) return;
+            const filename = this.iconFiles[id];
+            if (!filename) return;
+            const p = path.join(__dirname, '..', '..', 'assets', 'img', filename);
+            try {
+                if (fs.existsSync(p)) {
+                    this.imageCache[id] = await loadImage(p);
+                }
+            } catch (e) {
+                // ignore
+            }
+        }));
+
+        rows.forEach((row, rowIndex) => {
+            const totalButtons = row.length;
+            const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
+            let currentX = Math.round((width - totalWidth) / 2);
+            const currentY = startY + (rowIndex * (buttonHeight + 28));
+
+            row.forEach(buttonId => {
+                const template = this.buttonTemplates[buttonId];
+
+                // pill fill
+                ctx.save();
+                ctx.fillStyle = 'rgba(22,23,26,0.95)';
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                ctx.fill();
+                // highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, Math.floor(buttonHeight / 2), borderRadius);
+                ctx.fill();
+                // border
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                ctx.stroke();
+                ctx.restore();
+
+                if (template) {
+                    // left circle
+                    const circleX = currentX + 36;
+                    const circleY = currentY + (buttonHeight / 2);
+                    const circleR = 42;
+                    ctx.beginPath();
+                    ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    const img = this.imageCache[buttonId];
+                    if (img) {
+                        const imgSize = Math.round(circleR * 1.6);
+                        const ix = circleX - (imgSize / 2);
+                        const iy = circleY - (imgSize / 2) - 2;
+                        try { ctx.drawImage(img, ix, iy, imgSize, imgSize); } catch (e) { }
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = `${Math.round(circleR * 0.7)}px "Segoe UI Emoji", "Apple Color Emoji", "Arial"`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(template.emoji, circleX, circleY - 2);
+                    }
+
+                    // label
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '800 28px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    const textX = circleX + circleR + 28;
+                    ctx.fillText((template.label || '').toUpperCase(), textX, circleY + 2);
+                } else {
+                    // disabled
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(20,21,23,0.6)';
+                    this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.fillStyle = '#9aa0a6';
+                    ctx.font = '800 40px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('-', currentX + (buttonWidth / 2), currentY + (buttonHeight / 2));
+                }
+
+                currentX += buttonWidth + buttonSpacing;
+            });
+        });
+
+        return canvas.toBuffer();
+    }
 }
 
 const gen = new VoiceButtonBannerGenerator();
 // backward-compatible alias
 gen.generateVoiceControlBanner = gen.generateCompactBanner.bind(gen);
+// HD / 1080p banner for better readability
+gen.generateVoiceControlBannerHD = async function () {
+    // call instance method below
+    return await gen.generateHDBanner();
+};
 module.exports = gen;
