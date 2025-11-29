@@ -5,14 +5,14 @@ const path = require('path');
 class VoiceButtonBannerGenerator {
     constructor() {
         this.buttonTemplates = {
-            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#5865F2' },
-            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#EB459E' },
-            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#57F287' },
-            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#FEE75C' },
-            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#ED4245' },
-            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#9B59B6' },
-            'voice_btn_info': { emoji: 'ℹ️', label: 'INFO', color: '#3498DB' },
-            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#E67E22' },
+            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#2C2F33' },
+            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#2C2F33' },
+            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#2C2F33' },
+            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#2C2F33' },
+            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#2C2F33' },
+            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#2C2F33' },
+            'voice_btn_info': { emoji: 'ℹ️', label: 'INFO', color: '#2C2F33' },
+            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#2C2F33' },
             'voice_disable_left': { emoji: '⚫', label: '', color: '#2C2F33' },
             'voice_disable_right': { emoji: '⚫', label: '', color: '#2C2F33' }
         };
@@ -20,76 +20,94 @@ class VoiceButtonBannerGenerator {
 
     // 🎨 Generate banner dengan button visuals
     async generateButtonBanner(rows = []) {
-        const width = 800;
-        const height = 300;
+        const width = 960;
+        const height = 260;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
-        // Background gradient
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, '#1e1e2e');
-        gradient.addColorStop(1, '#181825');
-        ctx.fillStyle = gradient;
+        // Background
+        ctx.fillStyle = '#0b0c0e';
         ctx.fillRect(0, 0, width, height);
 
         // Title
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 28px Arial';
+        ctx.font = '700 22px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('VOICE CHANNEL CONTROL', width / 2, 40);
+        ctx.fillText('VOICE CHANNEL CONTROL', width / 2, 36);
 
         // Subtitle
-        ctx.fillStyle = '#CDD6F4';
-        ctx.font = '16px Arial';
-        ctx.fillText('Manage your temporary voice channel', width / 2, 70);
+        ctx.fillStyle = '#BFC7D9';
+        ctx.font = '14px Arial';
+        ctx.fillText('Manage your temporary voice channel', width / 2, 60);
 
-        // Draw buttons untuk setiap row
-        let currentY = 110;
-        const buttonWidth = 120;
-        const buttonHeight = 60;
-        const buttonSpacing = 20;
-        const borderRadius = 12;
+        // Draw buttons untuk setiap row (gaya pill gelap dengan icon bulat berwarna di kiri)
+        let currentY = 80;
+        const buttonWidth = 180;
+        const buttonHeight = 48;
+        const buttonSpacing = 18;
+        const borderRadius = 28;
 
-        rows.forEach((row, rowIndex) => {
+        rows.forEach((row) => {
             const totalButtons = row.length;
             const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
-            let currentX = (width - totalWidth) / 2;
+            let currentX = Math.round((width - totalWidth) / 2);
 
             row.forEach(buttonId => {
                 const template = this.buttonTemplates[buttonId];
-                if (!template) return;
+                if (!template) {
+                    currentX += buttonWidth + buttonSpacing;
+                    return;
+                }
 
-                // Button background
-                ctx.fillStyle = template.color;
+                // Outer pill (dark)
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetY = 3;
+                ctx.fillStyle = '#0f1113';
                 this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
                 ctx.fill();
+                ctx.restore();
 
-                // Button border
-                ctx.strokeStyle = '#FFFFFF20';
-                ctx.lineWidth = 2;
+                // Small colored circle for icon at left
+                const circleRadius = 18;
+                const circleX = currentX + 20;
+                const circleY = currentY + (buttonHeight / 2);
+                ctx.beginPath();
+                ctx.fillStyle = template.color || '#5865F2';
+                ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Emoji / icon inside circle
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(template.emoji, circleX, circleY);
+
+                // Label text (left aligned after icon)
+                const textX = circleX + circleRadius + 12;
+                const textY = currentY + (buttonHeight / 2) + 6; // vertical tweak
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '700 14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(template.label, textX, textY);
+
+                // subtle separator (very faint)
+                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctx.lineWidth = 1;
                 this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
                 ctx.stroke();
-
-                // Emoji/icon (center)
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = '20px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(template.emoji, currentX + (buttonWidth / 2), currentY + 25);
-
-                // Label text
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 12px Arial';
-                ctx.fillText(template.label, currentX + (buttonWidth / 2), currentY + 45);
 
                 currentX += buttonWidth + buttonSpacing;
             });
 
-            currentY += buttonHeight + 15;
+            currentY += buttonHeight + 18;
         });
 
-        // Footer decoration
-        ctx.fillStyle = '#FFFFFF20';
-        ctx.fillRect(0, height - 5, width, 5);
+        // Footer thin line
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(0, height - 6, width, 6);
 
         return canvas.toBuffer();
     }
