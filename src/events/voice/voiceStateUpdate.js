@@ -91,15 +91,17 @@ module.exports = {
         if (!members || members.size !== 0) return;
 
         const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-        const ownerIdForCooldown = ownerIdx !== -1 ? ownerToChannelArr[ownerIdx].ownerId : null;
+        if (ownerIdx === -1) {
+          return;
+        }
 
-        if (ownerIdx !== -1) {
-          ownerToChannelArr[ownerIdx].isActive = false;
-          ownerToChannelArr[ownerIdx].channelId = null;
-          if (voiceContainer && voiceContainer.parsed) {
-            voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-            saveGuildRaw(voiceContainer.parsed);
-          }
+        const ownerIdForCooldown = ownerToChannelArr[ownerIdx].ownerId || null;
+
+        ownerToChannelArr[ownerIdx].isActive = false;
+        ownerToChannelArr[ownerIdx].channelId = null;
+        if (voiceContainer && voiceContainer.parsed) {
+          voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+          saveGuildRaw(voiceContainer.parsed);
         }
 
         try {
