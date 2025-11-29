@@ -2,27 +2,7 @@ const { Events, PermissionFlagsBits, ChannelType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const tempDbPath = path.join(__dirname, '../../database/tempvoice.json');
 const guildDbPath = path.join(__dirname, '../../database/guild.json');
-
-function loadTempDb() {
-  try {
-    if (!fs.existsSync(tempDbPath)) return { ownerToChannel: {} };
-    const raw = fs.readFileSync(tempDbPath, 'utf8');
-    return raw.trim() ? JSON.parse(raw) : { ownerToChannel: {} };
-  } catch (e) {
-    console.error('Failed to load tempvoice.json:', e);
-    return { ownerToChannel: {} };
-  }
-}
-
-function saveTempDb(obj) {
-  try {
-    fs.writeFileSync(tempDbPath, JSON.stringify(obj, null, 2));
-  } catch (e) {
-    console.error('Failed to save tempvoice.json:', e);
-  }
-}
 
 function getGuildConfig(guildId) {
   try {
@@ -56,7 +36,7 @@ module.exports = {
 
       function loadGuildRaw() {
         try {
-          const guildDbPath = guildDbPath = path.join(__dirname, '../../database/guild.json');
+          const guildDbPath = path.join(__dirname, '../../database/guild.json');
           if (!fs.existsSync(guildDbPath)) return null;
           const raw = fs.readFileSync(guildDbPath, 'utf8');
           return raw.trim() ? JSON.parse(raw) : null;
@@ -178,10 +158,19 @@ module.exports = {
           try {
             const parent = guild.channels.cache.get(newState.channel.parentId) || null;
             const name = `${member.user.username}'s channel`;
+
+            const defaultBitrate = (tempCfg && tempCfg.bitrate) ? tempCfg.bitrate : 64000;
+            const defaultUserLimit = (tempCfg && tempCfg.userlimit) ? tempCfg.userlimit : 0;
+            const defaultRegion = (tempCfg && tempCfg.region) ? tempCfg.region : 'auto';
+            const defaultSlowmode = (tempCfg && tempCfg.slowmode) ? tempCfg.slowmode : 0;
+
             const created = await guild.channels.create({
               name,
               type: ChannelType.GuildVoice,
               parent: parent ? parent.id : null,
+              bitrate: defaultBitrate,
+              userLimit: defaultUserLimit,
+              rtcRegion: defaultRegion === 'auto' ? null : defaultRegion,
               permissionOverwrites: [
                 {
                   id: guild.roles.everyone.id,
@@ -199,6 +188,10 @@ module.exports = {
               ownerId: member.id,
               channelId: created.id,
               channelName: member.user.username,
+              slowmode: defaultSlowmode,
+              bitrate: defaultBitrate,
+              userlimit: defaultUserLimit,
+              region: defaultRegion,
               isActive: true
             };
             ownerToChannelArr.push(entryObj);
@@ -213,15 +206,70 @@ module.exports = {
 
       if (oldState.channelId && oldState.channelId !== newState.channelId) {
         const oldChannel = oldState.channel;
+        const tryDeleteChannel = async (channel) => {
+          if (!channel || channel.type !== ChannelType.GuildVoice) return;
+          const members = channel.members;
+          if (members && members.size === 0) {
+            const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
+
+            const delayedCleanup = async () => {
+              try {
+                let latest = guild.channels.cache.get(channel.id);
+                if (!latest) {
+                  try { latest = await guild.channels.fetch(channel.id); } catch (e) { latest = null; }
+                }
+
+                if (latest && latest.members && latest.members.size > 0) {
+                  if (ownerIdx !== -1) {
+                    ownerToChannelArr[ownerIdx].isActive = true;
+                    if (voiceContainer && voiceContainer.parsed) {
+                      voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+                      saveGuildRaw(voiceContainer.parsed);
+                    }
+                  }
+                  return;
+                }
+
+                try {
+                  if (latest) await latest.delete('Temporary voice channel empty - cleanup');
+                  else await channel.delete('Temporary voice channel empty - cleanup');
+                } catch (e) {
+                  console.error('Failed to delete temp voice channel:', e);
+                }
+
+                const remIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
+                if (remIdx !== -1) {
+                  ownerToChannelArr.splice(remIdx, 1);
+                  if (voiceContainer && voiceContainer.parsed) {
+                    voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+                    saveGuildRaw(voiceContainer.parsed);
+                  }
+                }
+              } catch (e) {
+                console.error('Error during delayed cleanup check for temp voice channel:', e);
+              }
+            };
+
+            if (ownerIdx !== -1) {
+              ownerToChannelArr[ownerIdx].isActive = false;
+              if (voiceContainer && voiceContainer.parsed) {
+                voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+                saveGuildRaw(voiceContainer.parsed);
+              }
+              setTimeout(delayedCleanup, 5000);
+              return;
+            }
+
+            const maybeTemp = (tempCfg.category && channel.parentId === tempCfg.category) || channel.name.endsWith("'s channel");
+            if (maybeTemp) {
+              setTimeout(delayedCleanup, 5000);
+            }
+          }
+        };
         await tryDeleteChannel(oldChannel);
       }
-
-      if (!newState.channel && oldState.channel) {
-        await tryDeleteChannel(oldState.channel);
-      }
-
-    } catch (err) {
-      console.error('Error in voiceStateUpdate handler:', err);
+    } catch (e) {
+      console.error('Error in voiceStateUpdate handler:', e);
     }
   }
 };

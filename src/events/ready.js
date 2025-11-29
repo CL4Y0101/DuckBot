@@ -191,7 +191,6 @@ module.exports = {
       await inviteTracker.initializeGuild(client, process.env.GUILD_ID);
       console.log('✅ Invite tracking initialized');
 
-      // publish voice setup embed to configured channels (implementation in utils/voice/publisher)
       try {
         await publishVoiceSetupEmbeds(client);
         console.log('✅ Voice setup embeds published');
