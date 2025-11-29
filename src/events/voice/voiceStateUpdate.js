@@ -156,8 +156,8 @@ module.exports = {
             return;
           }
 
-          const existingEntry = ownerToChannelArr.find(o => o.ownerId === member.id && o.channelId);
-          if (existingEntry) {
+          const existingEntry = ownerToChannelArr.find(o => o.ownerId === member.id);
+          if (existingEntry && existingEntry.channelId) {
             const existing = guild.channels.cache.get(existingEntry.channelId);
             if (existing) {
               try {
@@ -169,6 +169,9 @@ module.exports = {
               if (voiceContainer && voiceContainer.parsed) { voiceContainer.entry.ownerToChannel = ownerToChannelArr; saveGuildRaw(voiceContainer.parsed); }
               return;
             }
+            existingEntry.channelId = null;
+            existingEntry.isActive = false;
+            if (voiceContainer && voiceContainer.parsed) { voiceContainer.entry.ownerToChannel = ownerToChannelArr; saveGuildRaw(voiceContainer.parsed); }
           }
 
           try {
@@ -210,7 +213,12 @@ module.exports = {
               region: defaultRegion,
               isActive: true
             };
-            ownerToChannelArr.push(entryObj);
+            if (existingEntry) {
+              // update the existing mapping instead of adding a duplicate
+              Object.assign(existingEntry, entryObj);
+            } else {
+              ownerToChannelArr.push(entryObj);
+            }
             if (voiceContainer && voiceContainer.parsed) { voiceContainer.entry.ownerToChannel = ownerToChannelArr; saveGuildRaw(voiceContainer.parsed); }
 
             try { await member.voice.setChannel(created); } catch (e) { console.error('Failed to move user to new temp channel:', e); }
