@@ -152,7 +152,7 @@ module.exports = {
           if (expiresAt && Date.now() < expiresAt) {
             const expirySec = Math.floor(expiresAt / 1000);
             try {
-              await member.send(`Anda sedang dalam cooldown pembuatan channel. Silakan coba lagi <t:${expirySec}:R>`);
+              await member.send(`<:fail:1444451615255040061> Anda sedang dalam cooldown pembuatan channel. Silakan coba lagi <t:${expirySec}:R>`);
             } catch (e) {
             }
             return;

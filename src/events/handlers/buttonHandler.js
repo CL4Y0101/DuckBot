@@ -330,12 +330,12 @@ module.exports = {
 
                 const notOwnerReply = async () => {
                     try {
-                        await interaction.reply({ content: '❌ Anda bukan owner dari channel ini.', ephemeral: true });
+                        await interaction.reply({ content: '<:fail:1444451615255040061> You are not **Owner** of the channel.', ephemeral: true });
                     } catch (e) { console.error('Failed to send not-owner reply:', e); }
                 };
 
                 const notInVoiceReply = async () => {
-                    try { await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan tombol ini.', ephemeral: true }); } catch (e) { }
+                    try { await interaction.reply({ content: '<:fail:1444451615255040061> You must be in a voice channel to use this button.', ephemeral: true }); } catch (e) { }
                 };
 
                 switch (interaction.customId) {
@@ -361,7 +361,7 @@ module.exports = {
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const modalR = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
-                        const inputR = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. luhnox's Hangout").setRequired(true);
+                        const inputR = new TextInputBuilder().setCustomId('name_input').setLabel('New channel name').setStyle(TextInputStyle.Short).setPlaceholder("e.g. luhnox's Hangout").setRequired(true);
                         modalR.addComponents(new ActionRowBuilder().addComponents(inputR));
                         await interaction.showModal(modalR);
                         break;
@@ -384,36 +384,36 @@ module.exports = {
                             { label: 'US South', value: 'us_south' },
                             { label: 'US West', value: 'us_west' }
                         ];
-                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_region').setPlaceholder('Pilih region').addOptions(options.map(o => ({ label: o.label, value: o.value })));
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_region').setPlaceholder('Select a region').addOptions(options.map(o => ({ label: o.label, value: o.value })));
                         const row = new ActionRowBuilder().addComponents(menu);
-                        await interaction.reply({ content: 'Pilih region untuk channel Anda:', components: [row], ephemeral: true });
+                        await interaction.reply({ content: 'Select a region for your channel:', components: [row], ephemeral: true });
                         break;
                     }
                     case 'voice_btn_kick': {
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
-                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel.', ephemeral: true });
+                        if (members.length === 0) return await interaction.reply({ content: `<:fail:1444451615255040061> There's no other user in the channel.`, ephemeral: true });
                         const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
-                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Pilih user untuk dikick').setMinValues(1).setMaxValues(1).addOptions(options);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Select a user to kick').setMinValues(1).setMaxValues(1).addOptions(options);
                         const row = new ActionRowBuilder().addComponents(menu);
-                        await interaction.reply({ content: 'Pilih user untuk kick dari voice:', components: [row], ephemeral: true });
+                        await interaction.reply({ content: 'Select a user to kick from voice:', components: [row], ephemeral: true });
                         break;
                     }
                     case 'voice_btn_claim': {
                         if (!voiceChannel) return await notInVoiceReply();
 
                         if (!mapping) {
-                            return await interaction.reply({ content: '❌ Channel ini bukan dibuat atau dikelola oleh bot, sehingga tidak dapat diklaim.', ephemeral: true });
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
                         }
 
-                        if (mapping.ownerId && mapping.ownerId === member.id) return await interaction.reply({ content: 'Anda sudah menjadi owner.', ephemeral: true });
+                        if (mapping.ownerId && mapping.ownerId === member.id) return await interaction.reply({ content: 'You are being **owner** in this channel.', ephemeral: true });
 
                         let currentOwnerPresent = false;
                         if (mapping && mapping.ownerId) {
                             currentOwnerPresent = voiceChannel.members.has(mapping.ownerId);
                         }
-                        if (mapping && mapping.ownerId && currentOwnerPresent) return await interaction.reply({ content: 'Owner masih berada di channel, claim tidak diperbolehkan.', ephemeral: true });
+                        if (mapping && mapping.ownerId && currentOwnerPresent) return await interaction.reply({ content: '<:fail:1444451615255040061> Owner is still in the channel, claim is not allowed.', ephemeral: true });
 
                         try {
                             const botMember = interaction.guild.members.me || await interaction.guild.members.fetch(client.user.id).catch(() => null);
@@ -436,7 +436,7 @@ module.exports = {
                                 }
                             }
                             if (!hasAll) {
-                                return await interaction.reply({ content: '❌ Bot tidak memiliki izin yang diperlukan pada channel ini untuk melakukan klaim (Manage Channels / Connect / Send Messages / Manage Messages).', ephemeral: true });
+                                return await interaction.reply({ content: '<:fail:1444451615255040061> Bot does not have the required permissions on this channel to perform claim (Manage Channels / Connect / Send Messages / Manage Messages).', ephemeral: true });
                             }
                         } catch (err) {
                             console.error('Error checking/setting bot permissions for claim:', err);
@@ -445,7 +445,7 @@ module.exports = {
                         mapping.ownerId = member.id;
                         mapping.isActive = true;
                         if (parsed) saveGuildRaw(parsed);
-                        await interaction.reply({ content: '✅ Anda sekarang owner dari channel ini.', ephemeral: true });
+                        await interaction.reply({ content: '✅ You are now the owner of this channel.', ephemeral: true });
                         break;
                     }
                     case 'voice_btn_info': {
@@ -464,17 +464,17 @@ module.exports = {
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
-                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel untuk ditransfer.', ephemeral: true });
+                        if (members.length === 0) return await interaction.reply({ content: `<:fail:1444451615255040061> There's no other user in the channel to transfer to.`, ephemeral: true });
                         const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
-                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_transfer').setPlaceholder('Pilih user untuk transfer ownership').setMinValues(1).setMaxValues(1).addOptions(options);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_transfer').setPlaceholder('Select a user to transfer ownership to').setMinValues(1).setMaxValues(1).addOptions(options);
                         const row = new ActionRowBuilder().addComponents(menu);
-                        await interaction.reply({ content: 'Pilih user untuk menjadi owner baru:', components: [row], ephemeral: true });
+                        await interaction.reply({ content: 'Select a user to become the new owner:', components: [row], ephemeral: true });
                         break;
                     }
                 }
             } catch (err) {
                 console.error('Voice button handler error:', err);
-                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses tombol.', ephemeral: true }); } catch (e) { }
+                try { await interaction.reply({ content: '<:fail:1444451615255040061> An error occurred while processing the button.', ephemeral: true }); } catch (e) { }
             }
         }
 
@@ -482,7 +482,7 @@ module.exports = {
             try {
                 const member = interaction.member;
                 const voiceChannel = member && member.voice && member.voice.channel;
-                if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan ini.', ephemeral: true });
+                if (!voiceChannel) return await interaction.reply({ content: '<:fail:1444451615255040061> You must be in a voice channel to use this.', ephemeral: true });
 
                 const parsed = (function () { try { const p = fs.readFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), 'utf8'); return p.trim() ? JSON.parse(p) : null; } catch (e) { return null; } })();
                 const voiceCfg = (function () { if (!parsed) return null; if (Array.isArray(parsed)) { for (const it of parsed) { if (it && typeof it === 'object' && it[interaction.guild.id]) return it[interaction.guild.id].voice || null } return null } return parsed[interaction.guild.id] ? parsed[interaction.guild.id].voice || null : null })() || { ownerToChannel: [] };
@@ -490,7 +490,7 @@ module.exports = {
                 const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
 
                 if (interaction.customId === 'voice_select_region') {
-                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
                     const value = interaction.values[0];
                     const rtcRegion = value === 'auto' ? null : value;
                     try {
@@ -500,24 +500,24 @@ module.exports = {
                     if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
                     await interaction.reply({ content: `✅ Region diubah menjadi **${value}**`, ephemeral: true });
                 } else if (interaction.customId === 'voice_select_kick') {
-                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
                     const targetId = interaction.values[0];
                     const targetMember = voiceChannel.members.get(targetId);
-                    if (!targetMember) return await interaction.reply({ content: '❌ User tidak ditemukan di voice channel.', ephemeral: true });
+                    if (!targetMember) return await interaction.reply({ content: '<:fail:1444451615255040061> User not found in the voice channel.', ephemeral: true });
                     try { await targetMember.voice.setChannel(null); } catch (e) { console.error('Failed to kick member:', e); }
-                    await interaction.reply({ content: `✅ <@${targetId}> telah dikick dari voice.`, ephemeral: true });
+                    await interaction.reply({ content: `✅ <@${targetId}> has been kicked from the voice channel.`, ephemeral: true });
                 } else if (interaction.customId === 'voice_select_transfer') {
-                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
                     const targetId = interaction.values[0];
                     const targetMember = voiceChannel.members.get(targetId);
-                    if (!targetMember) return await interaction.reply({ content: '❌ User tidak ditemukan di voice channel.', ephemeral: true });
+                    if (!targetMember) return await interaction.reply({ content: '<:fail:1444451615255040061> User not found in the voice channel.', ephemeral: true });
                     mapping.ownerId = targetId;
                     if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
-                    await interaction.reply({ content: `✅ Ownership telah dipindahkan ke <@${targetId}>.`, ephemeral: true });
+                    await interaction.reply({ content: `✅ Ownership has been transferred to <@${targetId}>.`, ephemeral: true });
                 }
             } catch (err) {
                 console.error('Select menu handler error:', err);
-                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses pilihan.', ephemeral: true }); } catch (e) { }
+                try { await interaction.reply({ content: '<:fail:1444451615255040061> An error occurred while processing your selection.', ephemeral: true }); } catch (e) { }
             }
         }
 
