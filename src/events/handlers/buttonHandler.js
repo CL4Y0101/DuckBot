@@ -360,7 +360,7 @@ module.exports = {
             }
         }
 
-        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer']);
+        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer', 'voice_disable']);
 
         if (voiceButtonIds.has(interaction.customId)) {
             try {
