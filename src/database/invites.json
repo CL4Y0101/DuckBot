@@ -61,14 +61,6 @@
         "maxUses": 0,
         "createdAt": "2022-10-20T06:01:51.238Z"
       },
-      "QuUa9YkT": {
-        "code": "QuUa9YkT",
-        "inviter": "unknown",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-11-28T13:52:17.867Z",
-        "expiresAt": "2025-11-29T13:52:17.000Z"
-      },
       "Qwcb7YzV": {
         "code": "Qwcb7YzV",
         "inviter": "1001085268046118942",
@@ -286,6 +278,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-29T13:47:18.322Z"
+    "lastUpdated": "2025-11-29T13:52:18.365Z"
   }
 }
