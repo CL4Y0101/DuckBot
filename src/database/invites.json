@@ -92,14 +92,6 @@
         "createdAt": "2025-11-22T09:47:10.200Z",
         "expiresAt": "2025-11-29T09:47:10.000Z"
       },
-      "RYnkGsKA": {
-        "code": "RYnkGsKA",
-        "inviter": "1001085268046118942",
-        "uses": 1,
-        "maxUses": 0,
-        "createdAt": "2025-11-22T07:10:11.405Z",
-        "expiresAt": "2025-11-29T07:10:11.000Z"
-      },
       "V8KveXcK": {
         "code": "V8KveXcK",
         "inviter": "1439523336492286013",
@@ -206,12 +198,11 @@
         ]
       },
       "1001085268046118942": {
-        "totalInvites": 563,
-        "successfulInvites": 563,
+        "totalInvites": 562,
+        "successfulInvites": 562,
         "codes": [
           "B2tzAwNF5k",
           "Qwcb7YzV",
-          "RYnkGsKA",
           "XHmEY5uw",
           "m4eWgQR6m3"
         ]
@@ -310,6 +301,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-29T07:07:17.804Z"
+    "lastUpdated": "2025-11-29T07:12:17.800Z"
   }
 }
