@@ -1,0 +1,168 @@
+const { createCanvas, loadImage, registerFont } = require('canvas');
+const fs = require('fs');
+const path = require('path');
+
+class VoiceButtonBannerGenerator {
+    constructor() {
+        this.buttonTemplates = {
+            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#5865F2' },
+            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#EB459E' },
+            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#57F287' },
+            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#FEE75C' },
+            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#ED4245' },
+            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#9B59B6' },
+            'voice_btn_info': { emoji: 'ℹ️', label: 'INFO', color: '#3498DB' },
+            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#E67E22' },
+            'voice_disable_left': { emoji: '⚫', label: '', color: '#2C2F33' },
+            'voice_disable_right': { emoji: '⚫', label: '', color: '#2C2F33' }
+        };
+    }
+
+    // 🎨 Generate banner dengan button visuals
+    async generateButtonBanner(rows = []) {
+        const width = 800;
+        const height = 300;
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#1e1e2e');
+        gradient.addColorStop(1, '#181825');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('VOICE CHANNEL CONTROL', width / 2, 40);
+
+        // Subtitle
+        ctx.fillStyle = '#CDD6F4';
+        ctx.font = '16px Arial';
+        ctx.fillText('Manage your temporary voice channel', width / 2, 70);
+
+        // Draw buttons untuk setiap row
+        let currentY = 110;
+        const buttonWidth = 120;
+        const buttonHeight = 60;
+        const buttonSpacing = 20;
+        const borderRadius = 12;
+
+        rows.forEach((row, rowIndex) => {
+            const totalButtons = row.length;
+            const totalWidth = (totalButtons * buttonWidth) + ((totalButtons - 1) * buttonSpacing);
+            let currentX = (width - totalWidth) / 2;
+
+            row.forEach(buttonId => {
+                const template = this.buttonTemplates[buttonId];
+                if (!template) return;
+
+                // Button background
+                ctx.fillStyle = template.color;
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                ctx.fill();
+
+                // Button border
+                ctx.strokeStyle = '#FFFFFF20';
+                ctx.lineWidth = 2;
+                this.drawRoundedRect(ctx, currentX, currentY, buttonWidth, buttonHeight, borderRadius);
+                ctx.stroke();
+
+                // Emoji/icon (center)
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(template.emoji, currentX + (buttonWidth / 2), currentY + 25);
+
+                // Label text
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText(template.label, currentX + (buttonWidth / 2), currentY + 45);
+
+                currentX += buttonWidth + buttonSpacing;
+            });
+
+            currentY += buttonHeight + 15;
+        });
+
+        // Footer decoration
+        ctx.fillStyle = '#FFFFFF20';
+        ctx.fillRect(0, height - 5, width, 5);
+
+        return canvas.toBuffer();
+    }
+
+    // 🔧 Utility function untuk rounded rectangle
+    drawRoundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
+    // 🖼️ Generate banner berdasarkan button configuration
+    async generateVoiceControlBanner() {
+        // Define button rows sesuai dengan setup Anda
+        const row1 = [
+            'voice_btn_bitrate',
+            'voice_btn_limit', 
+            'voice_btn_rename',
+            'voice_btn_region',
+            'voice_btn_kick'
+        ];
+
+        const row2 = [
+            'voice_disable_left',
+            'voice_btn_claim',
+            'voice_btn_info',
+            'voice_btn_transfer', 
+            'voice_disable_right'
+        ];
+
+        return await this.generateButtonBanner([row1, row2]);
+    }
+
+    // 🎯 Generate banner untuk specific voice channel info
+    async generateChannelInfoBanner(channelInfo) {
+        const width = 800;
+        const height = 200;
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#5865F2');
+        gradient.addColorStop(1, '#EB459E');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(0, 0, width, height);
+
+        // Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('VOICE CHANNEL INFO', width / 2, 50);
+
+        // Channel info
+        ctx.font = '20px Arial';
+        ctx.fillText(`Channel: ${channelInfo.name || 'Unknown'}`, width / 2, 90);
+        ctx.fillText(`Bitrate: ${channelInfo.bitrate ? `${channelInfo.bitrate / 1000}kbps` : 'N/A'}`, width / 2, 120);
+        ctx.fillText(`Users: ${channelInfo.userCount || 0}/${channelInfo.userLimit || 'Unlimited'}`, width / 2, 150);
+
+        return canvas.toBuffer();
+    }
+}
+
+module.exports = new VoiceButtonBannerGenerator();

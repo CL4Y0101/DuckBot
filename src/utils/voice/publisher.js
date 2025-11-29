@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const bannerGen = require(path.join(__dirname, 'bannerGenerator'));
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -42,6 +43,18 @@ async function publishVoiceSetupEmbeds(client) {
                     .setDescription(`Gunakan perintah atau klik tombol (nanti) untuk menetapkan voice channel aktif sebagai lobby.\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
                     .setColor('#5865F2');
 
+                // Try generating a visual banner for the voice buttons. If generation fails (missing canvas, etc.), continue without image.
+                let attachment = null;
+                try {
+                    const buffer = await bannerGen.generateVoiceControlBanner();
+                    if (buffer) {
+                        attachment = new AttachmentBuilder(buffer, { name: 'voice_buttons.png' });
+                        embed.setImage('attachment://voice_buttons.png');
+                    }
+                } catch (err) {
+                    // ignore image generation errors and continue
+                }
+
                 const row1 = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setLabel('Bitrate').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setLabel('Limit').setStyle(ButtonStyle.Secondary),
@@ -61,9 +74,9 @@ async function publishVoiceSetupEmbeds(client) {
                 const components = [row1, row2];
 
                 if (botMessage) {
-                    try { await botMessage.edit({ embeds: [embed], components }); } catch (e) { }
+                    try { await botMessage.edit({ embeds: [embed], components, files: attachment ? [attachment] : [] }); } catch (e) { }
                 } else {
-                    try { await channelObj.send({ embeds: [embed], components }); } catch (e) { }
+                    try { await channelObj.send({ embeds: [embed], components, files: attachment ? [attachment] : [] }); } catch (e) { }
                 }
             } catch (err) {
                 console.error('Failed to publish voice setup embed for entry:', err);
