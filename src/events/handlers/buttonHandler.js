@@ -6,7 +6,8 @@ const {
     ActionRowBuilder,
     EmbedBuilder,
     ButtonBuilder,
-    ButtonStyle
+    ButtonStyle,
+    StringSelectMenuBuilder
 } = require('discord.js');
 const { PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
@@ -25,7 +26,7 @@ const CACHE_DURATION = 5 * 60 * 1000;
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction, client) {
-        if (!interaction.isButton()) return;
+        if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
 
         if (interaction.customId === 'verify_button_setup') {
             const userId = interaction.user.id;
@@ -356,6 +357,211 @@ module.exports = {
             } catch (err) {
                 console.error('Error handling voice_set_active button:', err);
                 try { await interaction.reply({ content: '❌ Error setting voice lobby', ephemeral: true }); } catch (e) { }
+            }
+        }
+
+        const voiceButtonIds = new Set(['voice_btn_bitrate','voice_btn_limit','voice_btn_rename','voice_btn_region','voice_btn_kick','voice_btn_claim','voice_btn_info','voice_btn_transfer']);
+
+        if (voiceButtonIds.has(interaction.customId)) {
+            try {
+                const member = interaction.member;
+                const voiceChannel = member && member.voice && member.voice.channel;
+
+                function loadGuildRaw() {
+                    try {
+                        const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+                        if (!fs.existsSync(guildConfigPath)) return null;
+                        const raw = fs.readFileSync(guildConfigPath, 'utf8');
+                        return raw.trim() ? JSON.parse(raw) : null;
+                    } catch (e) { console.error('Failed to load guild.json:', e); return null; }
+                }
+
+                function saveGuildRaw(parsed) {
+                    try {
+                        const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+                        fs.writeFileSync(guildConfigPath, JSON.stringify(parsed, null, 2), 'utf8');
+                    } catch (e) { console.error('Failed to save guild.json:', e); }
+                }
+
+                function getVoiceContainer(parsed, gid) {
+                    if (!parsed) return null;
+                    if (Array.isArray(parsed)) {
+                        for (const item of parsed) {
+                            if (item && typeof item === 'object' && item[gid]) return item[gid].voice || null;
+                        }
+                        return null;
+                    }
+                    return parsed[gid] ? (parsed[gid].voice || null) : null;
+                }
+
+                const parsed = loadGuildRaw();
+                const voiceCfg = getVoiceContainer(parsed, interaction.guild.id) || {};
+                voiceCfg.ownerToChannel = voiceCfg.ownerToChannel || [];
+
+                let mapping = null;
+                if (voiceChannel) mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
+
+                const notOwnerReply = async () => {
+                    try {
+                        await interaction.reply({ content: '❌ Anda bukan owner dari channel ini.', ephemeral: true });
+                    } catch (e) { console.error('Failed to send not-owner reply:', e); }
+                };
+
+                const notInVoiceReply = async () => {
+                    try { await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan tombol ini.', ephemeral: true }); } catch (e) {}
+                };
+
+                switch (interaction.customId) {
+                    case 'voice_btn_bitrate': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modal = new ModalBuilder().setCustomId('voice_modal_bitrate').setTitle('Set Bitrate');
+                        const input = new TextInputBuilder().setCustomId('bitrate_input').setLabel('Bitrate (8000 - 128000)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 64000').setRequired(true);
+                        modal.addComponents(new ActionRowBuilder().addComponents(input));
+                        await interaction.showModal(modal);
+                        break;
+                    }
+                    case 'voice_btn_limit': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modal = new ModalBuilder().setCustomId('voice_modal_limit').setTitle('Set User Limit');
+                        const input = new TextInputBuilder().setCustomId('limit_input').setLabel('User limit (0 = unlimited, max 99)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 10').setRequired(true);
+                        modal.addComponents(new ActionRowBuilder().addComponents(input));
+                        await interaction.showModal(modal);
+                        break;
+                    }
+                    case 'voice_btn_rename': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const modal = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
+                        const input = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. Luhnox's Hangout").setRequired(true);
+                        modal.addComponents(new ActionRowBuilder().addComponents(input));
+                        await interaction.showModal(modal);
+                        break;
+                    }
+                    case 'voice_btn_region': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const options = [
+                            { label: 'Automatic', value: 'auto' },
+                            { label: 'Brazil', value: 'brazil' },
+                            { label: 'Hong Kong', value: 'hongkong' },
+                            { label: 'India', value: 'india' },
+                            { label: 'Japan', value: 'japan' },
+                            { label: 'Rotterdam', value: 'rotterdam' },
+                            { label: 'Singapore', value: 'singapore' },
+                            { label: 'South Africa', value: 'southafrica' },
+                            { label: 'Sydney', value: 'sydney' },
+                            { label: 'US Central', value: 'us_central' },
+                            { label: 'US East', value: 'us_east' },
+                            { label: 'US South', value: 'us_south' },
+                            { label: 'US West', value: 'us_west' }
+                        ];
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_region').setPlaceholder('Pilih region').addOptions(options.map(o => ({ label: o.label, value: o.value })));
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Pilih region untuk channel Anda:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_kick': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
+                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel.', ephemeral: true });
+                        const options = members.slice(0,25).map(m => ({ label: `${m.user.username}`, value: m.id }));
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Pilih user untuk dikick').setMinValues(1).setMaxValues(1).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Pilih user untuk kick dari voice:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_claim': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (mapping && mapping.ownerId && mapping.ownerId === member.id) return await interaction.reply({ content: 'Anda sudah menjadi owner.', ephemeral: true });
+                        let currentOwnerPresent = false;
+                        if (mapping && mapping.ownerId) {
+                            currentOwnerPresent = voiceChannel.members.has(mapping.ownerId);
+                        }
+                        if (mapping && mapping.ownerId && currentOwnerPresent) return await interaction.reply({ content: 'Owner masih berada di channel, claim tidak diperbolehkan.', ephemeral: true });
+                        if (!mapping) {
+                            mapping = { ownerId: member.id, channelId: voiceChannel.id, channelName: voiceChannel.name, slowmode: 0, bitrate: voiceChannel.bitrate || 64000, userlimit: voiceChannel.userLimit || 0, region: 'auto', isActive: true };
+                            voiceCfg.ownerToChannel.push(mapping);
+                        } else {
+                            mapping.ownerId = member.id;
+                            mapping.isActive = true;
+                        }
+                        if (parsed) saveGuildRaw(parsed);
+                        await interaction.reply({ content: '✅ Anda sekarang owner dari channel ini.', ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_info': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        const embed = new EmbedBuilder().setTitle('Channel Info').setColor('#5865F2')
+                            .addFields(
+                                { name: 'Name', value: `${voiceChannel.name}`, inline: true },
+                                { name: 'Bitrate', value: `${voiceChannel.bitrate || 'N/A'}`, inline: true },
+                                { name: 'User Limit', value: `${voiceChannel.userLimit || 0}`, inline: true },
+                                { name: 'Owner', value: mapping && mapping.ownerId ? `<@${mapping.ownerId}>` : 'None', inline: true }
+                            );
+                        await interaction.reply({ embeds: [embed], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_transfer': {
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
+                        if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel untuk ditransfer.', ephemeral: true });
+                        const options = members.slice(0,25).map(m => ({ label: `${m.user.username}`, value: m.id }));
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_transfer').setPlaceholder('Pilih user untuk transfer ownership').setMinValues(1).setMaxValues(1).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Pilih user untuk menjadi owner baru:', components: [row], ephemeral: true });
+                        break;
+                    }
+                }
+            } catch (err) {
+                console.error('Voice button handler error:', err);
+                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses tombol.', ephemeral: true }); } catch (e) {}
+            }
+        }
+
+        if (interaction.isStringSelectMenu()) {
+            try {
+                const member = interaction.member;
+                const voiceChannel = member && member.voice && member.voice.channel;
+                if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan ini.', ephemeral: true });
+
+                const parsed = (function(){ try { const p = fs.readFileSync(path.join(__dirname,'..','..','database','guild.json'),'utf8'); return p.trim()?JSON.parse(p):null; } catch(e){return null;} })();
+                const voiceCfg = (function(){ if(!parsed) return null; if(Array.isArray(parsed)){ for(const it of parsed){ if(it && typeof it==='object' && it[interaction.guild.id]) return it[interaction.guild.id].voice||null } return null } return parsed[interaction.guild.id]?parsed[interaction.guild.id].voice||null:null })() || { ownerToChannel: [] };
+                voiceCfg.ownerToChannel = voiceCfg.ownerToChannel || [];
+                const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
+
+                if (interaction.customId === 'voice_select_region') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    const value = interaction.values[0];
+                    const rtcRegion = value === 'auto' ? null : value;
+                    try {
+                        await voiceChannel.edit({ rtcRegion });
+                    } catch (e) { console.error('Failed to edit channel region:', e); }
+                    mapping.region = value;
+                    if (parsed) fs.writeFileSync(path.join(__dirname,'..','..','database','guild.json'), JSON.stringify(parsed,null,2),'utf8');
+                    await interaction.reply({ content: `✅ Region diubah menjadi **${value}**`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_kick') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    const targetId = interaction.values[0];
+                    const targetMember = voiceChannel.members.get(targetId);
+                    if (!targetMember) return await interaction.reply({ content: '❌ User tidak ditemukan di voice channel.', ephemeral: true });
+                    try { await targetMember.voice.setChannel(null); } catch (e) { console.error('Failed to kick member:', e); }
+                    await interaction.reply({ content: `✅ <@${targetId}> telah dikick dari voice.`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_transfer') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+                    const targetId = interaction.values[0];
+                    const targetMember = voiceChannel.members.get(targetId);
+                    if (!targetMember) return await interaction.reply({ content: '❌ User tidak ditemukan di voice channel.', ephemeral: true });
+                    mapping.ownerId = targetId;
+                    if (parsed) fs.writeFileSync(path.join(__dirname,'..','..','database','guild.json'), JSON.stringify(parsed,null,2),'utf8');
+                    await interaction.reply({ content: `✅ Ownership telah dipindahkan ke <@${targetId}>.`, ephemeral: true });
+                }
+            } catch (err) {
+                console.error('Select menu handler error:', err);
+                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses pilihan.', ephemeral: true }); } catch (e) {}
             }
         }
 

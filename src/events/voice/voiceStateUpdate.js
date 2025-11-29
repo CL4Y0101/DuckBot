@@ -214,7 +214,6 @@ module.exports = {
               isActive: true
             };
             if (existingEntry) {
-              // update the existing mapping instead of adding a duplicate
               Object.assign(existingEntry, entryObj);
             } else {
               ownerToChannelArr.push(entryObj);

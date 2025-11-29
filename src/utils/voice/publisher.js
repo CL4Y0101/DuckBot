@@ -42,10 +42,26 @@ async function publishVoiceSetupEmbeds(client) {
                     .setDescription(`Gunakan perintah atau klik tombol (nanti) untuk menetapkan voice channel aktif sebagai lobby.\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
                     .setColor('#5865F2');
 
+                const row1 = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setLabel('Bitrate').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setLabel('Limit').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setLabel('Rename').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setLabel('Region').setStyle(ButtonStyle.Secondary)
+                );
+
+                const row2 = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setLabel('Kick').setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setLabel('Claim').setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setLabel('Info').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setLabel('Transfer').setStyle(ButtonStyle.Primary)
+                );
+
+                const components = [row1, row2];
+
                 if (botMessage) {
-                    try { await botMessage.edit({ embeds: [embed] }); } catch (e) { }
+                    try { await botMessage.edit({ embeds: [embed], components }); } catch (e) { }
                 } else {
-                    try { await channelObj.send({ embeds: [embed] }); } catch (e) { }
+                    try { await channelObj.send({ embeds: [embed], components }); } catch (e) { }
                 }
             } catch (err) {
                 console.error('Failed to publish voice setup embed for entry:', err);

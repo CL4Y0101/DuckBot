@@ -310,5 +310,104 @@ module.exports = {
         try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses verifikasi Venity.', ephemeral: true }); } catch (e) { console.error('Failed to send reply:', e); }
       }
     }
+
+    if (interaction.customId === 'voice_modal_bitrate') {
+      try {
+        const val = interaction.fields.getTextInputValue('bitrate_input');
+        const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+        if (isNaN(n) || n < 8000 || n > 128000) return await interaction.reply({ content: '❌ Bitrate tidak valid. Masukkan angka antara 8000 dan 128000.', ephemeral: true });
+
+        const member = interaction.member;
+        const voiceChannel = member && member.voice && member.voice.channel;
+        if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk mengubah bitrate.', ephemeral: true });
+
+        const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+        let parsed = null;
+        try { const raw = fs.existsSync(guildConfigPath) ? fs.readFileSync(guildConfigPath,'utf8') : null; parsed = raw && raw.trim() ? JSON.parse(raw) : null; } catch (e) { parsed = null; }
+        let voiceCfg = null;
+        if (parsed) {
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) { if (item && item[interaction.guild.id]) { voiceCfg = item[interaction.guild.id].voice || null; break; } }
+          } else if (parsed[interaction.guild.id]) voiceCfg = parsed[interaction.guild.id].voice || null;
+        }
+        voiceCfg = voiceCfg || { ownerToChannel: [] };
+        const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
+        if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+
+        try { await voiceChannel.edit({ bitrate: n }); } catch (e) { console.error('Failed to set bitrate:', e); }
+        mapping.bitrate = n;
+        if (parsed) { try { fs.writeFileSync(guildConfigPath, JSON.stringify(parsed, null, 2),'utf8'); } catch (e) { console.error('Failed to save guild.json after bitrate change:', e); } }
+        await interaction.reply({ content: `✅ Bitrate diubah menjadi ${n}`, ephemeral: true });
+      } catch (err) {
+        console.error('voice_modal_bitrate error:', err);
+        try { await interaction.reply({ content: '❌ Terjadi kesalahan saat mengubah bitrate.', ephemeral: true }); } catch (e) {}
+      }
+      return;
+    }
+
+    if (interaction.customId === 'voice_modal_limit') {
+      try {
+        const val = interaction.fields.getTextInputValue('limit_input');
+        const n = parseInt(val.replace(/[^0-9]/g, ''), 10);
+        if (isNaN(n) || n < 0 || n > 99) return await interaction.reply({ content: '❌ Limit tidak valid. Masukkan angka antara 0 dan 99.', ephemeral: true });
+        const member = interaction.member;
+        const voiceChannel = member && member.voice && member.voice.channel;
+        if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk mengubah limit.', ephemeral: true });
+
+        const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+        let parsed = null;
+        try { const raw = fs.existsSync(guildConfigPath) ? fs.readFileSync(guildConfigPath,'utf8') : null; parsed = raw && raw.trim() ? JSON.parse(raw) : null; } catch (e) { parsed = null; }
+        let voiceCfg = null;
+        if (parsed) {
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) { if (item && item[interaction.guild.id]) { voiceCfg = item[interaction.guild.id].voice || null; break; } }
+          } else if (parsed[interaction.guild.id]) voiceCfg = parsed[interaction.guild.id].voice || null;
+        }
+        voiceCfg = voiceCfg || { ownerToChannel: [] };
+        const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
+        if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+
+        try { await voiceChannel.edit({ userLimit: n }); } catch (e) { console.error('Failed to set user limit:', e); }
+        mapping.userlimit = n;
+        if (parsed) { try { fs.writeFileSync(guildConfigPath, JSON.stringify(parsed, null, 2),'utf8'); } catch (e) { console.error('Failed to save guild.json after limit change:', e); } }
+        await interaction.reply({ content: `✅ User limit diubah menjadi ${n}`, ephemeral: true });
+      } catch (err) {
+        console.error('voice_modal_limit error:', err);
+        try { await interaction.reply({ content: '❌ Terjadi kesalahan saat mengubah user limit.', ephemeral: true }); } catch (e) {}
+      }
+      return;
+    }
+
+    if (interaction.customId === 'voice_modal_rename') {
+      try {
+        const name = interaction.fields.getTextInputValue('name_input').trim();
+        if (!name) return await interaction.reply({ content: '❌ Nama tidak boleh kosong.', ephemeral: true });
+        const member = interaction.member;
+        const voiceChannel = member && member.voice && member.voice.channel;
+        if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk mengubah nama.', ephemeral: true });
+
+        const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+        let parsed = null;
+        try { const raw = fs.existsSync(guildConfigPath) ? fs.readFileSync(guildConfigPath,'utf8') : null; parsed = raw && raw.trim() ? JSON.parse(raw) : null; } catch (e) { parsed = null; }
+        let voiceCfg = null;
+        if (parsed) {
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) { if (item && item[interaction.guild.id]) { voiceCfg = item[interaction.guild.id].voice || null; break; } }
+          } else if (parsed[interaction.guild.id]) voiceCfg = parsed[interaction.guild.id].voice || null;
+        }
+        voiceCfg = voiceCfg || { ownerToChannel: [] };
+        const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
+        if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
+
+        try { await voiceChannel.setName(name); } catch (e) { console.error('Failed to rename channel:', e); }
+        mapping.channelName = name;
+        if (parsed) { try { fs.writeFileSync(guildConfigPath, JSON.stringify(parsed, null, 2),'utf8'); } catch (e) { console.error('Failed to save guild.json after rename:', e); } }
+        await interaction.reply({ content: `✅ Nama channel diubah menjadi **${name}**`, ephemeral: true });
+      } catch (err) {
+        console.error('voice_modal_rename error:', err);
+        try { await interaction.reply({ content: '❌ Terjadi kesalahan saat mengganti nama channel.', ephemeral: true }); } catch (e) {}
+      }
+      return;
+    }
   },
 };

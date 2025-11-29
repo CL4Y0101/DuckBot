@@ -235,6 +235,4 @@ module.exports = {
       }
     }, 5 * 60 * 1000); // 5 minutes
   }
-
-// publishVoiceSetupEmbeds moved to src/utils/voice/publisher.js
 };
