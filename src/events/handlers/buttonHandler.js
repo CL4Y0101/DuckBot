@@ -360,7 +360,7 @@ module.exports = {
             }
         }
 
-        const voiceButtonIds = new Set(['voice_btn_bitrate','voice_btn_limit','voice_btn_rename','voice_btn_region','voice_btn_kick','voice_btn_claim','voice_btn_info','voice_btn_transfer']);
+        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer']);
 
         if (voiceButtonIds.has(interaction.customId)) {
             try {
@@ -408,33 +408,61 @@ module.exports = {
                 };
 
                 const notInVoiceReply = async () => {
-                    try { await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan tombol ini.', ephemeral: true }); } catch (e) {}
+                    try { await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan tombol ini.', ephemeral: true }); } catch (e) { }
                 };
 
                 switch (interaction.customId) {
                     case 'voice_btn_bitrate': {
                         if (!voiceChannel) return await notInVoiceReply();
-                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
-                        const modal = new ModalBuilder().setCustomId('voice_modal_bitrate').setTitle('Set Bitrate');
-                        const input = new TextInputBuilder().setCustomId('bitrate_input').setLabel('Bitrate (8000 - 128000)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 64000').setRequired(true);
-                        modal.addComponents(new ActionRowBuilder().addComponents(input));
-                        await interaction.showModal(modal);
+
+                        if (!mapping) {
+                            return await interaction.reply({ content: '❌ Channel ini bukan dibuat atau dikelola oleh bot, sehingga tidak dapat diklaim.', ephemeral: true });
+                        }
+
+                        if (mapping.ownerId && mapping.ownerId === member.id) return await interaction.reply({ content: 'Anda sudah menjadi owner.', ephemeral: true });
+
+                        let currentOwnerPresent = false;
+                        if (mapping && mapping.ownerId) {
+                            currentOwnerPresent = voiceChannel.members.has(mapping.ownerId);
+                        }
+                        if (mapping && mapping.ownerId && currentOwnerPresent) return await interaction.reply({ content: 'Owner masih berada di channel, claim tidak diperbolehkan.', ephemeral: true });
+
+                        try {
+                            const botMember = interaction.guild.members.me || await interaction.guild.members.fetch(client.user.id).catch(() => null);
+                            const required = [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.Connect, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages];
+                            let hasAll = false;
+                            if (botMember) {
+                                hasAll = voiceChannel.permissionsFor(botMember).has(required, false);
+                            }
+                            if (!hasAll) {
+                                try {
+                                    await voiceChannel.permissionOverwrites.edit(client.user.id, {
+                                        Connect: true,
+                                        ManageChannels: true,
+                                        SendMessages: true,
+                                        ManageMessages: true
+                                    });
+                                    if (botMember) hasAll = voiceChannel.permissionsFor(botMember).has(required, false);
+                                } catch (err) {
+                                    console.error('Failed to set permission overwrites for bot on claim:', err);
+                                }
+                            }
+                            if (!hasAll) {
+                                return await interaction.reply({ content: '❌ Bot tidak memiliki izin yang diperlukan pada channel ini untuk melakukan klaim (Manage Channels / Connect / Send Messages / Manage Messages).', ephemeral: true });
+                            }
+                        } catch (err) {
+                            console.error('Error checking/setting bot permissions for claim:', err);
+                        }
+
+                        mapping.ownerId = member.id;
+                        mapping.isActive = true;
+                        if (parsed) saveGuildRaw(parsed);
+                        await interaction.reply({ content: '✅ Anda sekarang owner dari channel ini.', ephemeral: true });
                         break;
-                    }
-                    case 'voice_btn_limit': {
-                        if (!voiceChannel) return await notInVoiceReply();
-                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
-                        const modal = new ModalBuilder().setCustomId('voice_modal_limit').setTitle('Set User Limit');
-                        const input = new TextInputBuilder().setCustomId('limit_input').setLabel('User limit (0 = unlimited, max 99)').setStyle(TextInputStyle.Short).setPlaceholder('e.g. 10').setRequired(true);
-                        modal.addComponents(new ActionRowBuilder().addComponents(input));
-                        await interaction.showModal(modal);
-                        break;
-                    }
-                    case 'voice_btn_rename': {
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const modal = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
-                        const input = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. Luhnox's Hangout").setRequired(true);
+                        const input = new TextInputBuilder().setCustomId('name_input').setLabel('Nama channel baru').setStyle(TextInputStyle.Short).setPlaceholder("e.g. luhnox's Hangout").setRequired(true);
                         modal.addComponents(new ActionRowBuilder().addComponents(input));
                         await interaction.showModal(modal);
                         break;
@@ -467,7 +495,7 @@ module.exports = {
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
                         if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel.', ephemeral: true });
-                        const options = members.slice(0,25).map(m => ({ label: `${m.user.username}`, value: m.id }));
+                        const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
                         const menu = new StringSelectMenuBuilder().setCustomId('voice_select_kick').setPlaceholder('Pilih user untuk dikick').setMinValues(1).setMaxValues(1).addOptions(options);
                         const row = new ActionRowBuilder().addComponents(menu);
                         await interaction.reply({ content: 'Pilih user untuk kick dari voice:', components: [row], ephemeral: true });
@@ -509,7 +537,7 @@ module.exports = {
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
                         if (members.length === 0) return await interaction.reply({ content: 'Tidak ada user lain di channel untuk ditransfer.', ephemeral: true });
-                        const options = members.slice(0,25).map(m => ({ label: `${m.user.username}`, value: m.id }));
+                        const options = members.slice(0, 25).map(m => ({ label: `${m.user.username}`, value: m.id }));
                         const menu = new StringSelectMenuBuilder().setCustomId('voice_select_transfer').setPlaceholder('Pilih user untuk transfer ownership').setMinValues(1).setMaxValues(1).addOptions(options);
                         const row = new ActionRowBuilder().addComponents(menu);
                         await interaction.reply({ content: 'Pilih user untuk menjadi owner baru:', components: [row], ephemeral: true });
@@ -518,7 +546,7 @@ module.exports = {
                 }
             } catch (err) {
                 console.error('Voice button handler error:', err);
-                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses tombol.', ephemeral: true }); } catch (e) {}
+                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses tombol.', ephemeral: true }); } catch (e) { }
             }
         }
 
@@ -528,8 +556,8 @@ module.exports = {
                 const voiceChannel = member && member.voice && member.voice.channel;
                 if (!voiceChannel) return await interaction.reply({ content: '❌ Anda harus berada di voice channel untuk menggunakan ini.', ephemeral: true });
 
-                const parsed = (function(){ try { const p = fs.readFileSync(path.join(__dirname,'..','..','database','guild.json'),'utf8'); return p.trim()?JSON.parse(p):null; } catch(e){return null;} })();
-                const voiceCfg = (function(){ if(!parsed) return null; if(Array.isArray(parsed)){ for(const it of parsed){ if(it && typeof it==='object' && it[interaction.guild.id]) return it[interaction.guild.id].voice||null } return null } return parsed[interaction.guild.id]?parsed[interaction.guild.id].voice||null:null })() || { ownerToChannel: [] };
+                const parsed = (function () { try { const p = fs.readFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), 'utf8'); return p.trim() ? JSON.parse(p) : null; } catch (e) { return null; } })();
+                const voiceCfg = (function () { if (!parsed) return null; if (Array.isArray(parsed)) { for (const it of parsed) { if (it && typeof it === 'object' && it[interaction.guild.id]) return it[interaction.guild.id].voice || null } return null } return parsed[interaction.guild.id] ? parsed[interaction.guild.id].voice || null : null })() || { ownerToChannel: [] };
                 voiceCfg.ownerToChannel = voiceCfg.ownerToChannel || [];
                 const mapping = voiceCfg.ownerToChannel.find(o => o.channelId === voiceChannel.id) || null;
 
@@ -541,7 +569,7 @@ module.exports = {
                         await voiceChannel.edit({ rtcRegion });
                     } catch (e) { console.error('Failed to edit channel region:', e); }
                     mapping.region = value;
-                    if (parsed) fs.writeFileSync(path.join(__dirname,'..','..','database','guild.json'), JSON.stringify(parsed,null,2),'utf8');
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
                     await interaction.reply({ content: `✅ Region diubah menjadi **${value}**`, ephemeral: true });
                 } else if (interaction.customId === 'voice_select_kick') {
                     if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '❌ Anda bukan owner channel ini.', ephemeral: true });
@@ -556,12 +584,12 @@ module.exports = {
                     const targetMember = voiceChannel.members.get(targetId);
                     if (!targetMember) return await interaction.reply({ content: '❌ User tidak ditemukan di voice channel.', ephemeral: true });
                     mapping.ownerId = targetId;
-                    if (parsed) fs.writeFileSync(path.join(__dirname,'..','..','database','guild.json'), JSON.stringify(parsed,null,2),'utf8');
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
                     await interaction.reply({ content: `✅ Ownership telah dipindahkan ke <@${targetId}>.`, ephemeral: true });
                 }
             } catch (err) {
                 console.error('Select menu handler error:', err);
-                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses pilihan.', ephemeral: true }); } catch (e) {}
+                try { await interaction.reply({ content: '❌ Terjadi kesalahan saat memproses pilihan.', ephemeral: true }); } catch (e) { }
             }
         }
 
