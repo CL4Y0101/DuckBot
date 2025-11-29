@@ -14,27 +14,27 @@ module.exports = {
     .setDescription('Set channel untuk verifikasi username Roblox')
     .addSubcommandGroup(group =>
       group
-      .setName('verify')
-      .setDescription('Set channel untuk verifikasi username Roblox')
-      .addSubcommand(subcommand =>
-        subcommand
-        .setName('channel')
-        .setDescription('Set channel untuk verifikasi (roblox or minecraft)')
-        .addChannelOption(option =>
-          option.setName('channel')
-          .setDescription('Channel tempat verifikasi')
-          .setRequired(true)
-        )
-        .addStringOption(opt =>
-          opt.setName('type')
-            .setDescription('Tipe verifikasi: roblox atau minecraft')
-            .setRequired(true)
-            .addChoices(
-              { name: 'roblox', value: 'roblox' },
-              { name: 'minecraft', value: 'minecraft' }
+        .setName('verify')
+        .setDescription('Set channel untuk verifikasi username Roblox')
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('channel')
+            .setDescription('Set channel untuk verifikasi (roblox or minecraft)')
+            .addChannelOption(option =>
+              option.setName('channel')
+                .setDescription('Channel tempat verifikasi')
+                .setRequired(true)
+            )
+            .addStringOption(opt =>
+              opt.setName('type')
+                .setDescription('Tipe verifikasi: roblox atau minecraft')
+                .setRequired(true)
+                .addChoices(
+                  { name: 'roblox', value: 'roblox' },
+                  { name: 'minecraft', value: 'minecraft' }
+                )
             )
         )
-      )
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
@@ -128,22 +128,19 @@ module.exports = {
         ephemeral: true
       });
     }
-    // persist the selected verification channel by type into src/database/guild.json
     try {
       const fs = require('fs');
       const path = require('path');
       const guildDbPath = path.join(__dirname, '../../database/guild.json');
       let raw = '[]';
-      try { raw = fs.existsSync(guildDbPath) ? fs.readFileSync(guildDbPath, 'utf8') : '[]'; } catch {}
+      try { raw = fs.existsSync(guildDbPath) ? fs.readFileSync(guildDbPath, 'utf8') : '[]'; } catch { }
       let parsed = [];
       try { parsed = raw.trim() ? JSON.parse(raw) : []; } catch (e) { parsed = []; }
 
-      // support both array-of-objects and object mapping shapes
       const gid = interaction.guild.id;
       let modified = false;
 
       if (Array.isArray(parsed)) {
-        // find object that has key gid
         let foundIdx = -1;
         for (let i = 0; i < parsed.length; i++) {
           const item = parsed[i];

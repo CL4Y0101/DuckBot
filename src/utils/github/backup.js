@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 const execPromise = util.promisify(exec);
 const databaseDir = path.join(__dirname, '../../database');
-const databaseFiles = ['afk.json', 'guild.json', 'invites.json', 'sessions.json', 'username.json', 'venity.json'];
+const databaseFiles = ['afk.json', 'guild.json', 'invites.json', 'sessions.json', 'username.json', 'venity.json', 'tempvoice.json'];
 let lastHashes = {};
 let lastCommitSHA = null;
 const backupBranch = process.env.GITHUB_BACKUP_BRANCH || 'database';
@@ -248,39 +248,39 @@ async function restoreDatabase() {
       const { Octokit } = await import('@octokit/rest');
       const octokit = new Octokit({ auth: githubToken });
       for (const file of databaseFiles) {
-          const filePath = path.join(databaseDir, file);
-          const remoteCandidates = [`src/database/${file}`, `database/src/database/${file}`];
-          let remoteContent = null;
-          let usedPath = null;
-          for (const rp of remoteCandidates) {
-            try {
-              const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: rp, ref: backupBranch });
-              remoteContent = Buffer.from(fileData.content, fileData.encoding).toString('utf8');
-              usedPath = rp;
-              console.log(`ℹ️ Found remote file for ${file} at ${rp}`);
-              break;
-            } catch (e) {
-            }
-          }
-          if (!remoteContent) continue;
-
-          const localContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
-          if (remoteContent !== localContent) {
-            const localStat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
-            const localMtime = localStat ? localStat.mtimeMs : 0;
-            const now = Date.now();
-            const GRACE_MS = 2 * 60 * 1000; // 2 minutes grace period
-
-            if (localMtime && (now - localMtime) < GRACE_MS) {
-              console.warn(`⚠️ Skipping restore of ${file} because local file was modified recently (${Math.round((now - localMtime) / 1000)}s ago)`);
-              continue;
-            }
-
-            fs.writeFileSync(filePath, remoteContent, 'utf8');
-            console.log(`✅ Restored ${file} from ${backupBranch} via API (source: ${usedPath})`);
-            lastHashes[file] = getFileHash(filePath);
+        const filePath = path.join(databaseDir, file);
+        const remoteCandidates = [`src/database/${file}`, `database/src/database/${file}`];
+        let remoteContent = null;
+        let usedPath = null;
+        for (const rp of remoteCandidates) {
+          try {
+            const { data: fileData } = await octokit.repos.getContent({ owner: 'CL4Y0101', repo: 'DuckBot', path: rp, ref: backupBranch });
+            remoteContent = Buffer.from(fileData.content, fileData.encoding).toString('utf8');
+            usedPath = rp;
+            console.log(`ℹ️ Found remote file for ${file} at ${rp}`);
+            break;
+          } catch (e) {
           }
         }
+        if (!remoteContent) continue;
+
+        const localContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+        if (remoteContent !== localContent) {
+          const localStat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+          const localMtime = localStat ? localStat.mtimeMs : 0;
+          const now = Date.now();
+          const GRACE_MS = 2 * 60 * 1000; // 2 minutes grace period
+
+          if (localMtime && (now - localMtime) < GRACE_MS) {
+            console.warn(`⚠️ Skipping restore of ${file} because local file was modified recently (${Math.round((now - localMtime) / 1000)}s ago)`);
+            continue;
+          }
+
+          fs.writeFileSync(filePath, remoteContent, 'utf8');
+          console.log(`✅ Restored ${file} from ${backupBranch} via API (source: ${usedPath})`);
+          lastHashes[file] = getFileHash(filePath);
+        }
+      }
     } catch (error) {
       console.error('⚠️ api restore failed:', error.message);
     }

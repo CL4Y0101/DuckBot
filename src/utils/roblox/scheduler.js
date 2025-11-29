@@ -30,7 +30,6 @@ async function runVenityCheck(discordClient) {
         for (const entry of data) {
             try {
                 if (!entry || !entry.userid) continue;
-                // only check entries that were previously verified
                 if (!entry.verified) continue;
 
                 const playerId = entry.playerId || null;
@@ -38,7 +37,6 @@ async function runVenityCheck(discordClient) {
                 if (playerId) {
                     profile = await api.getProfileByUUID(String(playerId));
                 } else if (entry.playerName) {
-                    // fallback: search guilds for playerName
                     const allGuilds = await api.getAllBebekGuilds();
                     for (const g of allGuilds || []) {
                         if (!g || !Array.isArray(g.members)) continue;
@@ -50,16 +48,13 @@ async function runVenityCheck(discordClient) {
                     }
                 }
 
-                // decide membership: if profile exists and has guild info, consider still in guild
                 const stillInGuild = !!(profile && profile.guild && profile.guild.id);
 
                 if (!stillInGuild) {
-                    // mark unverified and remove role(s)
                     entry.verified = false;
                     changed = true;
 
                     try {
-                        // remove Venity-specific role and verified role
                         const guild = discordClient.guilds.cache.get(process.env.GUILD_ID);
                         if (guild) {
                             const roles = getRoleIds(guild.id);
@@ -69,7 +64,6 @@ async function runVenityCheck(discordClient) {
                                 if (venityRoleId && member.roles.cache.has(venityRoleId)) {
                                     await member.roles.remove(venityRoleId).catch(err => console.error('Failed to remove venity role:', err));
                                 }
-                                // also remove general verified role via roleManager
                                 await removeVerifiedRole(discordClient, entry.userid, null, { silent: true });
                             }
                         }
@@ -146,7 +140,6 @@ async function runVerificationCheck() {
                 console.warn('⚠️ Discord client disconnected during verification, skipping role update');
             }
 
-            // also run Venity (Minecraft) membership checks and remove roles if left guild
             try {
                 await runVenityCheck(client);
             } catch (e) {

@@ -13,10 +13,10 @@ class VerificationService {
     async verifyUser(userid, guildid = null) {
         try {
             const normalizedUserid = String(userid);
-            
+
             const data = this.loadDatabase();
             const user = data.find(u => String(u.userid) === normalizedUserid);
-            
+
             if (!user) {
                 console.log(`❌ User ${normalizedUserid} not found in database (total users in DB: ${data.length})`);
                 if (data.length > 0) {
@@ -33,7 +33,7 @@ class VerificationService {
                 const prevNick = prevEntry.roblox_nickname || '<none>';
                 const prevVerified = !!prevEntry.verified;
                 console.log(`🔍 verifyUser start: userid=${normalizedUserid} prevNick=${prevNick} prevVerified=${prevVerified}`);
-            } catch (e) {}
+            } catch (e) { }
 
             if (!user.roblox_nickname) {
                 if (user.verified) {
@@ -45,7 +45,7 @@ class VerificationService {
             }
 
             const isVerified = this.checkVerification(user.roblox_nickname, guildid);
-            
+
             if (user.verified !== isVerified) {
                 console.log(`🔁 verifyUser: userid=${normalizedUserid} nick=${user.roblox_nickname} isVerified=${isVerified} (was ${user.verified})`);
                 user.verified = isVerified;
@@ -85,13 +85,13 @@ class VerificationService {
                 }
 
                 await this.updateUserProfile(user);
-                
+
                 const isVerified = this.checkVerification(user.roblox_nickname, guildid);
 
                 if (user.verified !== isVerified) {
                     user.verified = isVerified;
                     updated = true;
-                    
+
                     console.log(
                         isVerified
                             ? `✅ Auto-verified ${user.username} (${user.roblox_nickname})`
@@ -100,7 +100,7 @@ class VerificationService {
                 }
 
                 processed++;
-                
+
                 if (processed % 5 === 0) {
                     await this.delay(500);
                 }
@@ -123,27 +123,27 @@ class VerificationService {
 
         const guildConfig = this.loadGuildConfig(guildid);
         const patterns = this.generatePatterns(nickname, guildConfig);
-        
-        const patternMatch = patterns.some(pattern => 
+
+        const patternMatch = patterns.some(pattern =>
             this.matchPattern(nickname, pattern)
         );
-        
+
         if (patternMatch) return true;
-        
+
         if (guildConfig && Object.keys(guildConfig).length > 0) {
             const suffixes = Object.keys(guildConfig).filter(k => guildConfig[k]);
             const nicknameLower = nickname.toLowerCase();
-            
+
             return suffixes.some(suffix => nicknameLower.includes(suffix.toLowerCase()));
         }
-        
+
         const nicknameLower = nickname.toLowerCase();
         return nicknameLower.includes('dv');
     }
 
     generatePatterns(nickname, guildConfig) {
         const patterns = [];
-        
+
         if (guildConfig && Object.keys(guildConfig).length > 0) {
             Object.keys(guildConfig).forEach(suffix => {
                 if (guildConfig[suffix]) {
@@ -167,7 +167,7 @@ class VerificationService {
             `${displayName}x${suffix}`,
             `${displayName}${suffix}`
         ];
-        
+
         const lowerSuffix = suffix.toLowerCase();
         if (lowerSuffix !== suffix) {
             patterns.push(
@@ -179,7 +179,7 @@ class VerificationService {
                 `${displayName}${lowerSuffix}`
             );
         }
-        
+
         const upperSuffix = suffix.toUpperCase();
         if (upperSuffix !== suffix && upperSuffix !== lowerSuffix) {
             patterns.push(
@@ -191,7 +191,7 @@ class VerificationService {
                 `${displayName}${upperSuffix}`
             );
         }
-        
+
         return patterns;
     }
 
@@ -203,7 +203,7 @@ class VerificationService {
         const regexPattern = pattern
             .replace(/\*/g, '.*')
             .replace(/\?/g, '.');
-            
+
         try {
             const regex = new RegExp(`^${regexPattern}$`, 'i');
             return regex.test(nickname);
@@ -215,7 +215,7 @@ class VerificationService {
     async updateUserProfile(user) {
         try {
             if (user.roblox_uid) {
-                
+
                 const profilePromise = robloxAPI.getUserProfile(user.roblox_uid);
                 const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('Roblox API timeout')), 10000)
@@ -237,14 +237,14 @@ class VerificationService {
                 console.warn(`⚠️ Database file not found at: ${databasePath}`);
                 return [];
             }
-            
+
             const content = fs.readFileSync(databasePath, 'utf8');
-            
+
             if (!content.trim()) {
                 console.warn(`⚠️ Database file is empty at: ${databasePath}`);
                 return [];
             }
-            
+
             try {
                 const data = JSON.parse(content);
                 if (!Array.isArray(data)) {
@@ -288,7 +288,7 @@ class VerificationService {
             try {
                 const stat = fs.statSync(databasePath);
                 console.log(`💾 Saved database (${deduped.length} entries) at ${databasePath} mtime=${new Date(stat.mtimeMs).toISOString()}`);
-            } catch {}
+            } catch { }
         } catch (error) {
             console.error('❌ Error saving database:', error);
         }

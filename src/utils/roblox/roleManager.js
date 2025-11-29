@@ -74,7 +74,6 @@ function getRoleIds(guildId) {
         if (guildConfig && guildConfig.Roles) {
             return {
                 verified: guildConfig.Roles.verified || '1405032359589449800',
-                // support both 'registered' and older 'unverified' naming
                 registered: guildConfig.Roles.registered || guildConfig.Roles.unverified || '996367985759486042',
                 venityRole: guildConfig.Roles.venityRole || '996406094618443807'
             };
@@ -194,7 +193,7 @@ async function removeVerifiedRole(client, userid, guildId = null, options = {}) 
 async function updateRoles(client) {
     try {
         console.log('🎭 Starting role update process...');
-        
+
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
         if (!guild) {
             console.log('❌ Guild not found for role updates');
@@ -205,7 +204,7 @@ async function updateRoles(client) {
         console.log(`🔎 Role IDs for guild ${guild.id}: verified=${roleIdsGlobal.verified}, registered=${roleIdsGlobal.registered}`);
 
         const fs = require('fs');
-        
+
         if (!fs.existsSync(databasePath)) {
             console.log('❌ Database file not found for role updates');
             return;
@@ -235,23 +234,23 @@ async function updateRoles(client) {
 
         for (let i = 0; i < normalizedUsers.length; i++) {
             const user = normalizedUsers[i];
-            
+
             try {
                 if (!user.userid) {
                     console.warn(`⚠️ Skipping user with no userid: ${user.username}`);
                     continue;
                 }
 
-                
+
                 if (i > 0 && i % 10 === 0) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
                 const memberFetchPromise = guild.members.fetch(user.userid).catch(() => null);
-                const timeoutPromise = new Promise((_, reject) => 
+                const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('Member fetch timeout')), 5000)
                 );
-                
+
                 let member;
                 try {
                     member = await Promise.race([memberFetchPromise, timeoutPromise]);
@@ -273,7 +272,7 @@ async function updateRoles(client) {
                 }
 
                 const isVerified = await verificationService.verifyUser(user.userid, guild.id);
-                
+
                 if (isVerified) {
                     if (!logState.verified.includes(user.userid) && logsToShow.verified.length < 5) {
                         logsToShow.verified.push(user.userid);
@@ -299,9 +298,9 @@ async function updateRoles(client) {
                         console.error(`⚠️ Error calling removeVerifiedRole for ${user.userid}:`, e);
                     }
                 }
-                
+
                 updatedCount++;
-                
+
             } catch (error) {
                 console.error(`❌ Error updating roles for user ${user.userid} (${user.username}):`, error.message);
                 errorCount++;

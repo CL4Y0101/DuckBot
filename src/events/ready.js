@@ -7,6 +7,7 @@ const { triggerImmediateBackup, checkAndPullRemoteChanges, startBackupWatcher } 
 const inviteTracker = require('../utils/inviteTracker');
 const fs = require('fs');
 const path = require('path');
+const { publishVoiceSetupEmbeds } = require('../utils/voice/publisher');
 
 module.exports = {
   name: Events.ClientReady,
@@ -15,9 +16,9 @@ module.exports = {
     console.log(`✅ Logged in as ${client.user.tag}`);
 
     await this.deployCommands();
-    
+
     await this.initializePresence(client);
-    
+
     await this.initializeServices(client);
 
     console.log('🚀 All systems initialized and ready!');
@@ -63,7 +64,7 @@ module.exports = {
 
         let robloxUsers = 0;
         let verifiedUsers = 0;
-        
+
         if (fs.existsSync(databasePath)) {
           const fileContent = fs.readFileSync(databasePath, 'utf8');
           if (fileContent.trim()) {
@@ -101,15 +102,14 @@ module.exports = {
     };
 
     await updatePresence();
-    
+
     setInterval(updatePresence, 2 * 60 * 1000);
   },
 
   async initializeServices(client) {
     try {
       console.log('🔄 Initializing services...');
-      
-      // pull remote database first so services use the latest remote state
+
       try {
         console.log('🔽 Pulling remote database before initializing services...');
         await checkAndPullRemoteChanges();
@@ -191,24 +191,32 @@ module.exports = {
       await inviteTracker.initializeGuild(client, process.env.GUILD_ID);
       console.log('✅ Invite tracking initialized');
 
+      // publish voice setup embed to configured channels (implementation in utils/voice/publisher)
+      try {
+        await publishVoiceSetupEmbeds(client);
+        console.log('✅ Voice setup embeds published');
+      } catch (err) {
+        console.error('❌ Failed to publish voice setup embeds:', err);
+      }
+
     } catch (error) {
       console.error('❌ Error initializing services:', error);
     }
   },
 
   async initializeBackupSystem() {
-      try {
-        await triggerImmediateBackup();
-        console.log('✅ Initial backup completed');
-      } catch (error) {
-        console.error('❌ Initial backup failed:', error.message);
-      }
+    try {
+      await triggerImmediateBackup();
+      console.log('✅ Initial backup completed');
+    } catch (error) {
+      console.error('❌ Initial backup failed:', error.message);
+    }
 
-      try {
-        startBackupWatcher();
-      } catch (err) {
-        console.error('❌ Failed to start backup watcher:', err.message);
-      }
+    try {
+      startBackupWatcher();
+    } catch (err) {
+      console.error('❌ Failed to start backup watcher:', err.message);
+    }
 
     setInterval(async () => {
       try {
@@ -228,4 +236,6 @@ module.exports = {
       }
     }, 5 * 60 * 1000); // 5 minutes
   }
+
+// publishVoiceSetupEmbeds moved to src/utils/voice/publisher.js
 };

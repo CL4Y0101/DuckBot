@@ -11,6 +11,19 @@
             "tracking": {
                 "enabled": true,
                 "channel": "1012734651489595476"
+            },
+            "voice": {
+                "lobby": "1444170953750872126",
+                "category": "1407381310498017371",
+                "channel": "1411332799969103914",
+                "ownerToChannel": [
+                    {
+                        "ownerId": "userId",
+                        "channelId": "channelId",
+                        "channelName": "default username discord",
+                        "isActive": false
+                    }
+                ]
             }
         }
     }

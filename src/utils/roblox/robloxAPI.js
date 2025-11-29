@@ -14,14 +14,14 @@ class RobloxAPI {
       try {
         const response = await axios.post(
           `https://users.roblox.com/v1/usernames/users`, {
-            usernames: [username]
+          usernames: [username]
         }, {
-            headers: {
-              'Content-Type': 'application/json',
-              'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
-            },
-            timeout: 15000
-          }
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
+          },
+          timeout: 15000
+        }
         );
 
         const users = response.data.data;

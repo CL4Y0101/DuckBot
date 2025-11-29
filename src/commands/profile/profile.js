@@ -204,24 +204,24 @@ module.exports = {
     .setDescription('Get user profile information')
     .addSubcommand(subcommand =>
       subcommand
-      .setName('roblox_user')
-      .setDescription('Get profile by Roblox username')
-      .addStringOption(option =>
-        option.setName('username')
-        .setDescription('Roblox username')
-        .setRequired(true)
-        .setAutocomplete(true)
-      )
+        .setName('roblox_user')
+        .setDescription('Get profile by Roblox username')
+        .addStringOption(option =>
+          option.setName('username')
+            .setDescription('Roblox username')
+            .setRequired(true)
+            .setAutocomplete(true)
+        )
     )
     .addSubcommand(subcommand =>
       subcommand
-      .setName('discord_user')
-      .setDescription('Get profile by Discord user')
-      .addUserOption(option =>
-        option.setName('user')
-        .setDescription('Discord user')
-        .setRequired(true)
-      )
+        .setName('discord_user')
+        .setDescription('Get profile by Discord user')
+        .addUserOption(option =>
+          option.setName('user')
+            .setDescription('Discord user')
+            .setRequired(true)
+        )
     ),
 
   async execute(interaction) {

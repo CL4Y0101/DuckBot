@@ -89,8 +89,8 @@ module.exports = {
         .setDescription('Set your AFK status')
         .addStringOption(option =>
           option.setName('reason')
-          .setDescription('Reason for being AFK')
-          .setRequired(false)
+            .setDescription('Reason for being AFK')
+            .setRequired(false)
         )
     )
     .addSubcommand(subcommand =>
@@ -99,8 +99,8 @@ module.exports = {
         .setDescription('Remove AFK status from a user (Admin only)')
         .addUserOption(option =>
           option.setName('user')
-          .setDescription('The user to remove AFK status from')
-          .setRequired(true)
+            .setDescription('The user to remove AFK status from')
+            .setRequired(true)
         )
     )
     .addSubcommand(subcommand =>

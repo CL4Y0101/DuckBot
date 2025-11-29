@@ -4,11 +4,9 @@ class MinecraftAPI {
   constructor() {
     this.venityGuildName = 'https://api.venitymc.com/v2/guild/search/{query}';
     this.venityGuildInformation = 'https://api.venitymc.com/v2/guild/info/{guildId}';
-    // Venity exposes player info at /v2/player/info/{id} (contains xuid)
     this.venityProfile = 'https://api.venitymc.com/v2/player/info/{id}';
   }
 
-  // Allowed bebek guild queries
   static getBebekGuildQueries() {
     return ['bebekslowmo', 'bebekfastmode', 'bebekneumode', 'bebekuniverse'];
   }
@@ -94,7 +92,6 @@ class MinecraftAPI {
    */
   async getProfileByUUID(idOrUuid) {
     try {
-      // try player/info by numeric id first
       const response = await axios.get(this.venityProfile.replace('{id}', idOrUuid), {
         headers: {
           'User-Agent': 'DuckCommunityBot/1.0 (Node.js)'
@@ -103,7 +100,6 @@ class MinecraftAPI {
       });
       if (response && response.data) return response.data;
     } catch (error) {
-      // fallback: some endpoints use /v2/profile/{uuid}
       try {
         const alt = 'https://api.venitymc.com/v2/profile/{uuid}';
         const resp2 = await axios.get(alt.replace('{uuid}', idOrUuid), {

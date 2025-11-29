@@ -63,7 +63,7 @@ async function createAnimatedWelcomeBanner(member) {
     return new Promise(async (resolve, reject) => {
         try {
             const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
-            
+
             if (!fs.existsSync(bannerPath)) {
                 console.log('❌ Background GIF not found, using simple banner');
                 const simpleBanner = await createSimpleBanner(member, 'welcome');
@@ -72,7 +72,7 @@ async function createAnimatedWelcomeBanner(member) {
 
             const width = 800;
             const height = 300;
-            
+
             const encoder = new GIFEncoder(width, height);
             const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
@@ -84,10 +84,10 @@ async function createAnimatedWelcomeBanner(member) {
 
             let avatarImage;
             try {
-                const avatarUrl = member.user.displayAvatarURL({ 
+                const avatarUrl = member.user.displayAvatarURL({
                     extension: 'jpg',
                     size: 128,
-                    forceStatic: true 
+                    forceStatic: true
                 });
                 avatarImage = await loadImage(avatarUrl);
             } catch (error) {
@@ -110,7 +110,7 @@ async function createAnimatedWelcomeBanner(member) {
 
                     if (avatarImage) {
                         ctx.save();
-                        
+
                         const borderHue = (frameIndex * 45) % 360;
                         ctx.strokeStyle = `hsl(${borderHue}, 100%, 65%)`;
                         ctx.lineWidth = 4;
@@ -125,17 +125,17 @@ async function createAnimatedWelcomeBanner(member) {
                         ctx.drawImage(avatarImage, 92, 92, 116, 116);
                         ctx.restore();
                     }
-                    
+
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 32px Arial';
                     ctx.textAlign = 'center';
-                    
+
                     const bounceOffset = Math.sin(frameIndex * 0.8) * 3;
                     ctx.fillText('WELCOME', 550, 100 + bounceOffset);
 
                     ctx.font = 'bold 24px Arial';
-                    const username = member.user.username.length > 12 
-                        ? member.user.username.substring(0, 12) + '...' 
+                    const username = member.user.username.length > 12
+                        ? member.user.username.substring(0, 12) + '...'
                         : member.user.username;
                     ctx.fillText(username, 550, 140);
 
@@ -189,13 +189,13 @@ async function createSimpleBanner(member, type) {
     ctx.fillRect(0, 0, 600, 200);
 
     try {
-        const avatarUrl = member.user.displayAvatarURL({ 
-            extension: 'jpg', 
+        const avatarUrl = member.user.displayAvatarURL({
+            extension: 'jpg',
             size: 64,
-            forceStatic: true 
+            forceStatic: true
         });
         const avatar = await loadImage(avatarUrl);
-        
+
         ctx.save();
         ctx.beginPath();
         ctx.arc(80, 100, 30, 0, Math.PI * 2);
@@ -216,13 +216,13 @@ async function createSimpleBanner(member, type) {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';
-    
+
     const title = type === 'welcome' ? 'WELCOME' : 'GOODBYE';
     ctx.fillText(title, 150, 60);
 
     ctx.font = 'bold 20px Arial';
-    const username = member.user.username.length > 10 
-        ? member.user.username.substring(0, 10) + '...' 
+    const username = member.user.username.length > 10
+        ? member.user.username.substring(0, 10) + '...'
         : member.user.username;
     ctx.fillText(username, 150, 90);
 
@@ -234,14 +234,14 @@ async function createSimpleBanner(member, type) {
     ctx.fillText(serverText, 150, 115);
 
     ctx.font = 'bold 14px Arial';
-    const memberText = type === 'welcome' 
-        ? `Member #${member.guild.memberCount}` 
+    const memberText = type === 'welcome'
+        ? `Member #${member.guild.memberCount}`
         : `Members: ${member.guild.memberCount}`;
     ctx.fillText(memberText, 150, 140);
 
     const buffer = canvas.toBuffer('image/png');
-    const attachment = new AttachmentBuilder(buffer, { 
-        name: type === 'welcome' ? 'welcome_banner.png' : 'leave_banner.png' 
+    const attachment = new AttachmentBuilder(buffer, {
+        name: type === 'welcome' ? 'welcome_banner.png' : 'leave_banner.png'
     });
 
     return attachment;

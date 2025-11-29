@@ -8,6 +8,7 @@ const {
     ButtonBuilder,
     ButtonStyle
 } = require('discord.js');
+const { PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -200,72 +201,72 @@ module.exports = {
             }
         }
 
-                if (interaction.customId === 'venity_verify_button') {
-                    const userId = interaction.user.id;
+        if (interaction.customId === 'venity_verify_button') {
+            const userId = interaction.user.id;
 
-                    const venityDbPath = path.join(__dirname, '../../database/venity.json');
-                    let data = [];
-                    if (fs.existsSync(venityDbPath)) {
-                        const fileContent = fs.readFileSync(venityDbPath, 'utf8');
-                        if (fileContent.trim()) data = JSON.parse(fileContent);
-                    }
+            const venityDbPath = path.join(__dirname, '../../database/venity.json');
+            let data = [];
+            if (fs.existsSync(venityDbPath)) {
+                const fileContent = fs.readFileSync(venityDbPath, 'utf8');
+                if (fileContent.trim()) data = JSON.parse(fileContent);
+            }
 
-                    const existing = data.find(u => u.userid === userId);
-                    if (existing) {
-                        const embed = new EmbedBuilder()
-                            .setTitle('`🔍` Your Venity Verification Status')
-                            .setColor(existing.xuid ? '#00ff00' : '#ff6b6b')
-                            .setDescription(
-                                `- **Discord Username:** \`${interaction.user.username}\`\n` +
-                                `- **Minecraft Player:** \`${existing.playerName || 'Not set'}\`\n` +
-                                `- **Venity PlayerId:** \`${existing.playerId || 'N/A'}\`\n` +
-                                `- **xuid:** \`${existing.xuid || 'N/A'}\``
-                            );
+            const existing = data.find(u => u.userid === userId);
+            if (existing) {
+                const embed = new EmbedBuilder()
+                    .setTitle('`🔍` Your Venity Verification Status')
+                    .setColor(existing.xuid ? '#00ff00' : '#ff6b6b')
+                    .setDescription(
+                        `- **Discord Username:** \`${interaction.user.username}\`\n` +
+                        `- **Minecraft Player:** \`${existing.playerName || 'Not set'}\`\n` +
+                        `- **Venity PlayerId:** \`${existing.playerId || 'N/A'}\`\n` +
+                        `- **xuid:** \`${existing.xuid || 'N/A'}\``
+                    );
 
-                        const button = new ButtonBuilder()
-                            .setCustomId('venity_reverify_button')
-                            .setLabel('Reverify your Minecraft name')
-                            .setStyle(ButtonStyle.Secondary);
+                const button = new ButtonBuilder()
+                    .setCustomId('venity_reverify_button')
+                    .setLabel('Reverify your Minecraft name')
+                    .setStyle(ButtonStyle.Secondary);
 
-                        const row = new ActionRowBuilder().addComponents(button);
+                const row = new ActionRowBuilder().addComponents(button);
 
-                        await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
-                    } else {
-                        const modal = new ModalBuilder()
-                            .setCustomId('venity_modal')
-                            .setTitle('Venity Verification');
+                await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+            } else {
+                const modal = new ModalBuilder()
+                    .setCustomId('venity_modal')
+                    .setTitle('Venity Verification');
 
-                        const nameInput = new TextInputBuilder()
-                            .setCustomId('venity_playername')
-                            .setLabel('Masukkan Minecraft username kamu:')
-                            .setStyle(TextInputStyle.Short)
-                            .setPlaceholder('contoh: BenBenKUN24')
-                            .setRequired(true);
+                const nameInput = new TextInputBuilder()
+                    .setCustomId('venity_playername')
+                    .setLabel('Masukkan Minecraft username kamu:')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('contoh: BenBenKUN24')
+                    .setRequired(true);
 
-                        const row = new ActionRowBuilder().addComponents(nameInput);
-                        modal.addComponents(row);
+                const row = new ActionRowBuilder().addComponents(nameInput);
+                modal.addComponents(row);
 
-                        await interaction.showModal(modal);
-                    }
-                }
+                await interaction.showModal(modal);
+            }
+        }
 
-                if (interaction.customId === 'venity_reverify_button') {
-                    const modal = new ModalBuilder()
-                        .setCustomId('venity_modal')
-                        .setTitle('Venity Reverify');
+        if (interaction.customId === 'venity_reverify_button') {
+            const modal = new ModalBuilder()
+                .setCustomId('venity_modal')
+                .setTitle('Venity Reverify');
 
-                    const nameInput = new TextInputBuilder()
-                        .setCustomId('venity_playername')
-                        .setLabel('Masukkan Minecraft username kamu:')
-                        .setStyle(TextInputStyle.Short)
-                        .setPlaceholder('contoh: BenBenKUN24')
-                        .setRequired(true);
+            const nameInput = new TextInputBuilder()
+                .setCustomId('venity_playername')
+                .setLabel('Masukkan Minecraft username kamu:')
+                .setStyle(TextInputStyle.Short)
+                .setPlaceholder('contoh: BenBenKUN24')
+                .setRequired(true);
 
-                    const row = new ActionRowBuilder().addComponents(nameInput);
-                    modal.addComponents(row);
+            const row = new ActionRowBuilder().addComponents(nameInput);
+            modal.addComponents(row);
 
-                    await interaction.showModal(modal);
-                }
+            await interaction.showModal(modal);
+        }
 
         if (interaction.customId === 'reverify_button') {
             const modal = new ModalBuilder()
@@ -283,6 +284,79 @@ module.exports = {
             modal.addComponents(row);
 
             await interaction.showModal(modal);
+        }
+
+        if (interaction.customId === 'voice_set_active') {
+            try {
+                const member = interaction.member;
+                if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
+                    await interaction.reply({ content: '❌ You need Administrator to set the active voice channel.', ephemeral: true });
+                    return;
+                }
+
+                const voiceChannel = member.voice.channel;
+                if (!voiceChannel) {
+                    await interaction.reply({ content: '❌ You must be connected to a voice channel to set it as active.', ephemeral: true });
+                    return;
+                }
+
+                const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
+                let raw = '[]';
+                try { raw = fs.existsSync(guildConfigPath) ? fs.readFileSync(guildConfigPath, 'utf8') : '[]'; } catch { }
+                let parsed = [];
+                try { parsed = raw.trim() ? JSON.parse(raw) : []; } catch (e) { parsed = []; }
+
+                const gid = interaction.guild.id;
+                let modified = false;
+                if (Array.isArray(parsed)) {
+                    let foundIdx = -1;
+                    for (let i = 0; i < parsed.length; i++) {
+                        const item = parsed[i];
+                        if (item && typeof item === 'object' && item[gid]) { foundIdx = i; break; }
+                    }
+                    if (foundIdx === -1) {
+                        const newCfg = {};
+                        newCfg[gid] = { voice: {} };
+                        newCfg[gid].voice.lobby = voiceChannel.id;
+                        parsed.push(newCfg);
+                        modified = true;
+                    } else {
+                        const cfg = parsed[foundIdx][gid] = parsed[foundIdx][gid] || {};
+                        cfg.voice = cfg.voice || {};
+                        cfg.voice.lobby = voiceChannel.id;
+                        modified = true;
+                    }
+                } else if (parsed && typeof parsed === 'object') {
+                    parsed[gid] = parsed[gid] || {};
+                    parsed[gid].voice = parsed[gid].voice || {};
+                    parsed[gid].voice.lobby = voiceChannel.id;
+                    modified = true;
+                }
+
+                if (modified) {
+                    try { fs.writeFileSync(guildConfigPath, JSON.stringify(parsed, null, 2)); console.log(`💾 Updated guild.json voice.lobby for ${gid} -> ${voiceChannel.id}`); } catch (e) { console.error('❌ Failed to write guild.json', e); }
+                }
+
+                try {
+                    const embed = new EmbedBuilder()
+                        .setTitle('Temporary Voice Setup')
+                        .setDescription(`Gunakan tombol di bawah untuk menetapkan voice channel aktif sebagai lobby.\n\nCurrent lobby: <#${voiceChannel.id}>`)
+                        .setColor('#5865F2');
+
+                    const row = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('voice_set_active').setLabel('Set Active Voice').setStyle(ButtonStyle.Primary)
+                    );
+
+                    try { await interaction.update({ embeds: [embed], components: [row] }); } catch (e) { /* message may be ephemeral */ }
+                } catch (e) {
+                    console.error('Failed to update voice setup message:', e);
+                }
+
+                await interaction.reply({ content: `✅ Voice lobby set to ${voiceChannel.name}`, ephemeral: true });
+            } catch (err) {
+                console.error('Error handling voice_set_active button:', err);
+                try { await interaction.reply({ content: '❌ Error setting voice lobby', ephemeral: true }); } catch (e) { }
+            }
         }
 
         if (interaction.customId.startsWith('leaderboard_')) {

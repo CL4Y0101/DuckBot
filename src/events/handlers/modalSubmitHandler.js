@@ -185,7 +185,6 @@ module.exports = {
       });
     }
 
-    // Venity / Minecraft verification modal
     if (interaction.customId === 'venity_modal') {
       try {
         const playerName = interaction.fields.getTextInputValue('venity_playername');
@@ -220,7 +219,6 @@ module.exports = {
         entry.playerName = playerName;
         entry.updatedAt = new Date().toISOString();
 
-        // Async lookup: search bebek guilds for the playerName
         setImmediate(async () => {
           try {
             const api = new MinecraftAPI();
@@ -240,7 +238,6 @@ module.exports = {
             if (found) {
               const playerId = found.member.playerId;
               entry.playerId = playerId;
-              // fetch profile to get xuid
               const profile = await api.getProfileByUUID(String(playerId));
               if (profile) {
                 if (profile.xuid) entry.xuid = profile.xuid;
@@ -251,14 +248,12 @@ module.exports = {
                   role: found.member.role
                 };
 
-                // verify by matching discordId
                 const profileDiscord = profile.discordId || profile.discordID || profile.discord || null;
                 if (profileDiscord && String(profileDiscord) === String(userId)) {
                   entry.verified = true;
                   entry.updatedAt = new Date().toISOString();
                   console.log(`Venity: Verified ${playerName} (playerId=${playerId}, xuid=${entry.xuid}) matching discordId=${profileDiscord}`);
 
-                  // assign roles: use existing verified assigner and also add Venity-specific role
                   try {
                     await assignVerifiedRole(client, userId);
                   } catch (err) {
@@ -278,7 +273,6 @@ module.exports = {
                     console.error('Error assigning Venity-specific role:', err);
                   }
 
-                  // follow up to user
                   try {
                     await interaction.followUp({ content: `✅ Venity verification berhasil — role telah diberikan.`, ephemeral: true });
                   } catch (e) { /* ignore followUp errors */ }
@@ -290,7 +284,6 @@ module.exports = {
                   } catch (e) { /* ignore */ }
                 }
               } else {
-                // profile fetch failed entirely
                 entry.verified = false;
                 console.log(`Venity: Found ${playerName} (playerId=${playerId}) but failed to fetch profile`);
               }

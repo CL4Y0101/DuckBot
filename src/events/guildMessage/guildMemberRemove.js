@@ -13,7 +13,7 @@ module.exports = {
 
             const channelId = '985908885938376744';
             const channel = client.channels.cache.get(channelId) || member.guild.channels.cache.get(channelId);
-            
+
             if (!channel) {
                 console.log('Channel not found');
                 return;
@@ -48,7 +48,7 @@ module.exports = {
 
         } catch (error) {
             console.error('❌ Error sending leave message:', error);
-            
+
             const channelId = '985908885938376744';
             const channel = member.guild.channels.cache.get(channelId);
             if (channel) {
@@ -62,7 +62,7 @@ async function createAnimatedLeaveBanner(member) {
     return new Promise(async (resolve, reject) => {
         try {
             const bannerPath = path.join(__dirname, '../../assets/img/banner_discord.gif');
-            
+
             if (!fs.existsSync(bannerPath)) {
                 const simpleBanner = await createSimpleBanner(member, 'goodbye');
                 return resolve(simpleBanner);
@@ -70,7 +70,7 @@ async function createAnimatedLeaveBanner(member) {
 
             const width = 800;
             const height = 300;
-            
+
             const encoder = new GIFEncoder(width, height);
             const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
@@ -82,10 +82,10 @@ async function createAnimatedLeaveBanner(member) {
 
             let avatarImage;
             try {
-                const avatarUrl = member.user.displayAvatarURL({ 
+                const avatarUrl = member.user.displayAvatarURL({
                     extension: 'jpg',
                     size: 128,
-                    forceStatic: true 
+                    forceStatic: true
                 });
                 avatarImage = await loadImage(avatarUrl);
             } catch (error) {
@@ -109,7 +109,7 @@ async function createAnimatedLeaveBanner(member) {
 
                     if (avatarImage) {
                         ctx.save();
-                        
+
                         const borderAlpha = 0.6 + Math.sin(frameIndex * 0.7) * 0.2;
                         ctx.strokeStyle = `rgba(255, 255, 255, ${borderAlpha})`;
                         ctx.lineWidth = 3;
@@ -130,12 +130,12 @@ async function createAnimatedLeaveBanner(member) {
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 32px Arial';
                     ctx.textAlign = 'center';
-                    
+
                     ctx.fillText('😢 GOODBYE 😢', 550, 100);
 
                     ctx.font = 'bold 24px Arial';
-                    const username = member.user.username.length > 12 
-                        ? member.user.username.substring(0, 12) + '...' 
+                    const username = member.user.username.length > 12
+                        ? member.user.username.substring(0, 12) + '...'
                         : member.user.username;
                     ctx.fillText(username, 550, 140);
 
@@ -189,13 +189,13 @@ async function createSimpleBanner(member, type) {
     ctx.fillRect(0, 0, 600, 200);
 
     try {
-        const avatarUrl = member.user.displayAvatarURL({ 
-            extension: 'jpg', 
+        const avatarUrl = member.user.displayAvatarURL({
+            extension: 'jpg',
             size: 64,
-            forceStatic: true 
+            forceStatic: true
         });
         const avatar = await loadImage(avatarUrl);
-        
+
         ctx.save();
         ctx.beginPath();
         ctx.arc(80, 100, 30, 0, Math.PI * 2);
@@ -216,13 +216,13 @@ async function createSimpleBanner(member, type) {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';
-    
+
     const title = type === 'goodbye' ? 'WELCOME' : 'GOODBYE';
     ctx.fillText(title, 150, 60);
 
     ctx.font = 'bold 20px Arial';
-    const username = member.user.username.length > 10 
-        ? member.user.username.substring(0, 10) + '...' 
+    const username = member.user.username.length > 10
+        ? member.user.username.substring(0, 10) + '...'
         : member.user.username;
     ctx.fillText(username, 150, 90);
 
@@ -234,14 +234,14 @@ async function createSimpleBanner(member, type) {
     ctx.fillText(serverText, 150, 115);
 
     ctx.font = 'bold 14px Arial';
-    const memberText = type === 'leave' 
-        ? `Member #${member.guild.memberCount}` 
+    const memberText = type === 'leave'
+        ? `Member #${member.guild.memberCount}`
         : `Members: ${member.guild.memberCount}`;
     ctx.fillText(memberText, 150, 140);
 
     const buffer = canvas.toBuffer('image/png');
-    const attachment = new AttachmentBuilder(buffer, { 
-        name: type === 'leave' ? 'leave_banner.png' : 'leave_banner.png' 
+    const attachment = new AttachmentBuilder(buffer, {
+        name: type === 'leave' ? 'leave_banner.png' : 'leave_banner.png'
     });
 
     return attachment;
