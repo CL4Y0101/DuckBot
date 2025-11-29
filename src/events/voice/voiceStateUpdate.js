@@ -84,56 +84,48 @@ module.exports = {
       const tryDeleteChannel = async (channel) => {
         if (!channel || channel.type !== ChannelType.GuildVoice) return;
         if (channel.id === lobbyId) return;
+        if (tempCfg && tempCfg.channel && channel.id === tempCfg.channel) return;
+
         const members = channel.members;
-        if (members && members.size === 0) {
-          const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-          if (ownerIdx !== -1) {
-            ownerToChannelArr[ownerIdx].isActive = false;
-            if (voiceContainer && voiceContainer.parsed) {
-              voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-              saveGuildRaw(voiceContainer.parsed);
-            }
+        if (!members || members.size !== 0) return;
 
-            setTimeout(async () => {
-              try {
-                let latest = guild.channels.cache.get(channel.id);
-                if (!latest) {
-                  try { latest = await guild.channels.fetch(channel.id); } catch (e) { latest = null; }
-                }
+        const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
 
-                if (latest && latest.members && latest.members.size > 0) {
-                  const idx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-                  if (idx !== -1) {
-                    ownerToChannelArr[idx].isActive = true;
-                    if (voiceContainer && voiceContainer.parsed) {
-                      voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-                      saveGuildRaw(voiceContainer.parsed);
-                    }
-                  }
-                  return;
-                }
-
-                try {
-                  if (latest) await latest.delete('Temporary voice channel empty - cleanup');
-                  else await channel.delete('Temporary voice channel empty - cleanup');
-                } catch (e) {
-                  console.error('Failed to delete temp voice channel:', e);
-                }
-
-                const remIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-                if (remIdx !== -1) {
-                  ownerToChannelArr[remIdx].channelId = null;
-                  ownerToChannelArr[remIdx].isActive = false;
-                  if (voiceContainer && voiceContainer.parsed) {
-                    voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-                    saveGuildRaw(voiceContainer.parsed);
-                  }
-                }
-              } catch (e) {
-                console.error('Error during delayed cleanup check for temp voice channel:', e);
-              }
-            }, 5000);
+        if (ownerIdx !== -1) {
+          ownerToChannelArr[ownerIdx].isActive = false;
+          ownerToChannelArr[ownerIdx].channelId = null;
+          if (voiceContainer && voiceContainer.parsed) {
+            voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+            saveGuildRaw(voiceContainer.parsed);
           }
+        }
+
+        try {
+          let latest = guild.channels.cache.get(channel.id);
+          if (!latest) {
+            try { latest = await guild.channels.fetch(channel.id); } catch (e) { latest = null; }
+          }
+
+          if (latest && latest.members && latest.members.size > 0) {
+            const idx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
+            if (idx !== -1) {
+              ownerToChannelArr[idx].isActive = true;
+              if (voiceContainer && voiceContainer.parsed) {
+                voiceContainer.entry.ownerToChannel = ownerToChannelArr;
+                saveGuildRaw(voiceContainer.parsed);
+              }
+            }
+            return;
+          }
+
+          try {
+            if (latest) await latest.delete('Temporary voice channel empty - cleanup');
+            else await channel.delete('Temporary voice channel empty - cleanup');
+          } catch (e) {
+            console.error('Failed to delete temp voice channel:', e);
+          }
+        } catch (e) {
+          console.error('Error during immediate cleanup for temp voice channel:', e);
         }
       };
 
@@ -208,67 +200,6 @@ module.exports = {
 
       if (oldState.channelId && oldState.channelId !== newState.channelId) {
         const oldChannel = oldState.channel;
-        const tryDeleteChannel = async (channel) => {
-          if (!channel || channel.type !== ChannelType.GuildVoice) return;
-          const members = channel.members;
-          if (members && members.size === 0) {
-            const ownerIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-
-            const delayedCleanup = async () => {
-              try {
-                let latest = guild.channels.cache.get(channel.id);
-                if (!latest) {
-                  try { latest = await guild.channels.fetch(channel.id); } catch (e) { latest = null; }
-                }
-
-                if (latest && latest.members && latest.members.size > 0) {
-                  if (ownerIdx !== -1) {
-                    ownerToChannelArr[ownerIdx].isActive = true;
-                    if (voiceContainer && voiceContainer.parsed) {
-                      voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-                      saveGuildRaw(voiceContainer.parsed);
-                    }
-                  }
-                  return;
-                }
-
-                try {
-                  if (latest) await latest.delete('Temporary voice channel empty - cleanup');
-                  else await channel.delete('Temporary voice channel empty - cleanup');
-                } catch (e) {
-                  console.error('Failed to delete temp voice channel:', e);
-                }
-
-                const remIdx = ownerToChannelArr.findIndex(o => o.channelId === channel.id);
-                if (remIdx !== -1) {
-                  ownerToChannelArr[remIdx].channelId = null;
-                  ownerToChannelArr[remIdx].isActive = false;
-                  if (voiceContainer && voiceContainer.parsed) {
-                    voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-                    saveGuildRaw(voiceContainer.parsed);
-                  }
-                }
-              } catch (e) {
-                console.error('Error during delayed cleanup check for temp voice channel:', e);
-              }
-            };
-
-            if (ownerIdx !== -1) {
-              ownerToChannelArr[ownerIdx].isActive = false;
-              if (voiceContainer && voiceContainer.parsed) {
-                voiceContainer.entry.ownerToChannel = ownerToChannelArr;
-                saveGuildRaw(voiceContainer.parsed);
-              }
-              setTimeout(delayedCleanup, 5000);
-              return;
-            }
-
-            const maybeTemp = (tempCfg.category && channel.parentId === tempCfg.category) || channel.name.endsWith("'s channel");
-            if (maybeTemp) {
-              setTimeout(delayedCleanup, 5000);
-            }
-          }
-        };
         await tryDeleteChannel(oldChannel);
       }
     } catch (e) {
