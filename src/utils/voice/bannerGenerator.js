@@ -288,8 +288,8 @@ class VoiceButtonBannerGenerator {
 
     // 🖼️ Generate compact version untuk embed kecil
     async generateCompactBanner() {
-        const width = 800;
-        const height = 280;
+        const width = 240;
+        const height = 120;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
