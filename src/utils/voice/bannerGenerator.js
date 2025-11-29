@@ -5,14 +5,14 @@ const path = require('path');
 class VoiceButtonBannerGenerator {
     constructor() {
         this.buttonTemplates = {
-            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#5865F2' },
-            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#EB459E' },
-            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#57F287' },
-            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#FEE75C' },
-            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#ED4245' },
-            'voice_btn_invite': { emoji: '📞', label: 'INVITE', color: '#2ECC71' },
-            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#9B59B6' },
-            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#E67E22' }
+            'voice_btn_bitrate': { emoji: '🔊', label: 'BITRATE', color: '#40444B' },
+            'voice_btn_limit': { emoji: '👥', label: 'LIMIT', color: '#40444B' },
+            'voice_btn_rename': { emoji: '📝', label: 'RENAME', color: '#40444B' },
+            'voice_btn_region': { emoji: '🌐', label: 'REGION', color: '#40444B' },
+            'voice_btn_kick': { emoji: '🚫', label: 'KICK', color: '#40444B' },
+            'voice_btn_claim': { emoji: '👑', label: 'CLAIM', color: '#40444B' },
+            'voice_btn_info': { emoji: 'ℹ️', label: 'INFO', color: '#40444B' },
+            'voice_btn_transfer': { emoji: '🔄', label: 'TRANSFER', color: '#40444B' }
         };
         // map template keys to asset filenames (relative to src/assets/img)
         this.iconFiles = {
@@ -82,7 +82,7 @@ class VoiceButtonBannerGenerator {
 
                 if (template) {
                     // left colored circle (filled)
-                    const circleX = currentX + 18;
+                    const circleX = currentX + 8;
                     const circleY = currentY + (buttonHeight / 2);
                     const circleR = 14;
                     ctx.beginPath();
@@ -93,7 +93,7 @@ class VoiceButtonBannerGenerator {
                     // draw image icon if available, otherwise emoji fallback
                     const img = this.imageCache[buttonId];
                     if (img) {
-                        const imgSize = Math.round(circleR * 1.6);
+                        const imgSize = Math.round(circleR * 1.8);
                         const ix = circleX - (imgSize / 2);
                         const iy = circleY - (imgSize / 2) - 1;
                         try { ctx.drawImage(img, ix, iy, imgSize, imgSize); } catch (e) { /* ignore */ }
@@ -110,7 +110,7 @@ class VoiceButtonBannerGenerator {
                     ctx.font = '700 12px Arial';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    const textX = circleX + circleR + 10;
+                    const textX = circleX + circleR + 8;
                     ctx.fillText((template.label || '').toUpperCase(), textX, circleY + 1);
                 } else {
                     // disabled placeholder (dash) centered
