@@ -39,13 +39,13 @@
           },
           {
             "ownerId": "941306983598923786",
-            "channelId": "1444548009093238925",
+            "channelId": null,
             "channelName": "loudfelix_",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "1001085268046118942",
