@@ -49,13 +49,13 @@
           },
           {
             "ownerId": "1001085268046118942",
-            "channelId": null,
+            "channelId": "1444533469710651412",
             "channelName": "lexoadiz",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": false
+            "isActive": true
           },
           {
             "ownerId": "849590328897175572",
