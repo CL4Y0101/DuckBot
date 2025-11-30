@@ -46,6 +46,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "1001085268046118942",
+            "channelId": "1444528644729864285",
+            "channelName": "lexoadiz",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
