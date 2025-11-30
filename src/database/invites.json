@@ -143,14 +143,6 @@
         "maxUses": 0,
         "createdAt": "2025-09-28T05:30:24.558Z"
       },
-      "uyKv4etd": {
-        "code": "uyKv4etd",
-        "inviter": "893907569335214090",
-        "uses": 1,
-        "maxUses": 0,
-        "createdAt": "2025-11-23T06:33:47.285Z",
-        "expiresAt": "2025-11-30T06:33:47.000Z"
-      },
       "xapaJBp8": {
         "code": "xapaJBp8",
         "inviter": "1417027242667802684",
@@ -264,13 +256,6 @@
           "kRayGPwaZ3"
         ]
       },
-      "893907569335214090": {
-        "totalInvites": 1,
-        "successfulInvites": 1,
-        "codes": [
-          "uyKv4etd"
-        ]
-      },
       "1417027242667802684": {
         "totalInvites": 1,
         "successfulInvites": 1,
@@ -286,6 +271,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-30T06:29:13.808Z"
+    "lastUpdated": "2025-11-30T06:34:13.776Z"
   }
 }
