@@ -184,6 +184,7 @@ module.exports = {
             const defaultUserLimit = (tempCfg && tempCfg.userlimit) ? tempCfg.userlimit : 0;
             const defaultRegion = (tempCfg && tempCfg.region) ? tempCfg.region : 'auto';
             const defaultSlowmode = (tempCfg && tempCfg.slowmode) ? tempCfg.slowmode : 0;
+            const roleId = 996367985759486042
 
             const created = await guild.channels.create({
               name,
@@ -203,7 +204,7 @@ module.exports = {
                   allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Speak]
                 },
                 {
-                  id: 996367985759486042,
+                  id: roleId,
                   allow: [PermissionFlagsBits.ViewChannel],
                   deny: []
                 }
