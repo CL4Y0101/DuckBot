@@ -477,9 +477,12 @@ module.exports = {
                         const isHidden = everyonePerms && everyonePerms.deny.has(PermissionFlagsBits.ViewChannel);
 
                         let privacySettings = '';
-                        if (isLocked) privacySettings += '<:fail:1444451615255040061> Locked\n';
-                        if (isHidden) privacySettings += '<:fail:1444451615255040061> Hidden\n';
-                        if (!privacySettings) privacySettings = 'None';
+                        if (!isLocked && !isHidden) {
+                            privacySettings = 'None';
+                        } else {
+                            privacySettings += isLocked ? '<:success:1444828199220547644> Locked\n' : '<:fail:1444451615255040061> Locked\n';
+                            privacySettings += isHidden ? '<:success:1444828199220547644> Hidden\n' : '<:fail:1444451615255040061> Hidden\n';
+                        }
 
                         mapping.trustedUsers = mapping.trustedUsers || [];
                         mapping.blockedUsers = mapping.blockedUsers || [];
