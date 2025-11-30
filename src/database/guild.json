@@ -36,6 +36,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "941306983598923786",
+            "channelId": "1444504192491196672",
+            "channelName": "loudfelix_",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
