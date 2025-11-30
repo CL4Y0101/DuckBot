@@ -195,7 +195,7 @@ module.exports = {
               permissionOverwrites: [
                 {
                   id: guild.roles.everyone.id,
-                  allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
+                  allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.SendMessages],
                   deny: [PermissionFlagsBits.ViewChannel]
                 },
                 {
