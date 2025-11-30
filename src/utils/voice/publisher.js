@@ -40,7 +40,7 @@ async function publishVoiceSetupEmbeds(client) {
                     .setTitle('Voice Channel Configuration')
                     .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different \n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
                     .setColor('#5865F2')
-                    .setImage('attachment://voice_banners.png');
+                    // .setImage('attachment://voice_banners.png');
 
                 const row1 = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Success),
