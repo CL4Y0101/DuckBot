@@ -195,12 +195,17 @@ module.exports = {
               permissionOverwrites: [
                 {
                   id: guild.roles.everyone.id,
-                  allow: [],
-                  deny: []
+                  allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
+                  deny: [PermissionFlagsBits.ViewChannel]
                 },
                 {
                   id: member.id,
                   allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Speak]
+                },
+                {
+                  id: 996367985759486042,
+                  allow: [PermissionFlagsBits.ViewChannel],
+                  deny: []
                 }
               ]
             });
