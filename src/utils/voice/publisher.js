@@ -109,18 +109,35 @@ async function publishVoiceSetupEmbeds(client) {
                     console.warn('Components V2 (SectionBuilder) tidak tersedia, melewati section:', e?.message || e);
                 }
 
-                const components = sectionComponent ? [sectionComponent, row1, row2, row3] : [row1, row2, row3];
+                const components = [row1, row2, row3];
 
                 if (botMessage) {
                     try {
-                        await botMessage.edit({ embeds: [embed], components, files: [attachment], flags: MessageFlags.IsComponentsV2 });
+                        // Jika SectionBuilder tersedia (Components V2), kita tidak boleh mengirim embed bersamaan.
+                        if (sectionComponent) {
+                            // 1) Edit pesan utama menjadi embed + banner + tombol interaktif (tanpa flag V2)
+                            await botMessage.edit({ embeds: [embed], components, files: [attachment] });
+                            // 2) Kirim pesan tambahan yang berisi Section (Components V2) saja
+                            await channelObj.send({ components: [sectionComponent], flags: MessageFlags.IsComponentsV2 });
+                        } else {
+                            // Tanpa Components V2, kirim seperti biasa
+                            await botMessage.edit({ embeds: [embed], components, files: [attachment] });
+                        }
                         console.log(`✅ Edited existing bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to edit bot message in channel ${ch}:`, e);
                     }
                 } else {
                     try {
-                        await channelObj.send({ embeds: [embed], components, files: [attachment], flags: MessageFlags.IsComponentsV2 });
+                        if (sectionComponent) {
+                            // Kirim dua pesan terpisah untuk memenuhi batasan API:
+                            // Pesan 1: embed + banner + tombol interaktif
+                            await channelObj.send({ embeds: [embed], components, files: [attachment] });
+                            // Pesan 2: section Components V2
+                            await channelObj.send({ components: [sectionComponent], flags: MessageFlags.IsComponentsV2 });
+                        } else {
+                            await channelObj.send({ embeds: [embed], components, files: [attachment] });
+                        }
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to send bot message in channel ${ch}:`, e);
