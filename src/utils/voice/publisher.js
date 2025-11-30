@@ -30,11 +30,17 @@ async function publishVoiceSetupEmbeds(client) {
                 const channelObj = client.channels.cache.get(ch);
                 if (!channelObj) continue;
 
-                let botMessage = null;
+                let botMessages = [];
                 try {
                     const messages = await channelObj.messages.fetch({ limit: 50 });
-                    botMessage = messages.find(m => m.author && m.author.id === client.user.id && m.embeds && m.embeds.length > 0 && m.embeds[0].title && (m.embeds[0].title.includes('Temporary Voice Setup') || m.embeds[0].title.includes('Voice Channel Configuration')));
-                    console.log(`🔍 Checking for existing bot message in channel ${ch}: ${botMessage ? 'Found' : 'Not found'}`);
+                    botMessages = messages.filter(m => 
+                        m.author && m.author.id === client.user.id && 
+                        (
+                            (m.embeds && m.embeds.length > 0 && m.embeds[0].title && (m.embeds[0].title.includes('Temporary Voice Setup') || m.embeds[0].title.includes('Voice Channel Configuration'))) ||
+                            (m.components && m.components.length > 0)
+                        )
+                    );
+                    console.log(`🔍 Found ${botMessages.size} existing bot message(s) in channel ${ch}`);
                 } catch (e) {
                     console.error(`❌ Error fetching messages in channel ${ch}:`, e);
                 }
@@ -46,10 +52,6 @@ async function publishVoiceSetupEmbeds(client) {
                     .setDescription(`Konfigurasi ini dapat digunakan untuk mengelola voice channel dari <@1203600776048414720>.\nJika mencoba mengonfigurasi channel lain, mungkin tidak berfungsi.\n\nLobby saat ini: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Belum diatur'}`)
                     .setColor('#5865F2')
                     .setImage('attachment://voice_banners.png');
-
-                // Tidak menggunakan baris tombol ActionRow; kontrol ditampilkan via Components V2 Container
-
-                // Ubah baris tombol menjadi Container (Components V2) dengan beberapa Section berisi accessory button
                 let containerComponentFromRows = null;
                 try {
                     containerComponentFromRows = new ContainerBuilder()
@@ -58,7 +60,6 @@ async function publishVoiceSetupEmbeds(client) {
                             td.setContent('Kontrol Voice (Components V2): gunakan tombol di setiap section.'),
                         )
                         .addSeparatorComponents((sep) => sep)
-                        // Row 1 buttons sebagai Sections
                         .addSectionComponents((section) =>
                             section
                                 .addTextDisplayComponents((td) => td.setContent('Rename'))
@@ -110,7 +111,6 @@ async function publishVoiceSetupEmbeds(client) {
                                 ),
                         )
                         .addSeparatorComponents((sep) => sep)
-                        // Row 2 (disable placeholders dan Privacy)
                         .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) =>
@@ -126,7 +126,6 @@ async function publishVoiceSetupEmbeds(client) {
                         .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSeparatorComponents((sep) => sep)
-                        // Row 3 (disable, Claim, Info, Transfer, disable)
                         .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) =>
                             section
@@ -163,16 +162,18 @@ async function publishVoiceSetupEmbeds(client) {
                     console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
 
-                if (botMessage) {
+                if (botMessages.size > 0) {
                     try {
+                        for (const msg of botMessages.values()) {
+                            await msg.delete();
+                        }
+                        console.log(`🗑️ Deleted ${botMessages.size} old bot message(s) in channel ${ch}`);
+                        
                         if (containerComponentFromRows) {
-                            // Hapus pesan embed lama, kirim Container baru
-                            await botMessage.delete();
                             await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            // Fallback: edit embed seperti biasa tanpa components
-                            await botMessage.edit({ embeds: [embed], files: [attachment] });
+                            await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Updated bot message in channel ${ch}`);
                     } catch (e) {
@@ -181,11 +182,9 @@ async function publishVoiceSetupEmbeds(client) {
                 } else {
                     try {
                         if (containerComponentFromRows) {
-                            // Kirim dua pesan baru: embed + banner, lalu Container
                             await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            // Fallback: kirim embed tanpa components
                             await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Sent new bot message in channel ${ch}`);
