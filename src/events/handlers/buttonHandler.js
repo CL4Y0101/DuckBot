@@ -287,7 +287,7 @@ module.exports = {
             await interaction.showModal(modal);
         }
 
-        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer', 'voice_disable_left', 'voice_disable_right']);
+        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer', 'voice_disable']);
 
         if (voiceButtonIds.has(interaction.customId)) {
             try {
@@ -340,6 +340,9 @@ module.exports = {
 
                 switch (interaction.customId) {
                     case 'voice_btn_bitrate': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const modalB = new ModalBuilder().setCustomId('voice_modal_bitrate').setTitle('Set Bitrate');
@@ -349,6 +352,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_limit': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const modalL = new ModalBuilder().setCustomId('voice_modal_limit').setTitle('Set User Limit');
@@ -358,6 +364,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_rename': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const modalR = new ModalBuilder().setCustomId('voice_modal_rename').setTitle('Rename Channel');
@@ -367,6 +376,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_region': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const options = [
@@ -390,6 +402,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_kick': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);
@@ -449,6 +464,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_info': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         const embed = new EmbedBuilder().setTitle('Channel Info').setColor('#5865F2')
                             .addFields(
@@ -461,6 +479,9 @@ module.exports = {
                         break;
                     }
                     case 'voice_btn_transfer': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
                         if (!voiceChannel) return await notInVoiceReply();
                         if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
                         const members = [...voiceChannel.members.values()].filter(m => m.id !== member.id);

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -39,40 +39,50 @@ async function publishVoiceSetupEmbeds(client) {
                     console.error(`❌ Error fetching messages in channel ${ch}:`, e);
                 }
 
+                const attachment = new AttachmentBuilder(path.join(__dirname, '../../assets/img/voice_banners.png'), { name: 'voice_banners.png' });
+
                 const embed = new EmbedBuilder()
                     .setTitle('Voice Channel Configuration')
                     .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different channel, it might cant\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
-                    .setColor('#5865F2');
-                // .setImage('attachment://voice_banners.png');
+                    .setColor('#5865F2')
+                    .setImage('attachment://voice_banners.png');
 
                 const row1 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Success),
-                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Premium),
+                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setStyle(ButtonStyle.Secondary)
                 );
 
                 const row2 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_disable_left').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('=').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                );
+
+                const row3 = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                     new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_disable_right').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                 );
 
-                const components = [row1, row2];
+                const components = [row1, row2, row3];
 
                 if (botMessage) {
                     try {
-                        await botMessage.edit({ embeds: [embed], components, files: [] });
+                        await botMessage.edit({ embeds: [embed], components, files: [attachment] });
                         console.log(`✅ Edited existing bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to edit bot message in channel ${ch}:`, e);
                     }
                 } else {
                     try {
-                        await channelObj.send({ embeds: [embed], components, files: [] });
+                        await channelObj.send({ embeds: [embed], components, files: [attachment] });
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to send bot message in channel ${ch}:`, e);
