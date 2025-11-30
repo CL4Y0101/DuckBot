@@ -34,13 +34,16 @@ async function publishVoiceSetupEmbeds(client) {
                 try {
                     const messages = await channelObj.messages.fetch({ limit: 50 });
                     botMessage = messages.find(m => m.author && m.author.id === client.user.id && m.embeds && m.embeds.length > 0 && m.embeds[0].title && (m.embeds[0].title.includes('Temporary Voice Setup') || m.embeds[0].title.includes('Voice Channel Configuration')));
-                } catch (e) { }
+                    console.log(`🔍 Checking for existing bot message in channel ${ch}: ${botMessage ? 'Found' : 'Not found'}`);
+                } catch (e) {
+                    console.error(`❌ Error fetching messages in channel ${ch}:`, e);
+                }
 
                 const embed = new EmbedBuilder()
                     .setTitle('Voice Channel Configuration')
-                    .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different \n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
-                    .setColor('#5865F2')
-                    // .setImage('attachment://voice_banners.png');
+                    .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different channel, it might cant\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
+                    .setColor('#5865F2');
+                // .setImage('attachment://voice_banners.png');
 
                 const row1 = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Success),
@@ -61,9 +64,19 @@ async function publishVoiceSetupEmbeds(client) {
                 const components = [row1, row2];
 
                 if (botMessage) {
-                    try { await botMessage.edit({ embeds: [embed], components, files: attachment ? [attachment] : [] }); } catch (e) { }
+                    try {
+                        await botMessage.edit({ embeds: [embed], components });
+                        console.log(`✅ Edited existing bot message in channel ${ch}`);
+                    } catch (e) {
+                        console.error(`❌ Failed to edit bot message in channel ${ch}:`, e);
+                    }
                 } else {
-                    try { await channelObj.send({ embeds: [embed], components, files: attachment ? [attachment] : [] }); } catch (e) { }
+                    try {
+                        await channelObj.send({ embeds: [embed], components });
+                        console.log(`✅ Sent new bot message in channel ${ch}`);
+                    } catch (e) {
+                        console.error(`❌ Failed to send bot message in channel ${ch}:`, e);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to publish voice setup embed for entry:', err);
