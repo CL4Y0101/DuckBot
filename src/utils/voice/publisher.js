@@ -170,10 +170,8 @@ async function publishVoiceSetupEmbeds(client) {
                         console.log(`🗑️ Deleted ${botMessages.size} old bot message(s) in channel ${ch}`);
                         
                         if (containerComponentFromRows) {
-                            await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Updated bot message in channel ${ch}`);
                     } catch (e) {
@@ -182,10 +180,8 @@ async function publishVoiceSetupEmbeds(client) {
                 } else {
                     try {
                         if (containerComponentFromRows) {
-                            await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
