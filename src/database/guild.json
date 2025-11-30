@@ -1,34 +1,44 @@
 [
-    {
-        "985901035593801749": {
-            "Roles": {
-                "verified": "1405032359589449800",
-                "unverified": "996367985759486042",
-                "venityRole": "996406094618443807"
-            },
-            "DV": true,
-            "dv": true,
-            "tracking": {
-                "enabled": true,
-                "channel": "1012734651489595476"
-            },
-            "voice": {
-                "lobby": "1444179327787859990",
-                "category": "1407381310498017371",
-                "channel": "1411332799969103914",
-                "ownerToChannel": [
-                    {
-                        "ownerId": null,
-                        "channelId": null,
-                        "channelName": "default username discord",
-                        "slowmode": 0,
-                        "bitrate": 64000,
-                        "userlimit": 0,
-                        "region": "auto",
-                        "isActive": false
-                    }
-                ]
-            }
-        }
+  {
+    "985901035593801749": {
+      "Roles": {
+        "verified": "1405032359589449800",
+        "unverified": "996367985759486042",
+        "venityRole": "996406094618443807"
+      },
+      "DV": true,
+      "dv": true,
+      "tracking": {
+        "enabled": true,
+        "channel": "1012734651489595476"
+      },
+      "voice": {
+        "lobby": "1444179327787859990",
+        "category": "1407381310498017371",
+        "channel": "1411332799969103914",
+        "ownerToChannel": [
+          {
+            "ownerId": null,
+            "channelId": null,
+            "channelName": "default username discord",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": false
+          },
+          {
+            "ownerId": "1032472108414017576",
+            "channelId": "1444823317373517867",
+            "channelName": "luhnox",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
+          }
+        ]
+      }
     }
+  }
 ]
