@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
+        // Flag untuk menyalakan tampilan Display Mode (non-interaktif via embed fields)
+        const useDisplayMode = true; // ubah ke false jika ingin mematikan
         const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
         if (!fs.existsSync(guildConfigPath)) return;
         const raw = fs.readFileSync(guildConfigPath, 'utf8');
@@ -43,9 +45,25 @@ async function publishVoiceSetupEmbeds(client) {
 
                 const embed = new EmbedBuilder()
                     .setTitle('Voice Channel Configuration')
-                    .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different channel, it might cant\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
+                    .setDescription(`Konfigurasi ini dapat digunakan untuk mengelola voice channel dari <@1203600776048414720>.\nJika mencoba mengonfigurasi channel lain, mungkin tidak berfungsi.\n\nLobby saat ini: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Belum diatur'}`)
                     .setColor('#5865F2')
                     .setImage('attachment://voice_banners.png');
+
+                // Tambahkan “Display Components” gaya embed fields (non-interaktif) jika diaktifkan
+                if (useDisplayMode) {
+                    const displayFields = [
+                        { name: '• Rename', value: 'Ubah nama channel', inline: true },
+                        { name: '• Limit', value: 'Batas pengguna', inline: true },
+                        { name: '• Region', value: 'Wilayah/Server', inline: true },
+                        { name: '• Kick', value: 'Keluarkan pengguna', inline: true },
+                        { name: '• Bitrate', value: 'Kualitas suara', inline: true },
+                        { name: '• Privacy', value: 'Privasi channel', inline: true },
+                        { name: '• Claim', value: 'Ambil kepemilikan', inline: true },
+                        { name: '• Info', value: 'Informasi channel', inline: true },
+                        { name: '• Transfer', value: 'Alihkan kepemilikan', inline: true },
+                    ];
+                    embed.addFields(displayFields);
+                }
 
                 const row1 = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Secondary),
