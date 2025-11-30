@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, SectionBuilder, UserSelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -46,6 +46,8 @@ async function publishVoiceSetupEmbeds(client) {
                     .setDescription(`Konfigurasi ini dapat digunakan untuk mengelola voice channel dari <@1203600776048414720>.\nJika mencoba mengonfigurasi channel lain, mungkin tidak berfungsi.\n\nLobby saat ini: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Belum diatur'}`)
                     .setColor('#5865F2')
                     .setImage('attachment://voice_banners.png');
+
+                // Tidak menggunakan baris tombol ActionRow; kontrol ditampilkan via Components V2 Container
 
                 // Ubah baris tombol menjadi Container (Components V2) dengan beberapa Section berisi accessory button
                 let containerComponentFromRows = null;
@@ -161,33 +163,30 @@ async function publishVoiceSetupEmbeds(client) {
                     console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
 
-                // Hanya gunakan Container yang dibentuk dari baris tombol (containerComponentFromRows)
-
-                const components = [row1, row2, row3];
-
                 if (botMessage) {
                     try {
-                        // Jika Components V2 tersedia dari baris tombol, kita tidak boleh mengirim embed bersamaan dalam pesan yang sama.
                         if (containerComponentFromRows) {
-                            // 1) Edit pesan utama: embed + banner + tombol interaktif (tanpa V2 flag)
-                            await botMessage.edit({ embeds: [embed], components, files: [attachment] });
-                            // 2) Kirim pesan tambahan: hanya Container (Components V2)
+                            // Hapus pesan embed lama, kirim Container baru
+                            await botMessage.delete();
+                            await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            await botMessage.edit({ embeds: [embed], components, files: [attachment] });
+                            // Fallback: edit embed seperti biasa tanpa components
+                            await botMessage.edit({ embeds: [embed], files: [attachment] });
                         }
-                        console.log(`✅ Edited existing bot message in channel ${ch}`);
+                        console.log(`✅ Updated bot message in channel ${ch}`);
                     } catch (e) {
-                        console.error(`❌ Failed to edit bot message in channel ${ch}:`, e);
+                        console.error(`❌ Failed to update bot message in channel ${ch}:`, e);
                     }
                 } else {
                     try {
                         if (containerComponentFromRows) {
-                            // Kirim dua pesan terpisah untuk memenuhi batasan API:
-                            await channelObj.send({ embeds: [embed], components, files: [attachment] });
+                            // Kirim dua pesan baru: embed + banner, lalu Container
+                            await channelObj.send({ embeds: [embed], files: [attachment] });
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            await channelObj.send({ embeds: [embed], components, files: [attachment] });
+                            // Fallback: kirim embed tanpa components
+                            await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
