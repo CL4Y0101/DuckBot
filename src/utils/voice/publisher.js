@@ -56,19 +56,19 @@ async function publishVoiceSetupEmbeds(client) {
                 );
 
                 const row2 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('=').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable').setEmoji('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                    new ButtonBuilder().setCustomId('voice_disable_1').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable_2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable_3').setLabel('=').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable_4').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable_5').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                 );
 
                 const row3 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    new ButtonBuilder().setCustomId('voice_disable_6').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                     new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                    new ButtonBuilder().setCustomId('voice_disable_7').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                 );
 
                 const components = [row1, row2, row3];
