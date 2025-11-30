@@ -76,14 +76,6 @@
         "maxUses": 0,
         "createdAt": "2022-08-24T15:14:52.873Z"
       },
-      "XHmEY5uw": {
-        "code": "XHmEY5uw",
-        "inviter": "1001085268046118942",
-        "uses": 1,
-        "maxUses": 0,
-        "createdAt": "2025-11-23T11:52:54.010Z",
-        "expiresAt": "2025-11-30T11:52:54.000Z"
-      },
       "YQsQttAEYa": {
         "code": "YQsQttAEYa",
         "inviter": "808418614109536277",
@@ -174,12 +166,11 @@
         ]
       },
       "1001085268046118942": {
-        "totalInvites": 568,
-        "successfulInvites": 568,
+        "totalInvites": 567,
+        "successfulInvites": 567,
         "codes": [
           "B2tzAwNF5k",
           "Qwcb7YzV",
-          "XHmEY5uw",
           "m4eWgQR6m3"
         ]
       },
@@ -256,6 +247,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-11-30T11:49:14.298Z"
+    "lastUpdated": "2025-11-30T11:54:14.294Z"
   }
 }
