@@ -39,23 +39,15 @@ async function publishVoiceSetupEmbeds(client) {
 
                 const embed = new EmbedBuilder()
                     .setTitle('Voice Channel Configuration')
-                    .setDescription(`This **Configuration** can be used to manage voice channels.\n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
-                    .setColor('#5865F2');
-
-                let attachment = null;
-                try {
-                    const buffer = await bannerGen.generateCompactBanner();
-                    if (buffer) {
-                        attachment = new AttachmentBuilder(buffer, { name: 'voice_buttons.png' });
-                        embed.setImage('attachment://voice_buttons.png');
-                    }
-                } catch (err) { }
+                    .setDescription(`This **Configuration** can be used to manage voice channels from <@1203600776048414720>.\nHowever if u try to Configuration different \n\nCurrent lobby: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Not set'}`)
+                    .setColor('#5865F2')
+                    .setImage('attachment://voice_banners.png');
 
                 const row1 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Success),
+                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Premium),
                     new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setStyle(ButtonStyle.Secondary)
                 );
 
