@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, SectionBuilder } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -89,18 +89,38 @@ async function publishVoiceSetupEmbeds(client) {
                     new ButtonBuilder().setCustomId('voice_disable_7').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                 );
 
-                const components = [row1, row2, row3];
+                // Components V2: SectionBuilder (Display Components) dengan accessory Button
+                // Catatan: Memerlukan dukungan Components V2 pada versi discord.js/API Anda
+                let sectionComponent = null;
+                try {
+                    sectionComponent = new SectionBuilder()
+                        .addTextDisplayComponents(
+                            (textDisplay) => textDisplay.setContent('Kontrol Voice: Rename • Limit • Region • Kick • Bitrate'),
+                            (textDisplay) => textDisplay.setContent('Tambahan: Privacy • Claim • Info • Transfer'),
+                            (textDisplay) => textDisplay.setContent('Gunakan tombol di bawah untuk aksi interaktif.'),
+                        )
+                        .setButtonAccessory((button) =>
+                            button
+                                .setCustomId('voice_section_info')
+                                .setLabel('Panduan Kontrol')
+                                .setStyle(ButtonStyle.Primary),
+                        );
+                } catch (e) {
+                    console.warn('Components V2 (SectionBuilder) tidak tersedia, melewati section:', e?.message || e);
+                }
+
+                const components = sectionComponent ? [sectionComponent, row1, row2, row3] : [row1, row2, row3];
 
                 if (botMessage) {
                     try {
-                        await botMessage.edit({ embeds: [embed], components, files: [attachment] });
+                        await botMessage.edit({ embeds: [embed], components, files: [attachment], flags: MessageFlags.IsComponentsV2 });
                         console.log(`✅ Edited existing bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to edit bot message in channel ${ch}:`, e);
                     }
                 } else {
                     try {
-                        await channelObj.send({ embeds: [embed], components, files: [attachment] });
+                        await channelObj.send({ embeds: [embed], components, files: [attachment], flags: MessageFlags.IsComponentsV2 });
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
                         console.error(`❌ Failed to send bot message in channel ${ch}:`, e);
