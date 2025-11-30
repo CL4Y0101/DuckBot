@@ -287,7 +287,7 @@ module.exports = {
             await interaction.showModal(modal);
         }
 
-        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer']);
+        const voiceButtonIds = new Set(['voice_btn_bitrate', 'voice_btn_limit', 'voice_btn_rename', 'voice_btn_region', 'voice_btn_kick', 'voice_btn_claim', 'voice_btn_info', 'voice_btn_transfer', 'voice_btn_privacy', 'voice_btn_trust', 'voice_btn_untrust', 'voice_btn_block', 'voice_btn_unblock']);
 
         if (voiceButtonIds.has(interaction.customId)) {
             try {
@@ -492,6 +492,92 @@ module.exports = {
                         await interaction.reply({ content: 'Select a user to become the new owner:', components: [row], ephemeral: true });
                         break;
                     }
+                    case 'voice_btn_privacy': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+                        const dropDownPrivacy = new StringSelectMenuBuilder()
+                            .setCustomId('voice_select_privacy')
+                            .setPlaceholder('Select Privacy Setting')
+                            .addOptions([
+                                { label: 'Hide', description: 'You hideing the Voice Channel', value: 'hide' },
+                                { label: 'UnHide', description: 'Backto Default setting Voice Channel', value: 'unhide' },
+                                { label: 'Lock', description: 'Only Owner can join the Voice Channel', value: 'lock' },
+                                { label: 'Unlock', description: 'Backto Default setting Voice Channel', value: 'unlock' }
+                            ]);
+
+                        const row = new ActionRowBuilder().addComponents(dropDownPrivacy);
+                        await interaction.reply({ content: 'Select a privacy setting for your channel:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_trust': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+
+                        mapping.trustedUsers = mapping.trustedUsers || [];
+                        const allMembers = await interaction.guild.members.fetch();
+                        const availableMembers = allMembers.filter(m => m.id !== member.id && !mapping.trustedUsers.includes(m.id));
+                        if (availableMembers.size === 0) return await interaction.reply({ content: '<:fail:1444451615255040061> No users available to trust.', ephemeral: true });
+                        const options = availableMembers.map(m => ({ label: `${m.user.username}`, value: m.id })).slice(0, 25);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_trust').setPlaceholder('Select users to trust').setMinValues(1).setMaxValues(Math.min(options.length, 25)).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Select users to trust:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_untrust': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+
+                        mapping.trustedUsers = mapping.trustedUsers || [];
+                        if (mapping.trustedUsers.length === 0) return await interaction.reply({ content: '<:fail:1444451615255040061> No trusted users to remove.', ephemeral: true });
+                        const trustedMembers = mapping.trustedUsers.map(id => interaction.guild.members.cache.get(id)).filter(Boolean);
+                        const options = trustedMembers.map(m => ({ label: `${m.user.username}`, value: m.id })).slice(0, 25);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_untrust').setPlaceholder('Select trusted users to remove').setMinValues(1).setMaxValues(Math.min(options.length, 25)).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Select trusted users to remove:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_block': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+
+                        mapping.blockedUsers = mapping.blockedUsers || [];
+                        const allMembers = await interaction.guild.members.fetch();
+                        const availableMembers = allMembers.filter(m => m.id !== member.id && !mapping.blockedUsers.includes(m.id));
+                        if (availableMembers.size === 0) return await interaction.reply({ content: '<:fail:1444451615255040061> No users available to block.', ephemeral: true });
+                        const options = availableMembers.map(m => ({ label: `${m.user.username}`, value: m.id })).slice(0, 25);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_block').setPlaceholder('Select users to block').setMinValues(1).setMaxValues(Math.min(options.length, 25)).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Select users to block:', components: [row], ephemeral: true });
+                        break;
+                    }
+                    case 'voice_btn_unblock': {
+                        if (!mapping) {
+                            return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
+                        }
+                        if (!voiceChannel) return await notInVoiceReply();
+                        if (!mapping || mapping.ownerId !== member.id) return await notOwnerReply();
+
+                        mapping.blockedUsers = mapping.blockedUsers || [];
+                        if (mapping.blockedUsers.length === 0) return await interaction.reply({ content: '<:fail:1444451615255040061> No blocked users to unblock.', ephemeral: true });
+                        const blockedMembers = mapping.blockedUsers.map(id => interaction.guild.members.cache.get(id)).filter(Boolean);
+                        const options = blockedMembers.map(m => ({ label: `${m.user.username}`, value: m.id })).slice(0, 25);
+                        const menu = new StringSelectMenuBuilder().setCustomId('voice_select_unblock').setPlaceholder('Select blocked users to unblock').setMinValues(1).setMaxValues(Math.min(options.length, 25)).addOptions(options);
+                        const row = new ActionRowBuilder().addComponents(menu);
+                        await interaction.reply({ content: 'Select blocked users to unblock:', components: [row], ephemeral: true });
+                        break;
+                    }
                 }
             } catch (err) {
                 console.error('Voice button handler error:', err);
@@ -535,6 +621,75 @@ module.exports = {
                     mapping.ownerId = targetId;
                     if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
                     await interaction.reply({ content: `✅ Ownership has been transferred to <@${targetId}>.`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_privacy') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
+                    const value = interaction.values[0];
+                    switch (value) {
+                        case 'hide':
+                            try {
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { ViewChannel: false });
+                                await interaction.reply({ content: '✅ Channel hidden.', ephemeral: true });
+                            } catch (e) {
+                                console.error('Failed to hide channel:', e);
+                                await interaction.reply({ content: '<:fail:1444451615255040061> Failed to hide channel.', ephemeral: true });
+                            }
+                            break;
+                        case 'unhide':
+                            try {
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { ViewChannel: null });
+                                await interaction.reply({ content: '✅ Channel unhidden.', ephemeral: true });
+                            } catch (e) {
+                                console.error('Failed to unhide channel:', e);
+                                await interaction.reply({ content: '<:fail:1444451615255040061> Failed to unhide channel.', ephemeral: true });
+                            }
+                            break;
+                        case 'lock':
+                            try {
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { Connect: false });
+                                await interaction.reply({ content: '✅ Channel locked.', ephemeral: true });
+                            } catch (e) {
+                                console.error('Failed to lock channel:', e);
+                                await interaction.reply({ content: '<:fail:1444451615255040061> Failed to lock channel.', ephemeral: true });
+                            }
+                            break;
+                        case 'unlock':
+                            try {
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { Connect: null });
+                                await interaction.reply({ content: '✅ Channel unlocked.', ephemeral: true });
+                            } catch (e) {
+                                console.error('Failed to unlock channel:', e);
+                                await interaction.reply({ content: '<:fail:1444451615255040061> Failed to unlock channel.', ephemeral: true });
+                            }
+                            break;
+                    }
+                } else if (interaction.customId === 'voice_select_trust') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
+                    mapping.trustedUsers = mapping.trustedUsers || [];
+                    const selectedIds = interaction.values;
+                    mapping.trustedUsers.push(...selectedIds);
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
+                    await interaction.reply({ content: `✅ Trusted ${selectedIds.length} user(s).`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_untrust') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
+                    mapping.trustedUsers = mapping.trustedUsers || [];
+                    const selectedIds = interaction.values;
+                    mapping.trustedUsers = mapping.trustedUsers.filter(id => !selectedIds.includes(id));
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
+                    await interaction.reply({ content: `✅ Removed trust from ${selectedIds.length} user(s).`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_block') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
+                    mapping.blockedUsers = mapping.blockedUsers || [];
+                    const selectedIds = interaction.values;
+                    mapping.blockedUsers.push(...selectedIds);
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
+                    await interaction.reply({ content: `✅ Blocked ${selectedIds.length} user(s).`, ephemeral: true });
+                } else if (interaction.customId === 'voice_select_unblock') {
+                    if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
+                    mapping.blockedUsers = mapping.blockedUsers || [];
+                    const selectedIds = interaction.values;
+                    mapping.blockedUsers = mapping.blockedUsers.filter(id => !selectedIds.includes(id));
+                    if (parsed) fs.writeFileSync(path.join(__dirname, '..', '..', 'database', 'guild.json'), JSON.stringify(parsed, null, 2), 'utf8');
+                    await interaction.reply({ content: `✅ Unblocked ${selectedIds.length} user(s).`, ephemeral: true });
                 }
             } catch (err) {
                 console.error('Select menu handler error:', err);
