@@ -468,13 +468,36 @@ module.exports = {
                             return await interaction.reply({ content: '<:fail:1444451615255040061> This Channel is not being managed by the bot.', ephemeral: true });
                         }
                         if (!voiceChannel) return await notInVoiceReply();
-                        const embed = new EmbedBuilder().setTitle('Channel Info').setColor('#5865F2')
+
+                        const createdAt = voiceChannel.createdAt ? `<t:${Math.floor(voiceChannel.createdAt.getTime() / 1000)}:F>` : 'Unknown';
+                        const owner = mapping.ownerId ? `<@${mapping.ownerId}>` : 'None';
+
+                        const everyonePerms = voiceChannel.permissionOverwrites.cache.get(interaction.guild.roles.everyone.id);
+                        const isLocked = everyonePerms && everyonePerms.deny.has(PermissionFlagsBits.Connect);
+                        const isHidden = everyonePerms && everyonePerms.deny.has(PermissionFlagsBits.ViewChannel);
+
+                        let privacySettings = '';
+                        if (isLocked) privacySettings += '<:fail:1444451615255040061> Locked\n';
+                        if (isHidden) privacySettings += '<:fail:1444451615255040061> Hidden\n';
+                        if (!privacySettings) privacySettings = 'None';
+
+                        mapping.trustedUsers = mapping.trustedUsers || [];
+                        mapping.blockedUsers = mapping.blockedUsers || [];
+
+                        const trustedMembers = mapping.trustedUsers.length > 0 ? mapping.trustedUsers.map(id => `<@${id}>`).join('\n') : '<:fail:1444451615255040061>';
+                        const blockedMembers = mapping.blockedUsers.length > 0 ? mapping.blockedUsers.map(id => `<@${id}>`).join('\n') : '<:fail:1444451615255040061>';
+
+                        const embed = new EmbedBuilder()
+                            .setTitle('`🗒️` Voice Channel Information')
+                            .setColor('#5865F2')
                             .addFields(
-                                { name: 'Name', value: `${voiceChannel.name}`, inline: true },
-                                { name: 'Bitrate', value: `${voiceChannel.bitrate || 'N/A'}`, inline: true },
-                                { name: 'User Limit', value: `${voiceChannel.userLimit || 0}`, inline: true },
-                                { name: 'Owner', value: mapping && mapping.ownerId ? `<@${mapping.ownerId}>` : 'None', inline: true }
+                                { name: 'Created at', value: createdAt, inline: true },
+                                { name: 'Owner', value: owner, inline: true },
+                                { name: 'Privacy Setting', value: privacySettings, inline: true },
+                                { name: 'Trusted Member', value: trustedMembers, inline: false },
+                                { name: 'Blocked Member', value: blockedMembers, inline: false }
                             );
+
                         await interaction.reply({ embeds: [embed], ephemeral: true });
                         break;
                     }
