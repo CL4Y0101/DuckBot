@@ -26,6 +26,7 @@ const CACHE_DURATION = 5 * 60 * 1000;
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction, client) {
+        // Hanya dukung Button dan StringSelectMenu (tidak memakai UserSelectMenu contoh)
         if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
 
         if (interaction.customId === 'verify_button_setup') {

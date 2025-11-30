@@ -1,11 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, SectionBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, SectionBuilder, UserSelectMenuBuilder } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
-        // Flag untuk menyalakan tampilan Display Mode (non-interaktif via embed fields)
-        const useDisplayMode = true; // ubah ke false jika ingin mematikan
         const guildConfigPath = path.join(__dirname, '..', '..', 'database', 'guild.json');
         if (!fs.existsSync(guildConfigPath)) return;
         const raw = fs.readFileSync(guildConfigPath, 'utf8');
@@ -49,78 +47,133 @@ async function publishVoiceSetupEmbeds(client) {
                     .setColor('#5865F2')
                     .setImage('attachment://voice_banners.png');
 
-                // Tambahkan “Display Components” gaya embed fields (non-interaktif) jika diaktifkan
-                if (useDisplayMode) {
-                    const displayFields = [
-                        { name: '• Rename', value: 'Ubah nama channel', inline: true },
-                        { name: '• Limit', value: 'Batas pengguna', inline: true },
-                        { name: '• Region', value: 'Wilayah/Server', inline: true },
-                        { name: '• Kick', value: 'Keluarkan pengguna', inline: true },
-                        { name: '• Bitrate', value: 'Kualitas suara', inline: true },
-                        { name: '• Privacy', value: 'Privasi channel', inline: true },
-                        { name: '• Claim', value: 'Ambil kepemilikan', inline: true },
-                        { name: '• Info', value: 'Informasi channel', inline: true },
-                        { name: '• Transfer', value: 'Alihkan kepemilikan', inline: true },
-                    ];
-                    embed.addFields(displayFields);
-                }
-
-                const row1 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setStyle(ButtonStyle.Secondary)
-                );
-
-                const row2 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_disable_1').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable_2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_btn_privacy').setEmoji('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_disable_4').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_disable_5').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
-                );
-
-                const row3 = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('voice_disable_6').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('voice_disable_7').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
-                );
-
-                // Components V2: SectionBuilder (Display Components) dengan accessory Button
-                // Catatan: Memerlukan dukungan Components V2 pada versi discord.js/API Anda
-                let sectionComponent = null;
+                // Ubah baris tombol menjadi Container (Components V2) dengan beberapa Section berisi accessory button
+                let containerComponentFromRows = null;
                 try {
-                    sectionComponent = new SectionBuilder()
-                        .addTextDisplayComponents(
-                            (textDisplay) => textDisplay.setContent('Kontrol Voice: Rename • Limit • Region • Kick • Bitrate'),
-                            (textDisplay) => textDisplay.setContent('Tambahan: Privacy • Claim • Info • Transfer'),
-                            (textDisplay) => textDisplay.setContent('Gunakan tombol di bawah untuk aksi interaktif.'),
+                    containerComponentFromRows = new ContainerBuilder()
+                        .setAccentColor(0x5865F2)
+                        .addTextDisplayComponents((td) =>
+                            td.setContent('Kontrol Voice (Components V2): gunakan tombol di setiap section.'),
                         )
-                        .setButtonAccessory((button) =>
-                            button
-                                .setCustomId('voice_section_info')
-                                .setLabel('Panduan Kontrol')
-                                .setStyle(ButtonStyle.Primary),
-                        );
+                        .addSeparatorComponents((sep) => sep)
+                        // Row 1 buttons sebagai Sections
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Rename'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_rename')
+                                        .setLabel('Rename')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Limit'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_limit')
+                                        .setLabel('Limit')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Region'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_region')
+                                        .setLabel('Region')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Kick'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_kick')
+                                        .setLabel('Kick')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Bitrate'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_bitrate')
+                                        .setLabel('Bitrate')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSeparatorComponents((sep) => sep)
+                        // Row 2 (disable placeholders dan Privacy)
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Privacy'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_privacy')
+                                        .setLabel('Privacy')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
+                        .addSeparatorComponents((sep) => sep)
+                        // Row 3 (disable, Claim, Info, Transfer, disable)
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Claim'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_claim')
+                                        .setLabel('Claim')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Info'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_info')
+                                        .setLabel('Info')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) =>
+                            section
+                                .addTextDisplayComponents((td) => td.setContent('Transfer'))
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_transfer')
+                                        .setLabel('Transfer')
+                                        .setStyle(ButtonStyle.Secondary),
+                                ),
+                        )
+                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')));
                 } catch (e) {
-                    console.warn('Components V2 (SectionBuilder) tidak tersedia, melewati section:', e?.message || e);
+                    console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
+
+                // Hanya gunakan Container yang dibentuk dari baris tombol (containerComponentFromRows)
 
                 const components = [row1, row2, row3];
 
                 if (botMessage) {
                     try {
-                        // Jika SectionBuilder tersedia (Components V2), kita tidak boleh mengirim embed bersamaan.
-                        if (sectionComponent) {
-                            // 1) Edit pesan utama menjadi embed + banner + tombol interaktif (tanpa flag V2)
+                        // Jika Components V2 tersedia dari baris tombol, kita tidak boleh mengirim embed bersamaan dalam pesan yang sama.
+                        if (containerComponentFromRows) {
+                            // 1) Edit pesan utama: embed + banner + tombol interaktif (tanpa V2 flag)
                             await botMessage.edit({ embeds: [embed], components, files: [attachment] });
-                            // 2) Kirim pesan tambahan yang berisi Section (Components V2) saja
-                            await channelObj.send({ components: [sectionComponent], flags: MessageFlags.IsComponentsV2 });
+                            // 2) Kirim pesan tambahan: hanya Container (Components V2)
+                            await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
-                            // Tanpa Components V2, kirim seperti biasa
                             await botMessage.edit({ embeds: [embed], components, files: [attachment] });
                         }
                         console.log(`✅ Edited existing bot message in channel ${ch}`);
@@ -129,12 +182,10 @@ async function publishVoiceSetupEmbeds(client) {
                     }
                 } else {
                     try {
-                        if (sectionComponent) {
+                        if (containerComponentFromRows) {
                             // Kirim dua pesan terpisah untuk memenuhi batasan API:
-                            // Pesan 1: embed + banner + tombol interaktif
                             await channelObj.send({ embeds: [embed], components, files: [attachment] });
-                            // Pesan 2: section Components V2
-                            await channelObj.send({ components: [sectionComponent], flags: MessageFlags.IsComponentsV2 });
+                            await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
                             await channelObj.send({ embeds: [embed], components, files: [attachment] });
                         }
