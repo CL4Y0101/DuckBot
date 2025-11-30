@@ -69,13 +69,13 @@
           },
           {
             "ownerId": "874263044551766028",
-            "channelId": "1444533236356354099",
+            "channelId": null,
             "channelName": "zxlka.",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
