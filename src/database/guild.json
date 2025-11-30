@@ -59,13 +59,13 @@
           },
           {
             "ownerId": "849590328897175572",
-            "channelId": null,
+            "channelId": "1444537873536909323",
             "channelName": "pukimakkk11111",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": false
+            "isActive": true
           },
           {
             "ownerId": "874263044551766028",
