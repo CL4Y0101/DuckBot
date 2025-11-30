@@ -624,10 +624,11 @@ module.exports = {
                 } else if (interaction.customId === 'voice_select_privacy') {
                     if (!mapping || mapping.ownerId !== member.id) return await interaction.reply({ content: '<:fail:1444451615255040061> You are not the owner of this channel.', ephemeral: true });
                     const value = interaction.values[0];
+                    const role = "996367985759486042"
                     switch (value) {
                         case 'hide':
                             try {
-                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { ViewChannel: false });
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.cache.get(role), { ViewChannel: false });
                                 await interaction.reply({ content: '✅ Channel hidden.', ephemeral: true });
                             } catch (e) {
                                 console.error('Failed to hide channel:', e);
@@ -636,7 +637,7 @@ module.exports = {
                             break;
                         case 'unhide':
                             try {
-                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { ViewChannel: null });
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.cache.get(role), { ViewChannel: null });
                                 await interaction.reply({ content: '✅ Channel unhidden.', ephemeral: true });
                             } catch (e) {
                                 console.error('Failed to unhide channel:', e);
@@ -645,7 +646,7 @@ module.exports = {
                             break;
                         case 'lock':
                             try {
-                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { Connect: false });
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.cache.get(role), { Connect: false });
                                 await interaction.reply({ content: '✅ Channel locked.', ephemeral: true });
                             } catch (e) {
                                 console.error('Failed to lock channel:', e);
@@ -654,7 +655,7 @@ module.exports = {
                             break;
                         case 'unlock':
                             try {
-                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { Connect: null });
+                                await voiceChannel.permissionOverwrites.edit(interaction.guild.roles.cache.get(role), { Connect: null });
                                 await interaction.reply({ content: '✅ Channel unlocked.', ephemeral: true });
                             } catch (e) {
                                 console.error('Failed to unlock channel:', e);

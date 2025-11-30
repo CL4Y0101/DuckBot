@@ -58,7 +58,7 @@ async function publishVoiceSetupEmbeds(client) {
                 const row2 = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('voice_disable_1').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                     new ButtonBuilder().setCustomId('voice_disable_2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                    new ButtonBuilder().setCustomId('voice_btn_privacy').setLabel('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('voice_btn_privacy').setEmoji('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder().setCustomId('voice_disable_4').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                     new ButtonBuilder().setCustomId('voice_disable_5').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                 );
