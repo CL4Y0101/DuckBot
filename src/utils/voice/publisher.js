@@ -124,6 +124,7 @@ async function publishVoiceSetupEmbeds(client) {
                         .addSeparatorComponents((sep) => sep)
                         .addSectionComponents((section) =>
                             section
+                                .addTextDisplayComponents((td) => td.setContent('-# Info / Transfer / Claim'))
                                 .setButtonAccessory((btn) =>
                                     btn
                                         .setCustomId('voice_btn_info')
