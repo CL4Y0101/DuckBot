@@ -47,7 +47,6 @@ async function publishVoiceSetupEmbeds(client) {
                 );
 
                 const container = new ContainerBuilder()
-                    .setAccentColor(0x5865F2)
                     .addComponents(
                         new TextDisplayBuilder().setContent('## Voice Channel Configuration'),
                         new MediaGalleryBuilder().addItems(
