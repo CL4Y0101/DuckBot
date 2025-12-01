@@ -5,8 +5,8 @@ const {
     ButtonStyle,
     MessageFlags,
     ContainerBuilder,
-    TextInputBuilder,
-    TextDisplayBuilder
+    TextDisplayBuilder,
+    SeparatorBuilder,
 } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
@@ -44,7 +44,7 @@ async function publishVoiceSetupEmbeds(client) {
                     { name: 'voice_banners.png' }
                 );
 
-                const seperator = new SeperatorBuilder();
+                const seperator = new SeparatorBuilder();
 
                 const Text = new TextDisplayBuilder().setContent(
                     '### Voice Channel Setup Instructions'
