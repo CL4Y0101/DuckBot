@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -52,142 +52,38 @@ async function publishVoiceSetupEmbeds(client) {
                     .setDescription(`Konfigurasi ini dapat digunakan untuk mengelola voice channel dari <@1203600776048414720>.\nJika mencoba mengonfigurasi channel lain, mungkin tidak berfungsi.\n\nLobby saat ini: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Belum diatur'}`)
                     .setColor('#5865F2')
                     .setImage('attachment://voice_banners.png');
-                let containerComponentFromRows = null;
-                try {
-                    containerComponentFromRows = new ContainerBuilder()
-                        .setAccentColor(0x5865F2)
-                        .addTextDisplayComponents((td) =>
-                            td.setContent('Kontrol Voice (Components V2): gunakan tombol di setiap section.'),
-                        )
-                        .addSeparatorComponents((sep) => sep)
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Rename'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_rename')
-                                        .setLabel('Rename')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Limit'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_limit')
-                                        .setLabel('Limit')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Region'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_region')
-                                        .setLabel('Region')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Kick'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_kick')
-                                        .setLabel('Kick')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Bitrate'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_bitrate')
-                                        .setLabel('Bitrate')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSeparatorComponents((sep) => sep)
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Privacy'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_privacy')
-                                        .setLabel('Privacy')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSeparatorComponents((sep) => sep)
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('-# Info / Transfer / Claim'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_info')
-                                        .setLabel('Info')
-                                        .setStyle(ButtonStyle.Secondary),
-                                )
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_transfer')
-                                        .setLabel('Transfer')
-                                        .setStyle(ButtonStyle.Secondary),
-                                )
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_claim')
-                                        .setLabel('Claim')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSeparatorComponents((sep) => sep);
-                } catch (e) {
-                    console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
-                }
-
-                const actionRow = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('voice_panel_refresh')
-                        .setLabel('🔄 Refresh')
-                        .setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder()
-                        .setCustomId('voice_panel_settings')
-                        .setLabel('⚙️ Settings')
-                        .setStyle(ButtonStyle.Primary)
-                );
+                const Rows = [
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name_1:1444497646554320906>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit_1:1444497644658495590>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region_1:1444497649007984680>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick_1:1444497642506948722>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate_1:1444497627046612992>').setStyle(ButtonStyle.Secondary)
+                    ),
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('voice_disable1').setLabel('─').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                        new ButtonBuilder().setCustomId('voice_btn_privacy').setEmoji('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_disable2').setLabel('─').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                    ),
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('voice_disable3').setLabel('─').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                        new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info_1:1444497632746803412>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer_1:1444497651159662603>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim_1:1444497629634629724>').setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder().setCustomId('voice_disable4').setLabel('─').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                    )
+                ];
 
                 if (botMessages.size > 0) {
                     try {
                         const firstMsg = botMessages.first();
-                        if (containerComponentFromRows) {
-                            await firstMsg.edit({
-                                embeds: [],
-                                components: [containerComponentFromRows, actionRow],
-                                files: [],
-                                flags: MessageFlags.IsComponentsV2
-                            });
-                        } else {
-                            await firstMsg.edit({ embeds: [embed], components: [], files: [attachment] });
-                        }
-                        console.log(`✅ Updated bot message in channel ${ch}`);
+                        await firstMsg.edit({ embeds: [embed], components: [...Rows], files: [attachment] });
                     } catch (e) {
                         console.error(`❌ Failed to update bot message in channel ${ch}:`, e);
                     }
                 } else {
                     try {
-                        if (containerComponentFromRows) {
-                            await channelObj.send({
-                                components: [containerComponentFromRows, actionRow],
-                                flags: MessageFlags.IsComponentsV2
-                            });
-                        } else {
-                            await channelObj.send({ embeds: [embed], files: [attachment] });
-                        }
-                        console.log(`✅ Sent new bot message in channel ${ch}`);
+                        await channelObj.send({ embeds: [embed], files: [attachment], components: [...Rows] });
                     } catch (e) {
                         console.error(`❌ Failed to send bot message in channel ${ch}:`, e);
                     }
