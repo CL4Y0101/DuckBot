@@ -116,7 +116,7 @@
       "p5uaMVEr": {
         "code": "p5uaMVEr",
         "inviter": "533496449112211466",
-        "uses": 1,
+        "uses": 2,
         "maxUses": 0,
         "createdAt": "2025-12-01T03:49:28.785Z",
         "expiresAt": "2025-12-08T03:49:28.000Z"
@@ -241,8 +241,8 @@
         ]
       },
       "533496449112211466": {
-        "totalInvites": 1,
-        "successfulInvites": 1,
+        "totalInvites": 2,
+        "successfulInvites": 2,
         "codes": [
           "p5uaMVEr"
         ]
@@ -262,6 +262,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-01T07:59:52.800Z"
+    "lastUpdated": "2025-12-01T08:04:52.850Z"
   }
 }
