@@ -33,8 +33,8 @@ async function publishVoiceSetupEmbeds(client) {
                 let botMessages = [];
                 try {
                     const messages = await channelObj.messages.fetch({ limit: 50 });
-                    botMessages = messages.filter(m => 
-                        m.author && m.author.id === client.user.id && 
+                    botMessages = messages.filter(m =>
+                        m.author && m.author.id === client.user.id &&
                         (
                             (m.embeds && m.embeds.length > 0 && m.embeds[0].title && (m.embeds[0].title.includes('Temporary Voice Setup') || m.embeds[0].title.includes('Voice Channel Configuration'))) ||
                             (m.components && m.components.length > 0)
@@ -111,8 +111,6 @@ async function publishVoiceSetupEmbeds(client) {
                                 ),
                         )
                         .addSeparatorComponents((sep) => sep)
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) =>
                             section
                                 .addTextDisplayComponents((td) => td.setContent('Privacy'))
@@ -123,10 +121,7 @@ async function publishVoiceSetupEmbeds(client) {
                                         .setStyle(ButtonStyle.Secondary),
                                 ),
                         )
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSeparatorComponents((sep) => sep)
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')))
                         .addSectionComponents((section) =>
                             section
                                 .addTextDisplayComponents((td) => td.setContent('Claim'))
@@ -156,8 +151,7 @@ async function publishVoiceSetupEmbeds(client) {
                                         .setLabel('Transfer')
                                         .setStyle(ButtonStyle.Secondary),
                                 ),
-                        )
-                        .addSectionComponents((section) => section.addTextDisplayComponents((td) => td.setContent('—')));
+                        );
                 } catch (e) {
                     console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
@@ -168,7 +162,7 @@ async function publishVoiceSetupEmbeds(client) {
                             await msg.delete();
                         }
                         console.log(`🗑️ Deleted ${botMessages.size} old bot message(s) in channel ${ch}`);
-                        
+
                         if (containerComponentFromRows) {
                             await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
                         } else {
