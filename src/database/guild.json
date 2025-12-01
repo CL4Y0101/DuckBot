@@ -59,13 +59,13 @@
           },
           {
             "ownerId": "893907569335214090",
-            "channelId": "1445055629340184606",
+            "channelId": null,
             "channelName": "kelas 8sd",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "1001085268046118942",
