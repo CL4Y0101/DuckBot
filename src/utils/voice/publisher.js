@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, Attachment, ContainerBuilder, MessageFlags, ButtonStyle, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
     try {
@@ -156,16 +156,30 @@ async function publishVoiceSetupEmbeds(client) {
                     console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
 
+                // Tambahkan ActionRow biasa di bawah Container (seperti pagination di OwO bot)
+                const actionRow = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('voice_panel_refresh')
+                        .setLabel('🔄 Refresh')
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId('voice_panel_settings')
+                        .setLabel('⚙️ Settings')
+                        .setStyle(ButtonStyle.Primary)
+                );
+
                 if (botMessages.size > 0) {
                     try {
-                        for (const msg of botMessages.values()) {
-                            await msg.delete();
-                        }
-                        console.log(`🗑️ Deleted ${botMessages.size} old bot message(s) in channel ${ch}`);
-
+                        const firstMsg = botMessages.first();
                         if (containerComponentFromRows) {
-                            await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
+                            await firstMsg.edit({ 
+                                embeds: [], 
+                                components: [containerComponentFromRows, actionRow], 
+                                files: [], 
+                                flags: MessageFlags.IsComponentsV2 
+                            });
                         } else {
+                            await firstMsg.edit({ embeds: [embed], components: [], files: [attachment] });
                         }
                         console.log(`✅ Updated bot message in channel ${ch}`);
                     } catch (e) {
@@ -174,8 +188,12 @@ async function publishVoiceSetupEmbeds(client) {
                 } else {
                     try {
                         if (containerComponentFromRows) {
-                            await channelObj.send({ components: [containerComponentFromRows], flags: MessageFlags.IsComponentsV2 });
+                            await channelObj.send({ 
+                                components: [containerComponentFromRows, actionRow], 
+                                flags: MessageFlags.IsComponentsV2 
+                            });
                         } else {
+                            await channelObj.send({ embeds: [embed], files: [attachment] });
                         }
                         console.log(`✅ Sent new bot message in channel ${ch}`);
                     } catch (e) {
