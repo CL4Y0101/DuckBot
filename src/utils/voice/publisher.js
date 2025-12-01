@@ -5,8 +5,6 @@ const {
     ButtonStyle,
     MessageFlags,
     ContainerBuilder,
-    TextDisplayBuilder,
-    SeparatorBuilder,
 } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
@@ -44,23 +42,22 @@ async function publishVoiceSetupEmbeds(client) {
                     { name: 'voice_banners.png' }
                 );
 
-                const seperator = new SeparatorBuilder();
-
-                const Text = new TextDisplayBuilder().setContent(
-                    '### Voice Channel Setup Instructions'
-                    + '\n\n**Rename**: Change the name of your temporary voice channel.'
-                    + '\n**Limit**: Set a user limit for your channel.'
-                    + '\n**Region**: Change the voice server region.'
-                    + '\n**Kick**: Remove a user from your channel.'
-                    + '\n**Bitrate**: Adjust the audio quality of your channel.'
-                    + '\n**Privacy**: Set your channel to Private or Public.'
-                    + '\n**Info**: View information about your channel.'
-                    + '\n**Transfer**: Transfer ownership of the channel to another user.'
-                    + '\n**Claim**: Claim ownership of an unclaimed temporary voice channel.'
-                );
-
-                const container = new ContainerBuilder().addTextDisplayComponents(Text)
-                    .addSeperatorComponents(seperator)
+                const container = new ContainerBuilder()
+                    .addTextDisplayComponents(td =>
+                        td.setContent(
+                            '### Voice Channel Setup Instructions'
+                            + '\n\n**Rename**: Change the name of your temporary voice channel.'
+                            + '\n**Limit**: Set a user limit for your channel.'
+                            + '\n**Region**: Change the voice server region.'
+                            + '\n**Kick**: Remove a user from your channel.'
+                            + '\n**Bitrate**: Adjust the audio quality of your channel.'
+                            + '\n**Privacy**: Set your channel to Private or Public.'
+                            + '\n**Info**: View information about your channel.'
+                            + '\n**Transfer**: Transfer ownership of the channel to another user.'
+                            + '\n**Claim**: Claim ownership of an unclaimed temporary voice channel.'
+                        )
+                    )
+                    .addSeparatorComponents(sep => sep)
                     .addActionRowComponents(row =>
                         row.addComponents(
                             { type: 2, custom_id: 'voice_btn_rename', label: 'Rename', emoji: { name: '' }, style: ButtonStyle.Secondary },
@@ -70,7 +67,7 @@ async function publishVoiceSetupEmbeds(client) {
                             { type: 2, custom_id: 'voice_btn_bitrate', label: 'Bitrate', emoji: { name: '' }, style: ButtonStyle.Secondary }
                         )
                     )
-                    .addSeperatorComponents(seperator)
+                    .addSeparatorComponents(sep => sep)
                     .addActionRowComponents(row =>
                         row.addComponents(
                             { type: 2, custom_id: 'voice_disable', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
@@ -80,7 +77,7 @@ async function publishVoiceSetupEmbeds(client) {
                             { type: 2, custom_id: 'voice_disable3', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true }
                         )
                     )
-                    .addSeperatorComponents(seperator)
+                    .addSeparatorComponents(sep => sep)
                     .addActionRowComponents(row =>
                         row.addComponents(
                             { type: 2, custom_id: 'voice_disable4', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
@@ -99,9 +96,9 @@ async function publishVoiceSetupEmbeds(client) {
 
                 if (botMessages.size > 0) {
                     const firstMsg = botMessages.first();
-                    await firstMsg.edit({ components: [Text, container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
+                    await firstMsg.edit({ components: [container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
                 } else {
-                    await channelObj.send({ components: [Text, container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
+                    await channelObj.send({ components: [container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
                 }
             } catch (err) {
                 console.error('Failed to publish voice setup embed for entry:', err);
