@@ -151,12 +151,12 @@ async function publishVoiceSetupEmbeds(client) {
                                         .setLabel('Transfer')
                                         .setStyle(ButtonStyle.Secondary),
                                 ),
-                        );
+                        )
+                        .addSeparatorComponents((sep) => sep);
                 } catch (e) {
                     console.warn('Components V2 (ContainerBuilder) dari baris tombol tidak tersedia:', e?.message || e);
                 }
 
-                // Tambahkan ActionRow biasa di bawah Container (seperti pagination di OwO bot)
                 const actionRow = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId('voice_panel_refresh')
@@ -172,11 +172,11 @@ async function publishVoiceSetupEmbeds(client) {
                     try {
                         const firstMsg = botMessages.first();
                         if (containerComponentFromRows) {
-                            await firstMsg.edit({ 
-                                embeds: [], 
-                                components: [containerComponentFromRows, actionRow], 
-                                files: [], 
-                                flags: MessageFlags.IsComponentsV2 
+                            await firstMsg.edit({
+                                embeds: [],
+                                components: [containerComponentFromRows, actionRow],
+                                files: [],
+                                flags: MessageFlags.IsComponentsV2
                             });
                         } else {
                             await firstMsg.edit({ embeds: [embed], components: [], files: [attachment] });
@@ -188,9 +188,9 @@ async function publishVoiceSetupEmbeds(client) {
                 } else {
                     try {
                         if (containerComponentFromRows) {
-                            await channelObj.send({ 
-                                components: [containerComponentFromRows, actionRow], 
-                                flags: MessageFlags.IsComponentsV2 
+                            await channelObj.send({
+                                components: [containerComponentFromRows, actionRow],
+                                flags: MessageFlags.IsComponentsV2
                             });
                         } else {
                             await channelObj.send({ embeds: [embed], files: [attachment] });
