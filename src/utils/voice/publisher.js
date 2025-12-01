@@ -1,14 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const {
-    ContainerBuilder,
-    TextDisplayBuilder,
-    MediaGalleryBuilder,
-    ButtonBuilder,
-    ActionRowBuilder,
+    AttachmentBuilder,
     ButtonStyle,
     MessageFlags,
-    AttachmentBuilder
+    ContainerBuilder,
+    TextInputBuilder,
+    TextDisplayBuilder
 } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
@@ -46,26 +44,50 @@ async function publishVoiceSetupEmbeds(client) {
                     { name: 'voice_banners.png' }
                 );
 
-                const container = new ContainerBuilder()
-                    .addComponents(
-                        new TextDisplayBuilder().setContent('## Voice Channel Configuration'),
-                        new MediaGalleryBuilder().addItems(
-                            item => item.setURL('attachment://voice_banners.png')
-                        ),
-                        new TextDisplayBuilder().setContent(
-                            `Konfigurasi ini dapat digunakan untuk mengelola voice channel dari <@1203600776048414720>.\n` +
-                            `Lobby saat ini: ${voiceCfg.lobby ? `<#${voiceCfg.lobby}>` : 'Belum diatur'}`
-                        ),
-                        new ActionRowBuilder().addComponents(
-                            new ButtonBuilder().setCustomId('voice_btn_rename').setLabel('Rename').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_limit').setLabel('Limit').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_region').setLabel('Region').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_kick').setLabel('Kick').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_bitrate').setLabel('Bitrate').setStyle(ButtonStyle.Secondary)
-                        ),
-                        new ActionRowBuilder().addComponents(
-                            new ButtonBuilder().setCustomId('voice_btn_privacy').setLabel('Privacy').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_info').setLabel('Info').setStyle(ButtonStyle.Secondary)
+                const seperator = new SeperatorBuilder();
+
+                const Text = new TextDisplayBuilder().setContent(
+                    '### Voice Channel Setup Instructions'
+                    + '\n\n**Rename**: Change the name of your temporary voice channel.'
+                    + '\n**Limit**: Set a user limit for your channel.'
+                    + '\n**Region**: Change the voice server region.'
+                    + '\n**Kick**: Remove a user from your channel.'
+                    + '\n**Bitrate**: Adjust the audio quality of your channel.'
+                    + '\n**Privacy**: Set your channel to Private or Public.'
+                    + '\n**Info**: View information about your channel.'
+                    + '\n**Transfer**: Transfer ownership of the channel to another user.'
+                    + '\n**Claim**: Claim ownership of an unclaimed temporary voice channel.'
+                );
+
+                const container = new ContainerBuilder().addTextDisplayComponents(Text)
+                    .addSeperatorComponents(seperator)
+                    .addActionRowComponents(row =>
+                        row.addComponents(
+                            { type: 2, custom_id: 'voice_btn_rename', label: 'Rename', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_limit', label: 'Limit', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_region', label: 'Region', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_kick', label: 'Kick', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_bitrate', label: 'Bitrate', emoji: { name: '' }, style: ButtonStyle.Secondary }
+                        )
+                    )
+                    .addSeperatorComponents(seperator)
+                    .addActionRowComponents(row =>
+                        row.addComponents(
+                            { type: 2, custom_id: 'voice_disable', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
+                            { type: 2, custom_id: 'voice_disable1', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
+                            { type: 2, custom_id: 'voice_btn_privacy', label: 'Privacy', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_disable2', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
+                            { type: 2, custom_id: 'voice_disable3', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true }
+                        )
+                    )
+                    .addSeperatorComponents(seperator)
+                    .addActionRowComponents(row =>
+                        row.addComponents(
+                            { type: 2, custom_id: 'voice_disable4', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
+                            { type: 2, custom_id: 'voice_btn_info', label: 'Info', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_transfer', label: 'Transfer', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_btn_claim', label: 'Claim', emoji: { name: '' }, style: ButtonStyle.Secondary },
+                            { type: 2, custom_id: 'voice_disable5', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true }
                         )
                     );
 
@@ -73,21 +95,13 @@ async function publishVoiceSetupEmbeds(client) {
                 try {
                     const messages = await channelObj.messages.fetch({ limit: 50 });
                     botMessages = messages.filter(m => m.author?.id === client.user.id);
-                } catch {}
+                } catch { }
 
                 if (botMessages.size > 0) {
                     const firstMsg = botMessages.first();
-                    await firstMsg.edit({
-                        components: [container],
-                        files: [attachment],
-                        flags: MessageFlags.IsComponentsV2
-                    });
+                    await firstMsg.edit({ components: [Text, container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
                 } else {
-                    await channelObj.send({
-                        components: [container],
-                        files: [attachment],
-                        flags: MessageFlags.IsComponentsV2
-                    });
+                    await channelObj.send({ components: [Text, container], files: [attachment], flags: MessageFlags.IsComponentsV2 });
                 }
             } catch (err) {
                 console.error('Failed to publish voice setup embed for entry:', err);
