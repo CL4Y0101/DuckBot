@@ -46,6 +46,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "1429479206521278494",
+            "channelId": "1445049923249770506",
+            "channelName": "blupblupfish",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
