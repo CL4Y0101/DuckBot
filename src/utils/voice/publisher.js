@@ -5,6 +5,7 @@ const {
     ButtonStyle,
     MessageFlags,
     ContainerBuilder,
+    ButtonBuilder,
 } = require('discord.js');
 
 async function publishVoiceSetupEmbeds(client) {
@@ -45,7 +46,7 @@ async function publishVoiceSetupEmbeds(client) {
                 const container = new ContainerBuilder()
                     .addTextDisplayComponents(td =>
                         td.setContent(
-                            '### Voice Channel Setup Instructions'
+                            '## `🔊` Voice Channel Setup Instructions'
                             + '\n\n**Rename**: Change the name of your temporary voice channel.'
                             + '\n**Limit**: Set a user limit for your channel.'
                             + '\n**Region**: Change the voice server region.'
@@ -58,33 +59,35 @@ async function publishVoiceSetupEmbeds(client) {
                         )
                     )
                     .addSeparatorComponents(sep => sep)
-                    .addActionRowComponents(row =>
-                        row.addComponents(
-                            { type: 2, custom_id: 'voice_btn_rename', label: 'Rename', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_limit', label: 'Limit', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_region', label: 'Region', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_kick', label: 'Kick', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_bitrate', label: 'Bitrate', emoji: { name: '' }, style: ButtonStyle.Secondary }
-                        )
+                    .addMediaGalleryComponents(mg =>
+                        mg.addItems(item => item.setURL('attachment://voice_banners.png'))
                     )
                     .addSeparatorComponents(sep => sep)
                     .addActionRowComponents(row =>
                         row.addComponents(
-                            { type: 2, custom_id: 'voice_disable', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
-                            { type: 2, custom_id: 'voice_disable1', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
-                            { type: 2, custom_id: 'voice_btn_privacy', label: 'Privacy', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_disable2', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
-                            { type: 2, custom_id: 'voice_disable3', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true }
+                            new ButtonBuilder().setCustomId('voice_btn_rename').setLabel('Rename').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_limit').setLabel('Limit').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_region').setLabel('Region').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_kick').setLabel('Kick').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_bitrate').setLabel('Bitrate').setStyle(ButtonStyle.Secondary)
                         )
                     )
-                    .addSeparatorComponents(sep => sep)
                     .addActionRowComponents(row =>
                         row.addComponents(
-                            { type: 2, custom_id: 'voice_disable4', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true },
-                            { type: 2, custom_id: 'voice_btn_info', label: 'Info', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_transfer', label: 'Transfer', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_btn_claim', label: 'Claim', emoji: { name: '' }, style: ButtonStyle.Secondary },
-                            { type: 2, custom_id: 'voice_disable5', emoji: { name: '-' }, style: ButtonStyle.Secondary, disabled: true }
+                            new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                            new ButtonBuilder().setCustomId('voice_disable1').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                            new ButtonBuilder().setCustomId('voice_btn_privacy').setLabel('Privacy').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_disable2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                            new ButtonBuilder().setCustomId('voice_disable3').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                        )
+                    )
+                    .addActionRowComponents(row =>
+                        row.addComponents(
+                            new ButtonBuilder().setCustomId('voice_disable4').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                            new ButtonBuilder().setCustomId('voice_btn_info').setLabel('Info').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_transfer').setLabel('Transfer').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_btn_claim').setLabel('Claim').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_disable5').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                         )
                     );
 
