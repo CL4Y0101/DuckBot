@@ -124,31 +124,22 @@ async function publishVoiceSetupEmbeds(client) {
                         .addSeparatorComponents((sep) => sep)
                         .addSectionComponents((section) =>
                             section
-                                .addTextDisplayComponents((td) => td.setContent('Claim'))
-                                .setButtonAccessory((btn) =>
-                                    btn
-                                        .setCustomId('voice_btn_claim')
-                                        .setLabel('Claim')
-                                        .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Info'))
                                 .setButtonAccessory((btn) =>
                                     btn
                                         .setCustomId('voice_btn_info')
                                         .setLabel('Info')
                                         .setStyle(ButtonStyle.Secondary),
-                                ),
-                        )
-                        .addSectionComponents((section) =>
-                            section
-                                .addTextDisplayComponents((td) => td.setContent('Transfer'))
+                                )
                                 .setButtonAccessory((btn) =>
                                     btn
                                         .setCustomId('voice_btn_transfer')
                                         .setLabel('Transfer')
+                                        .setStyle(ButtonStyle.Secondary),
+                                )
+                                .setButtonAccessory((btn) =>
+                                    btn
+                                        .setCustomId('voice_btn_claim')
+                                        .setLabel('Claim')
                                         .setStyle(ButtonStyle.Secondary),
                                 ),
                         )
