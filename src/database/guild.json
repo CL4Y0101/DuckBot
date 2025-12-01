@@ -79,13 +79,13 @@
           },
           {
             "ownerId": "1311999881476444181",
-            "channelId": "1445058080105697382",
+            "channelId": null,
             "channelName": "anak baik",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "808418614109536277",
