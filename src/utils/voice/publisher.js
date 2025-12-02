@@ -68,26 +68,22 @@ async function publishVoiceSetupEmbeds(client) {
                             new ButtonBuilder().setCustomId('voice_btn_rename').setEmoji('<:name:1444180316284649503>').setStyle(ButtonStyle.Secondary),
                             new ButtonBuilder().setCustomId('voice_btn_limit').setEmoji('<:limit:1444180214845407353>').setStyle(ButtonStyle.Secondary),
                             new ButtonBuilder().setCustomId('voice_btn_region').setEmoji('<:region:1444180378549223588>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setStyle(ButtonStyle.Secondary)
+                            new ButtonBuilder().setCustomId('voice_btn_kick').setEmoji('<:kick:1444180450443657307>').setStyle(ButtonStyle.Secondary)
                         )
                     )
                     .addActionRowComponents(row =>
                         row.addComponents(
-                            new ButtonBuilder().setCustomId('voice_disable').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
+                            new ButtonBuilder().setCustomId('voice_btn_bitrate').setEmoji('<:bitrate:1444180148202111120>').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_disable0').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                             new ButtonBuilder().setCustomId('voice_disable1').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                            new ButtonBuilder().setCustomId('voice_btn_privacy').setEmoji('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_disable2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
-                            new ButtonBuilder().setCustomId('voice_disable3').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                            new ButtonBuilder().setCustomId('voice_btn_privacy').setEmoji('<:privacy:1444822572054216885>').setStyle(ButtonStyle.Secondary)
                         )
                     )
                     .addActionRowComponents(row =>
                         row.addComponents(
-                            new ButtonBuilder().setCustomId('voice_disable4').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true),
                             new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setStyle(ButtonStyle.Secondary),
                             new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_disable5').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
+                            new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary)
                         )
                     );
 
