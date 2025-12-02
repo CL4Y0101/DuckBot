@@ -116,6 +116,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "1145633858172223509",
+            "channelId": "1445359133858463774",
+            "channelName": "freakingmess",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
