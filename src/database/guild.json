@@ -133,7 +133,7 @@
             "channelName": "cewek intelegen",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 0,
+            "userlimit": 8,
             "region": "auto",
             "isActive": true
           },
