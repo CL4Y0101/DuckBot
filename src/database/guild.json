@@ -99,13 +99,13 @@
           },
           {
             "ownerId": "1370237039533883405",
-            "channelId": "1445286604607459490",
+            "channelId": null,
             "channelName": "ijaaneiou",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
