@@ -109,13 +109,13 @@
           },
           {
             "ownerId": "1285439507726073876",
-            "channelId": "1445305746366398574",
+            "channelId": null,
             "channelName": "ricko85674",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
