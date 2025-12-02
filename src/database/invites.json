@@ -49,7 +49,7 @@
       "EqUPXRTf": {
         "code": "EqUPXRTf",
         "inviter": "1072332425847378001",
-        "uses": 0,
+        "uses": 1,
         "maxUses": 0,
         "createdAt": "2025-12-02T20:34:22.881Z",
         "expiresAt": "2025-12-09T20:34:22.000Z"
@@ -188,8 +188,8 @@
         ]
       },
       "1072332425847378001": {
-        "totalInvites": 0,
-        "successfulInvites": 0,
+        "totalInvites": 1,
+        "successfulInvites": 1,
         "codes": [
           "EqUPXRTf"
         ]
@@ -253,6 +253,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-02T20:36:08.525Z"
+    "lastUpdated": "2025-12-02T20:41:08.447Z"
   }
 }
