@@ -83,7 +83,8 @@ async function publishVoiceSetupEmbeds(client) {
                         row.addComponents(
                             new ButtonBuilder().setCustomId('voice_btn_info').setEmoji('<:info:1444180599517610079>').setStyle(ButtonStyle.Secondary),
                             new ButtonBuilder().setCustomId('voice_btn_transfer').setEmoji('<:transfer:1444180697911787590>').setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary)
+                            new ButtonBuilder().setCustomId('voice_btn_claim').setEmoji('<:claim:1444180511437357169>').setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder().setCustomId('voice_disable2').setLabel('-').setStyle(ButtonStyle.Secondary).setDisabled(true)
                         )
                     );
 
