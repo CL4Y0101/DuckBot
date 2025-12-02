@@ -96,6 +96,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "1370237039533883405",
+            "channelId": "1445285967551402148",
+            "channelName": "ijaaneiou",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
