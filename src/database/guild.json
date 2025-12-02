@@ -139,13 +139,13 @@
           },
           {
             "ownerId": "1332293703489945620",
-            "channelId": "1445396173488783563",
+            "channelId": null,
             "channelName": "Kalau mau masuk silahkan",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
