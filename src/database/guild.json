@@ -149,13 +149,13 @@
           },
           {
             "ownerId": "835323968474841180",
-            "channelId": "1445402279870988512",
+            "channelId": null,
             "channelName": "hibbal",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
