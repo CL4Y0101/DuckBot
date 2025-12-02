@@ -1,174 +1,34 @@
 [
-  {
-    "985901035593801749": {
-      "Roles": {
-        "verified": "1405032359589449800",
-        "unverified": "996367985759486042",
-        "venityRole": "996406094618443807"
-      },
-      "DV": true,
-      "dv": true,
-      "tracking": {
-        "enabled": true,
-        "channel": "1012734651489595476"
-      },
-      "voice": {
-        "lobby": "1444179327787859990",
-        "category": "1407381310498017371",
-        "channel": "1411332799969103914",
-        "ownerToChannel": [
-          {
-            "ownerId": null,
-            "channelId": null,
-            "channelName": "default username discord",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1032472108414017576",
-            "channelId": "1445553224034549841",
-            "channelName": "luhnox",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": true
-          },
-          {
-            "ownerId": "849590328897175572",
-            "channelId": null,
-            "channelName": "pukimakkk11111",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1429479206521278494",
-            "channelId": null,
-            "channelName": "blupblupfish",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "893907569335214090",
-            "channelId": null,
-            "channelName": "kelas 8sd",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1001085268046118942",
-            "channelId": null,
-            "channelName": "lexoadiz",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1311999881476444181",
-            "channelId": null,
-            "channelName": "anak baik",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "808418614109536277",
-            "channelId": null,
-            "channelName": "taktyy",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1370237039533883405",
-            "channelId": null,
-            "channelName": "ijaaneiou",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1285439507726073876",
-            "channelId": null,
-            "channelName": "ricko85674",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "1145633858172223509",
-            "channelId": null,
-            "channelName": "freakingmess",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "994235138256945282",
-            "channelId": "1445379911346032762",
-            "channelName": "cipkoll",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 8,
-            "region": "auto",
-            "isActive": true
-          },
-          {
-            "ownerId": "1332293703489945620",
-            "channelId": null,
-            "channelName": "Kalau mau masuk silahkan",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "835323968474841180",
-            "channelId": null,
-            "channelName": "hibbal",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 0,
-            "region": "auto",
-            "isActive": false
-          },
-          {
-            "ownerId": "941306983598923786",
-            "channelId": "1445469533002268702",
-            "channelName": "loudfelix_",
-            "slowmode": 0,
-            "bitrate": 64000,
-            "userlimit": 2,
-            "region": "auto",
-            "isActive": true
-          }
-        ]
-      }
+    {
+        "985901035593801749": {
+            "Roles": {
+                "verified": "1405032359589449800",
+                "unverified": "996367985759486042",
+                "venityRole": "996406094618443807"
+            },
+            "DV": true,
+            "dv": true,
+            "tracking": {
+                "enabled": true,
+                "channel": "1012734651489595476"
+            },
+            "voice": {
+                "lobby": "1444179327787859990",
+                "category": "1407381310498017371",
+                "channel": "1411332799969103914",
+                "ownerToChannel": [
+                    {
+                        "ownerId": null,
+                        "channelId": null,
+                        "channelName": "default username discord",
+                        "slowmode": 0,
+                        "bitrate": 64000,
+                        "userlimit": 0,
+                        "region": "auto",
+                        "isActive": false
+                    }
+                ]
+            }
+        }
     }
-  }
 ]
