@@ -46,6 +46,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "1438876617337475092",
+            "channelId": "1445778230165508166",
+            "channelName": "haqibakso",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
