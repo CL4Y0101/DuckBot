@@ -69,13 +69,13 @@
           },
           {
             "ownerId": "808418614109536277",
-            "channelId": "1445815308559450144",
+            "channelId": null,
             "channelName": "taktyy",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
