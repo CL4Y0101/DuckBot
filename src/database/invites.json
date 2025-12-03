@@ -20,7 +20,7 @@
       "B2tzAwNF5k": {
         "code": "B2tzAwNF5k",
         "inviter": "1001085268046118942",
-        "uses": 563,
+        "uses": 564,
         "maxUses": 0,
         "createdAt": "2025-07-10T02:46:50.964Z"
       },
@@ -175,8 +175,8 @@
         ]
       },
       "1001085268046118942": {
-        "totalInvites": 568,
-        "successfulInvites": 568,
+        "totalInvites": 569,
+        "successfulInvites": 569,
         "codes": [
           "B2tzAwNF5k",
           "m4eWgQR6m3"
@@ -283,6 +283,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-03T17:14:00.283Z"
+    "lastUpdated": "2025-12-03T17:19:00.312Z"
   }
 }
