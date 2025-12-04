@@ -79,13 +79,13 @@
           },
           {
             "ownerId": "1072332425847378001",
-            "channelId": "1445977597115633789",
+            "channelId": null,
             "channelName": "apdet bot dc",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "1443155462068506654",
