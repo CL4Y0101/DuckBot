@@ -86,6 +86,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "1443155462068506654",
+            "channelId": "1446111998738698240",
+            "channelName": "gangirl",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
