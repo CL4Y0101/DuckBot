@@ -59,13 +59,13 @@
           },
           {
             "ownerId": "893907569335214090",
-            "channelId": null,
+            "channelId": "1446146527897845893",
             "channelName": "clayyuriee",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": false
+            "isActive": true
           },
           {
             "ownerId": "808418614109536277",
