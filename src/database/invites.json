@@ -20,7 +20,7 @@
       "B2tzAwNF5k": {
         "code": "B2tzAwNF5k",
         "inviter": "1001085268046118942",
-        "uses": 564,
+        "uses": 565,
         "maxUses": 0,
         "createdAt": "2025-07-10T02:46:50.964Z"
       },
@@ -82,6 +82,14 @@
         "maxUses": 0,
         "createdAt": "2025-12-03T12:20:59.719Z",
         "expiresAt": "2025-12-10T12:20:59.000Z"
+      },
+      "cAhDwmXd": {
+        "code": "cAhDwmXd",
+        "inviter": "unknown",
+        "uses": 0,
+        "maxUses": 0,
+        "createdAt": "2025-12-05T07:07:21.697Z",
+        "expiresAt": "2025-12-06T07:07:21.000Z"
       },
       "kRayGPwaZ3": {
         "code": "kRayGPwaZ3",
@@ -151,8 +159,8 @@
         ]
       },
       "1001085268046118942": {
-        "totalInvites": 569,
-        "successfulInvites": 569,
+        "totalInvites": 570,
+        "successfulInvites": 570,
         "codes": [
           "B2tzAwNF5k",
           "m4eWgQR6m3"
@@ -245,6 +253,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-05T07:04:05.412Z"
+    "lastUpdated": "2025-12-05T07:09:05.438Z"
   }
 }
