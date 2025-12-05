@@ -123,7 +123,7 @@
             "channelName": "grenshi5",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 0,
+            "userlimit": 1,
             "region": "auto",
             "isActive": true
           }
