@@ -111,14 +111,6 @@
         "maxUses": 0,
         "createdAt": "2025-09-28T05:30:24.558Z"
       },
-      "xapaJBp8": {
-        "code": "xapaJBp8",
-        "inviter": "1417027242667802684",
-        "uses": 1,
-        "maxUses": 0,
-        "createdAt": "2025-11-28T19:04:56.189Z",
-        "expiresAt": "2025-12-05T19:04:56.000Z"
-      },
       "xskxqTQVvc": {
         "code": "xskxqTQVvc",
         "inviter": "862263528492105748",
@@ -208,13 +200,6 @@
           "p5uaMVEr"
         ]
       },
-      "1417027242667802684": {
-        "totalInvites": 1,
-        "successfulInvites": 1,
-        "codes": [
-          "xapaJBp8"
-        ]
-      },
       "862263528492105748": {
         "totalInvites": 1,
         "successfulInvites": 1,
@@ -223,6 +208,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-05T19:01:15.069Z"
+    "lastUpdated": "2025-12-05T19:06:15.190Z"
   }
 }
