@@ -136,6 +136,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "994235138256945282",
+            "channelId": "1446531657405567121",
+            "channelName": "lucianaaa._",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
