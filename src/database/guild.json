@@ -96,6 +96,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "849590328897175572",
+            "channelId": "1446388362167586947",
+            "channelName": "pukimakkk11111",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
