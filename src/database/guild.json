@@ -126,6 +126,16 @@
             "userlimit": 1,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "1332293703489945620",
+            "channelId": "1446424062933991547",
+            "channelName": "satriaganteng0537",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
