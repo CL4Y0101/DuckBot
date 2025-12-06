@@ -149,13 +149,13 @@
           },
           {
             "ownerId": "760117882239320115",
-            "channelId": "1446682184722284606",
+            "channelId": null,
             "channelName": "grenshi5",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
