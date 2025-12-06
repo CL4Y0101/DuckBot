@@ -75,14 +75,6 @@
         "createdAt": "2025-12-03T12:20:59.719Z",
         "expiresAt": "2025-12-10T12:20:59.000Z"
       },
-      "cAhDwmXd": {
-        "code": "cAhDwmXd",
-        "inviter": "unknown",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-12-05T07:07:21.697Z",
-        "expiresAt": "2025-12-06T07:07:21.000Z"
-      },
       "kRayGPwaZ3": {
         "code": "kRayGPwaZ3",
         "inviter": "835323968474841180",
@@ -223,6 +215,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-06T07:06:16.411Z"
+    "lastUpdated": "2025-12-06T07:11:16.448Z"
   }
 }
