@@ -33,7 +33,7 @@
             "channelName": "nugas sampe pagi",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 6,
+            "userlimit": 4,
             "region": "auto",
             "isActive": true
           },
