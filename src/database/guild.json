@@ -149,13 +149,13 @@
           },
           {
             "ownerId": "760117882239320115",
-            "channelId": "1446937412239622146",
+            "channelId": null,
             "channelName": "Forgeholic",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
