@@ -169,13 +169,13 @@
           },
           {
             "ownerId": "929404734002065408",
-            "channelId": "1447204986898485288",
+            "channelId": null,
             "channelName": "a7lr",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
