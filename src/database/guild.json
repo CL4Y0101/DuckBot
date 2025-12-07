@@ -33,7 +33,7 @@
             "channelName": "SAMPE BESOK",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 0,
+            "userlimit": 4,
             "region": "auto",
             "isActive": true
           },
