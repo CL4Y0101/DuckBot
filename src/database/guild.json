@@ -29,13 +29,13 @@
           },
           {
             "ownerId": "1311999881476444181",
-            "channelId": "1447189097121841254",
+            "channelId": null,
             "channelName": "nugas",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "1445073243903102987",
