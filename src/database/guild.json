@@ -33,7 +33,7 @@
             "channelName": ".",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 4,
+            "userlimit": 0,
             "region": "auto",
             "isActive": true
           },
