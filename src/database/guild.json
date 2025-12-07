@@ -179,13 +179,13 @@
           },
           {
             "ownerId": "892757131365867521",
-            "channelId": "1447225865204273317",
+            "channelId": null,
             "channelName": "tim kx",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
