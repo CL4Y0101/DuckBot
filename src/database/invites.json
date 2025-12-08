@@ -33,7 +33,7 @@
       "HJ9ffWBe": {
         "code": "HJ9ffWBe",
         "inviter": "533496449112211466",
-        "uses": 0,
+        "uses": 1,
         "maxUses": 0,
         "createdAt": "2025-12-08T14:05:03.140Z",
         "expiresAt": "2025-12-15T14:05:03.000Z"
@@ -177,8 +177,8 @@
         ]
       },
       "533496449112211466": {
-        "totalInvites": 0,
-        "successfulInvites": 0,
+        "totalInvites": 1,
+        "successfulInvites": 1,
         "codes": [
           "HJ9ffWBe"
         ]
@@ -242,6 +242,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-08T14:23:20.523Z"
+    "lastUpdated": "2025-12-08T14:28:20.526Z"
   }
 }
