@@ -186,6 +186,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": false
+          },
+          {
+            "ownerId": "1443947072502894756",
+            "channelId": "1447493298871865456",
+            "channelName": "this_is_vinz_40695",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
