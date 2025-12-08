@@ -30,14 +30,6 @@
         "createdAt": "2025-12-02T20:34:22.881Z",
         "expiresAt": "2025-12-09T20:34:22.000Z"
       },
-      "HZMAGJKr": {
-        "code": "HZMAGJKr",
-        "inviter": "unknown",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-12-07T10:09:40.930Z",
-        "expiresAt": "2025-12-08T10:09:40.000Z"
-      },
       "M9YAvMfH": {
         "code": "M9YAvMfH",
         "inviter": "1437776847877181500",
@@ -235,6 +227,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-08T10:08:32.525Z"
+    "lastUpdated": "2025-12-08T10:13:31.068Z"
   }
 }
