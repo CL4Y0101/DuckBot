@@ -113,7 +113,7 @@
             "channelName": "loudfelix_",
             "slowmode": 0,
             "bitrate": 64000,
-            "userlimit": 0,
+            "userlimit": 1,
             "region": "auto",
             "isActive": true
           },
