@@ -199,13 +199,13 @@
           },
           {
             "ownerId": "1032472108414017576",
-            "channelId": "1447777173900361789",
+            "channelId": null,
             "channelName": "12 hour on voice",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "835323968474841180",
