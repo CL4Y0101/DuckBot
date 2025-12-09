@@ -206,6 +206,16 @@
             "userlimit": 0,
             "region": "auto",
             "isActive": true
+          },
+          {
+            "ownerId": "835323968474841180",
+            "channelId": "1447928948985172152",
+            "channelName": "hibbal",
+            "slowmode": 0,
+            "bitrate": 64000,
+            "userlimit": 0,
+            "region": "auto",
+            "isActive": true
           }
         ]
       }
