@@ -46,14 +46,6 @@
         "createdAt": "2025-12-06T04:21:25.066Z",
         "expiresAt": "2025-12-13T04:21:25.000Z"
       },
-      "PAKfhpuV": {
-        "code": "PAKfhpuV",
-        "inviter": "812961198064009227",
-        "uses": 0,
-        "maxUses": 0,
-        "createdAt": "2025-12-03T05:48:39.500Z",
-        "expiresAt": "2025-12-10T05:48:39.000Z"
-      },
       "PVgZS9p5Kw": {
         "code": "PVgZS9p5Kw",
         "inviter": "302050872383242240",
@@ -199,13 +191,6 @@
           "M9YAvMfH"
         ]
       },
-      "812961198064009227": {
-        "totalInvites": 0,
-        "successfulInvites": 0,
-        "codes": [
-          "PAKfhpuV"
-        ]
-      },
       "302050872383242240": {
         "totalInvites": 42,
         "successfulInvites": 42,
@@ -251,6 +236,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-10T05:47:14.694Z"
+    "lastUpdated": "2025-12-10T05:52:14.671Z"
   }
 }
