@@ -239,13 +239,13 @@
           },
           {
             "ownerId": "816868572214591488",
-            "channelId": "1448589861035446364",
+            "channelId": null,
             "channelName": "luqmanmaumeledak",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
