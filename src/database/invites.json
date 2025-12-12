@@ -105,6 +105,14 @@
         "createdAt": "2025-12-11T03:56:15.627Z",
         "expiresAt": "2025-12-18T03:56:15.000Z"
       },
+      "n3uYtnc4": {
+        "code": "n3uYtnc4",
+        "inviter": "1032472108414017576",
+        "uses": 0,
+        "maxUses": 0,
+        "createdAt": "2025-12-12T03:44:18.786Z",
+        "expiresAt": "2025-12-19T03:44:18.000Z"
+      },
       "nWMsPr66": {
         "code": "nWMsPr66",
         "inviter": "1001085268046118942",
@@ -230,6 +238,13 @@
           "kRayGPwaZ3"
         ]
       },
+      "1032472108414017576": {
+        "totalInvites": 0,
+        "successfulInvites": 0,
+        "codes": [
+          "n3uYtnc4"
+        ]
+      },
       "862263528492105748": {
         "totalInvites": 1,
         "successfulInvites": 1,
@@ -238,6 +253,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-12T03:40:39.486Z"
+    "lastUpdated": "2025-12-12T03:45:39.369Z"
   }
 }
