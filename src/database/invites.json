@@ -136,6 +136,14 @@
         "maxUses": 0,
         "createdAt": "2022-10-20T06:57:16.184Z"
       },
+      "twuBUGnR": {
+        "code": "twuBUGnR",
+        "inviter": "unknown",
+        "uses": 0,
+        "maxUses": 0,
+        "createdAt": "2025-12-12T21:11:30.893Z",
+        "expiresAt": "2025-12-13T21:11:30.000Z"
+      },
       "uVMBFxg3Du": {
         "code": "uVMBFxg3Du",
         "inviter": "808418614109536277",
@@ -245,6 +253,6 @@
         ]
       }
     },
-    "lastUpdated": "2025-12-12T21:08:50.727Z"
+    "lastUpdated": "2025-12-12T21:13:50.926Z"
   }
 }
