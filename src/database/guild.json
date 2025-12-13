@@ -259,13 +259,13 @@
           },
           {
             "ownerId": "1106923939277590540",
-            "channelId": "1449406086829445190",
+            "channelId": null,
             "channelName": "spar",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 6,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           },
           {
             "ownerId": "1033828048916721675",
