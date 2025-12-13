@@ -279,13 +279,13 @@
           },
           {
             "ownerId": "1084864554946809866",
-            "channelId": "1449422330077122672",
+            "channelId": null,
             "channelName": "putralv",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": true
+            "isActive": false
           }
         ]
       }
