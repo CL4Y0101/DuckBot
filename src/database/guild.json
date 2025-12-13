@@ -269,13 +269,13 @@
           },
           {
             "ownerId": "1033828048916721675",
-            "channelId": null,
+            "channelId": "1449414766958346363",
             "channelName": "williamthe4rd",
             "slowmode": 0,
             "bitrate": 64000,
             "userlimit": 0,
             "region": "auto",
-            "isActive": false
+            "isActive": true
           }
         ]
       }
